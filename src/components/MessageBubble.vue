@@ -65,7 +65,7 @@ onBeforeUnmount(() => {
       'nc-message-bubble--sending': isSending,
     }"
   >
-    <div class="nc-message-bubble__header">
+    <div v-if="!isError" class="nc-message-bubble__header">
       <template v-if="isUser">
         <span class="nc-message-bubble__label">You</span>
       </template>
@@ -143,7 +143,7 @@ onBeforeUnmount(() => {
   .nc-message-bubble--assistant .nc-message-bubble__bubble,
   .nc-message-bubble--error .nc-message-bubble__bubble {
     background: rgb(var(--v-theme-surface));
-    border: 1px solid #ebebed;
+    border: 1px solid rgba(var(--v-theme-on-surface), 0.12);
     color: rgb(var(--v-theme-on-surface));
   }
 

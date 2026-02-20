@@ -59,7 +59,7 @@ development_status:
   3-2-performance-validation: done
   epic-3-retrospective: optional
 
-  epic-4: backlog
-  4-1-error-display-as-chat-messages: backlog
+  epic-4: in-progress
+  4-1-error-display-as-chat-messages: done
   4-2-message-retry-error-recovery: backlog
   epic-4-retrospective: optional

@@ -200,6 +200,52 @@ describe('MessageBubble', () => {
     expect(mockParse).not.toHaveBeenCalled()
   })
 
+  describe('error variant', () => {
+    it('renders error message left-aligned like assistant messages', () => {
+      const wrapper = mountBubble(
+        createMessage({ id: 'error-1', role: 'assistant', content: 'Something went wrong.' }),
+      )
+
+      expect(wrapper.classes()).toContain('nc-message-bubble--error')
+      expect(wrapper.classes()).not.toContain('nc-message-bubble--user')
+    })
+
+    it('applies nc-message-bubble--error class for error by id prefix', () => {
+      const wrapper = mountBubble(
+        createMessage({ id: 'error-123', role: 'assistant', content: 'Error text' }),
+      )
+
+      expect(wrapper.classes()).toContain('nc-message-bubble--error')
+    })
+
+    it('applies nc-message-bubble--error class for error by status failed', () => {
+      const wrapper = mountBubble(
+        createMessage({ id: 'msg-1', role: 'assistant', content: 'Error text', status: 'failed' }),
+      )
+
+      expect(wrapper.classes()).toContain('nc-message-bubble--error')
+    })
+
+    it('does not show assistant label/icon for error messages', () => {
+      const wrapper = mountBubble(
+        createMessage({ id: 'error-1', role: 'assistant', content: 'Something went wrong.' }),
+      )
+
+      expect(wrapper.find('.nc-message-bubble__header').exists()).toBe(false)
+      expect(wrapper.find('.nc-message-bubble__star').exists()).toBe(false)
+      expect(wrapper.find('.nc-message-bubble__label').exists()).toBe(false)
+    })
+
+    it('renders as li with role="listitem"', () => {
+      const wrapper = mountBubble(
+        createMessage({ id: 'error-1', role: 'assistant', content: 'Error occurred' }),
+      )
+
+      expect(wrapper.element.tagName).toBe('LI')
+      expect(wrapper.attributes('role')).toBe('listitem')
+    })
+  })
+
   it('clears copyTimeout on unmount to prevent memory leak', async () => {
     vi.useFakeTimers()
     const writeTextMock = vi.fn().mockResolvedValue(undefined)

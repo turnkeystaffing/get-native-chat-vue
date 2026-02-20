@@ -375,6 +375,97 @@ describe('Empty and Failed Open Flows (AC #4, #5)', () => {
   })
 })
 
+describe('Error Display Flow Integration (Story 4.1)', () => {
+  function createMockApiClientLocal(): NativeChatApiClient {
+    return {
+      createConversation: vi.fn(),
+      getConversations: vi.fn(),
+      getMessages: vi.fn(),
+      sendMessage: vi.fn(),
+    }
+  }
+
+  it('full send-fail-error-display flow with mock API client', async () => {
+    const apiClient = createMockApiClientLocal()
+    ;(apiClient.getConversations as ReturnType<typeof vi.fn>).mockResolvedValue({
+      conversations: [{ id: 'conv-1', createdAt: '2026-01-01' }],
+      has_more: false,
+    })
+    ;(apiClient.getMessages as ReturnType<typeof vi.fn>).mockResolvedValue({
+      messages: [],
+      has_more: false,
+    })
+    ;(apiClient.sendMessage as ReturnType<typeof vi.fn>).mockRejectedValue(
+      Object.assign(new Error('Service Unavailable'), { statusCode: 503 }),
+    )
+
+    const onError = vi.fn()
+    const chatState = useChat(apiClient, { apiClient, onError })
+    await chatState.open()
+
+    const Wrapper = defineComponent({
+      setup() {
+        return () => h(VLayout, null, () => h(ChatPanel))
+      },
+    })
+
+    const wrapper = mount(Wrapper, {
+      global: {
+        provide: {
+          [CONFIG_KEY as symbol]: { apiClient },
+          [CHAT_STATE_KEY as symbol]: chatState,
+        },
+      },
+    })
+
+    // Send message that will fail
+    await chatState.sendMessage('Hello')
+    await nextTick()
+
+    // Verify: optimistic message removed, error message displayed
+    expect(chatState.messages.value).toHaveLength(1)
+    expect(chatState.messages.value[0].id).toMatch(/^error-/)
+    expect(chatState.messages.value[0].role).toBe('assistant')
+    expect(chatState.messages.value[0].status).toBe('failed')
+    expect(chatState.messages.value[0].content).toBe(
+      'The service is temporarily unavailable. Please try again in a moment.',
+    )
+
+    // Verify: failedMessageText populated
+    expect(chatState.failedMessageText.value).toBe('Hello')
+
+    // Verify: isSending reset
+    expect(chatState.isSending.value).toBe(false)
+
+    // Verify: onError callback called with correct ChatError
+    expect(onError).toHaveBeenCalledWith(
+      expect.objectContaining({
+        message: 'The service is temporarily unavailable. Please try again in a moment.',
+        statusCode: 503,
+      }),
+    )
+
+    // Verify: error message renders in MessageList
+    expect(wrapper.findComponent(MessageList).exists()).toBe(true)
+
+    // Verify: error bubble has correct class and no header
+    const errorBubble = wrapper.find('.nc-message-bubble--error')
+    expect(errorBubble.exists()).toBe(true)
+    expect(errorBubble.find('.nc-message-bubble__header').exists()).toBe(false)
+    expect(errorBubble.attributes('aria-label')).toBe('Error message')
+    expect(errorBubble.find('.nc-message-bubble__content').text()).toBe(
+      'The service is temporarily unavailable. Please try again in a moment.',
+    )
+
+    // Verify: no copy button on error message
+    expect(errorBubble.find('.nc-message-bubble__copy').exists()).toBe(false)
+
+    // Verify: input is re-enabled
+    const textarea = wrapper.find('textarea')
+    expect(textarea.attributes('disabled')).toBeUndefined()
+  })
+})
+
 describe('Real useChat Integration (AC #5 — null conversationId recovery)', () => {
   function createMockApiClient(): NativeChatApiClient {
     return {

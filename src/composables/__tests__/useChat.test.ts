@@ -874,6 +874,187 @@ describe('useChat', () => {
     })
   })
 
+  describe('error display as chat messages', () => {
+    async function setupWithOpenChat(configOverrides?: Partial<NativeChatPluginOptions>) {
+      const apiClient = createMockApiClient()
+      const config = createConfig({ apiClient, ...configOverrides })
+      ;(apiClient.getConversations as ReturnType<typeof vi.fn>).mockResolvedValue({
+        conversations: [{ id: 'conv-1', createdAt: '2026-01-01' }],
+        has_more: false,
+      })
+      ;(apiClient.getMessages as ReturnType<typeof vi.fn>).mockResolvedValue({
+        messages: [],
+        has_more: false,
+      })
+      const chat = useChat(apiClient, config)
+      await chat.open()
+      return { apiClient, config, chat }
+    }
+
+    // AC#1: Error message creation
+    it('error message has role assistant and id starting with error-', async () => {
+      const { apiClient, chat } = await setupWithOpenChat()
+      ;(apiClient.sendMessage as ReturnType<typeof vi.fn>).mockRejectedValue(new Error('fail'))
+
+      await chat.sendMessage('Hello')
+
+      const errorMsg = chat.messages.value[0]
+      expect(errorMsg.role).toBe('assistant')
+      expect(errorMsg.id).toMatch(/^error-/)
+    })
+
+    it('error message has status failed', async () => {
+      const { apiClient, chat } = await setupWithOpenChat()
+      ;(apiClient.sendMessage as ReturnType<typeof vi.fn>).mockRejectedValue(new Error('fail'))
+
+      await chat.sendMessage('Hello')
+
+      expect(chat.messages.value[0].status).toBe('failed')
+    })
+
+    it('populates failedMessageText with original message on failure', async () => {
+      const { apiClient, chat } = await setupWithOpenChat()
+      ;(apiClient.sendMessage as ReturnType<typeof vi.fn>).mockRejectedValue(new Error('fail'))
+
+      await chat.sendMessage('My important message')
+
+      expect(chat.failedMessageText.value).toBe('My important message')
+    })
+
+    it('resets isSending to false after error', async () => {
+      const { apiClient, chat } = await setupWithOpenChat()
+      ;(apiClient.sendMessage as ReturnType<typeof vi.fn>).mockRejectedValue(new Error('fail'))
+
+      await chat.sendMessage('Hello')
+
+      expect(chat.isSending.value).toBe(false)
+    })
+
+    // AC#2: HTTP status code mapping
+    it('maps 429 error to rate-limit message', async () => {
+      const { apiClient, chat } = await setupWithOpenChat()
+      ;(apiClient.sendMessage as ReturnType<typeof vi.fn>).mockRejectedValue(
+        Object.assign(new Error('Too Many Requests'), { statusCode: 429 }),
+      )
+
+      await chat.sendMessage('Hello')
+
+      expect(chat.messages.value[0].content).toBe(
+        "You're sending messages too quickly. Please wait a moment and try again.",
+      )
+    })
+
+    it('maps 503 error to service unavailable message', async () => {
+      const { apiClient, chat } = await setupWithOpenChat()
+      ;(apiClient.sendMessage as ReturnType<typeof vi.fn>).mockRejectedValue(
+        Object.assign(new Error('Service Unavailable'), { statusCode: 503 }),
+      )
+
+      await chat.sendMessage('Hello')
+
+      expect(chat.messages.value[0].content).toBe(
+        'The service is temporarily unavailable. Please try again in a moment.',
+      )
+    })
+
+    it('maps 504 error to service unavailable message', async () => {
+      const { apiClient, chat } = await setupWithOpenChat()
+      ;(apiClient.sendMessage as ReturnType<typeof vi.fn>).mockRejectedValue(
+        Object.assign(new Error('Gateway Timeout'), { statusCode: 504 }),
+      )
+
+      await chat.sendMessage('Hello')
+
+      expect(chat.messages.value[0].content).toBe(
+        'The service is temporarily unavailable. Please try again in a moment.',
+      )
+    })
+
+    it('maps unknown error to generic error message', async () => {
+      const { apiClient, chat } = await setupWithOpenChat()
+      ;(apiClient.sendMessage as ReturnType<typeof vi.fn>).mockRejectedValue(
+        Object.assign(new Error('Internal Server Error'), { statusCode: 500 }),
+      )
+
+      await chat.sendMessage('Hello')
+
+      expect(chat.messages.value[0].content).toBe(
+        'Something went wrong. You can try sending your message again.',
+      )
+    })
+
+    it('maps network error (no status code) to generic error message', async () => {
+      const { apiClient, chat } = await setupWithOpenChat()
+      ;(apiClient.sendMessage as ReturnType<typeof vi.fn>).mockRejectedValue(
+        new Error('Network error'),
+      )
+
+      await chat.sendMessage('Hello')
+
+      expect(chat.messages.value[0].content).toBe(
+        'Something went wrong. You can try sending your message again.',
+      )
+    })
+
+    // AC#3: onError callback
+    it('calls onError callback with ChatError containing message, statusCode, and originalError', async () => {
+      const onError = vi.fn()
+      const { apiClient, chat } = await setupWithOpenChat({ onError })
+      const originalError = Object.assign(new Error('Too Many Requests'), { statusCode: 429 })
+      ;(apiClient.sendMessage as ReturnType<typeof vi.fn>).mockRejectedValue(originalError)
+
+      await chat.sendMessage('Hello')
+
+      expect(onError).toHaveBeenCalledWith({
+        message: "You're sending messages too quickly. Please wait a moment and try again.",
+        statusCode: 429,
+        originalError,
+      })
+    })
+
+    it('displays inline error even when onError is not configured', async () => {
+      const { apiClient, chat } = await setupWithOpenChat()
+      ;(apiClient.sendMessage as ReturnType<typeof vi.fn>).mockRejectedValue(new Error('fail'))
+
+      await chat.sendMessage('Hello')
+
+      expect(chat.messages.value).toHaveLength(1)
+      expect(chat.messages.value[0].id).toMatch(/^error-/)
+    })
+
+    it('survives onError callback throwing an error', async () => {
+      const onError = vi.fn().mockImplementation(() => {
+        throw new Error('callback crashed')
+      })
+      const { apiClient, chat } = await setupWithOpenChat({ onError })
+      ;(apiClient.sendMessage as ReturnType<typeof vi.fn>).mockRejectedValue(new Error('fail'))
+
+      await chat.sendMessage('Hello')
+
+      // Chat should still function — error message displayed, failedMessageText set
+      expect(chat.messages.value).toHaveLength(1)
+      expect(chat.messages.value[0].id).toMatch(/^error-/)
+      expect(chat.failedMessageText.value).toBe('Hello')
+      expect(chat.isSending.value).toBe(false)
+      expect(onError).toHaveBeenCalled()
+    })
+
+    it('survives onError callback returning a rejected promise', async () => {
+      const onError = vi.fn().mockImplementation(() => Promise.reject(new Error('async crash')))
+      const { apiClient, chat } = await setupWithOpenChat({ onError })
+      ;(apiClient.sendMessage as ReturnType<typeof vi.fn>).mockRejectedValue(new Error('fail'))
+
+      await chat.sendMessage('Hello')
+
+      // Chat should still function despite async callback rejection
+      expect(chat.messages.value).toHaveLength(1)
+      expect(chat.messages.value[0].id).toMatch(/^error-/)
+      expect(chat.failedMessageText.value).toBe('Hello')
+      expect(chat.isSending.value).toBe(false)
+      expect(onError).toHaveBeenCalled()
+    })
+  })
+
   describe('batchSize', () => {
     it('default batchSize is 20 when not configured', async () => {
       const { apiClient, chat } = setup()

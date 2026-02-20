@@ -45,6 +45,41 @@ export function useChat(
   const messageOffset = ref(0)
   const batchSize = config.batchSize ?? 20
 
+  function handleSendFailure(error: unknown, text: string, tempId: string): void {
+    messages.value = messages.value.filter((m) => m.id !== tempId && !m.id.startsWith('error-'))
+
+    const errorContent = getErrorContent(error)
+    const errorMessage: ChatMessage = {
+      id: `error-${Date.now()}`,
+      conversationId: conversationId.value ?? '',
+      role: 'assistant',
+      content: errorContent,
+      createdAt: new Date().toISOString(),
+      status: 'failed',
+    }
+    messages.value = [...messages.value, errorMessage]
+
+    failedMessageText.value = text
+
+    if (config.onError) {
+      try {
+        // Promise.resolve handles both sync throws and async rejections
+        Promise.resolve(
+          config.onError({
+            message: errorContent,
+            statusCode:
+              error && typeof error === 'object' && 'statusCode' in error
+                ? (error as { statusCode: number }).statusCode
+                : undefined,
+            originalError: error,
+          }),
+        ).catch(() => {})
+      } catch {
+        // Synchronous callback failure must not break the chat
+      }
+    }
+  }
+
   async function open(): Promise<void> {
     if (isOpen.value || isLoading.value) return
 
@@ -102,30 +137,8 @@ export function useChat(
         const newConv = await apiClient.createConversation()
         conversationId.value = newConv.id
       } catch (error) {
-        // Cannot establish conversation — remove optimistic, show error inline
-        messages.value = messages.value.filter((m) => m.id !== tempId && !m.id.startsWith('error-'))
-        const errorContent = getErrorContent(error)
-        const errorMessage: ChatMessage = {
-          id: `error-${Date.now()}`,
-          conversationId: '',
-          role: 'assistant',
-          content: errorContent,
-          createdAt: new Date().toISOString(),
-        }
-        messages.value = [...messages.value, errorMessage]
-        failedMessageText.value = text
+        handleSendFailure(error, text, tempId)
         isSending.value = false
-
-        if (config.onError) {
-          config.onError({
-            message: errorContent,
-            statusCode:
-              error && typeof error === 'object' && 'statusCode' in error
-                ? (error as { statusCode: number }).statusCode
-                : undefined,
-            originalError: error,
-          })
-        }
         return
       }
     }
@@ -147,32 +160,7 @@ export function useChat(
       ]
       failedMessageText.value = null
     } catch (error) {
-      // Remove optimistic message and previous error messages
-      messages.value = messages.value.filter((m) => m.id !== tempId && !m.id.startsWith('error-'))
-
-      // Add error message as assistant role
-      const errorContent = getErrorContent(error)
-      const errorMessage: ChatMessage = {
-        id: `error-${Date.now()}`,
-        conversationId: conversationId.value!,
-        role: 'assistant',
-        content: errorContent,
-        createdAt: new Date().toISOString(),
-      }
-      messages.value = [...messages.value, errorMessage]
-
-      failedMessageText.value = text
-
-      if (config.onError) {
-        config.onError({
-          message: errorContent,
-          statusCode:
-            error && typeof error === 'object' && 'statusCode' in error
-              ? (error as { statusCode: number }).statusCode
-              : undefined,
-          originalError: error,
-        })
-      }
+      handleSendFailure(error, text, tempId)
     } finally {
       isSending.value = false
     }
