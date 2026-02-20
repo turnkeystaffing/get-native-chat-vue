@@ -2,6 +2,7 @@ node_modules
 docs/.vitepress/dist
 docs/.vitepress/cache
 coverage
+test-results
 *.local
 
 # Yarn v4
