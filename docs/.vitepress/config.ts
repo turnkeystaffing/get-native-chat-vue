@@ -1,3 +1,4 @@
+import { fileURLToPath, URL } from 'node:url'
 import { defineConfig } from 'vitepress'
 
 export default defineConfig({
@@ -6,5 +7,12 @@ export default defineConfig({
   themeConfig: {
     nav: [{ text: 'Home', link: '/' }],
     sidebar: [],
+  },
+  vite: {
+    resolve: {
+      alias: {
+        '@': fileURLToPath(new URL('../../src', import.meta.url)),
+      },
+    },
   },
 })

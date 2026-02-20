@@ -24,6 +24,7 @@
   },
   "devDependencies": {
     "@mdi/font": "^7.4.0",
+    "@playwright/test": "^1.58.2",
     "@vitejs/plugin-vue": "^5.2.0",
     "@vue/eslint-config-typescript": "^14.0.0",
     "@vue/test-utils": "^2.4.6",
@@ -56,7 +57,8 @@
     "format": "prettier --write .",
     "docs:dev": "vitepress dev docs",
     "docs:build": "vitepress build docs",
-    "typecheck": "vue-tsc --noEmit"
+    "typecheck": "vue-tsc --noEmit",
+    "perf": "playwright test --config playwright.config.ts"
   },
   "packageManager": "yarn@4.12.0+sha512.f45ab632439a67f8bc759bf32ead036a1f413287b9042726b7cc4818b7b49e14e9423ba49b18f9e06ea4941c1ad062385b1d8760a8d5091a1a31e5f6219afca8"
 }
