@@ -42,7 +42,7 @@ story_location: _bmad-output/implementation-artifacts
 development_status:
   epic-1: in-progress
   1-1-project-scaffold-build-configuration: done
-  1-2-core-types-api-client-helper-plugin-install: backlog
+  1-2-core-types-api-client-helper-plugin-install: done
   1-3-floating-agent-button: backlog
   1-4-chat-panel-with-header-welcome-state: backlog
   epic-1-retrospective: optional
