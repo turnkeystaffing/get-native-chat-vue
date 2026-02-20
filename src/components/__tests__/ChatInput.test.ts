@@ -194,6 +194,53 @@ describe('ChatInput', () => {
     expect(chatState.sendMessage).not.toHaveBeenCalled()
   })
 
+  it('focuses textarea when chat opens (isOpen transitions to true)', async () => {
+    const isOpen = ref(false)
+    const chatState = createMockChatState({ isOpen: readonly(isOpen) })
+    const { wrapper } = mountChatInput(chatState)
+
+    const textarea = wrapper.find('textarea')
+    const focusSpy = vi.spyOn(textarea.element, 'focus')
+
+    // Simulate chat opening
+    isOpen.value = true
+    await nextTick()
+    await nextTick() // Double nextTick: watcher fires → nextTick inside watcher
+
+    expect(focusSpy).toHaveBeenCalled()
+  })
+
+  it('does not focus textarea when chat closes', async () => {
+    const isOpen = ref(true)
+    const chatState = createMockChatState({ isOpen: readonly(isOpen) })
+    const { wrapper } = mountChatInput(chatState)
+
+    const textarea = wrapper.find('textarea')
+    const focusSpy = vi.spyOn(textarea.element, 'focus')
+
+    // Simulate chat closing
+    isOpen.value = false
+    await nextTick()
+    await nextTick()
+
+    expect(focusSpy).not.toHaveBeenCalled()
+  })
+
+  it('does not focus textarea on mount when isOpen is already true', async () => {
+    const isOpen = ref(true)
+    const chatState = createMockChatState({ isOpen: readonly(isOpen) })
+    const { wrapper } = mountChatInput(chatState)
+
+    // Wait for any potential mount-triggered effects
+    await nextTick()
+    await nextTick()
+
+    // watch() without { immediate: true } does not fire on mount,
+    // so textarea should not be focused when isOpen is already true at mount
+    const textarea = wrapper.find('textarea')
+    expect(textarea.element).not.toBe(document.activeElement)
+  })
+
   it('failedMessageText being cleared does not empty user-typed text', async () => {
     const failedMessageText = ref<string | null>(null)
     const chatState = createMockChatState({ failedMessageText: readonly(failedMessageText) })

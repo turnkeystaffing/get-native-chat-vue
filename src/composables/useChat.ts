@@ -82,13 +82,13 @@ export function useChat(
   }
 
   async function sendMessage(text: string): Promise<void> {
-    if (!text.trim() || isSending.value || !conversationId.value) return
+    if (!text.trim() || isSending.value) return
 
     isSending.value = true
     const tempId = `temp-${Date.now()}`
     const optimisticMessage: ChatMessage = {
       id: tempId,
-      conversationId: conversationId.value,
+      conversationId: conversationId.value ?? '',
       role: 'user',
       content: text,
       createdAt: new Date().toISOString(),
@@ -96,8 +96,42 @@ export function useChat(
     }
     messages.value = [...messages.value, optimisticMessage]
 
+    // Ensure we have a conversation — create one if open() failed to establish it
+    if (!conversationId.value) {
+      try {
+        const newConv = await apiClient.createConversation()
+        conversationId.value = newConv.id
+      } catch (error) {
+        // Cannot establish conversation — remove optimistic, show error inline
+        messages.value = messages.value.filter((m) => m.id !== tempId && !m.id.startsWith('error-'))
+        const errorContent = getErrorContent(error)
+        const errorMessage: ChatMessage = {
+          id: `error-${Date.now()}`,
+          conversationId: '',
+          role: 'assistant',
+          content: errorContent,
+          createdAt: new Date().toISOString(),
+        }
+        messages.value = [...messages.value, errorMessage]
+        failedMessageText.value = text
+        isSending.value = false
+
+        if (config.onError) {
+          config.onError({
+            message: errorContent,
+            statusCode:
+              error && typeof error === 'object' && 'statusCode' in error
+                ? (error as { statusCode: number }).statusCode
+                : undefined,
+            originalError: error,
+          })
+        }
+        return
+      }
+    }
+
     try {
-      const response = await apiClient.sendMessage(conversationId.value, text)
+      const response = await apiClient.sendMessage(conversationId.value!, text)
       // Replace optimistic message with server response, remove old error messages
       const serverUserMessage: ChatMessage = {
         ...response.userMessage,
@@ -120,7 +154,7 @@ export function useChat(
       const errorContent = getErrorContent(error)
       const errorMessage: ChatMessage = {
         id: `error-${Date.now()}`,
-        conversationId: conversationId.value,
+        conversationId: conversationId.value!,
         role: 'assistant',
         content: errorContent,
         createdAt: new Date().toISOString(),

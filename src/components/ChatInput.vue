@@ -37,6 +37,18 @@ watch(
   },
 )
 
+// Focus textarea when chat opens
+watch(
+  () => chatState.isOpen.value,
+  (isOpen) => {
+    if (isOpen) {
+      nextTick(() => {
+        textareaRef.value?.focus()
+      })
+    }
+  },
+)
+
 // Restore focus to textarea after send completes
 watch(
   () => chatState.isSending.value,

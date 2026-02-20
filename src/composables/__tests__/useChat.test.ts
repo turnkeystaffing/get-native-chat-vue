@@ -722,6 +722,134 @@ describe('useChat', () => {
     })
   })
 
+  describe('sendMessage() with null conversationId', () => {
+    it('creates conversation when conversationId is null and sends message', async () => {
+      const { apiClient, chat } = setup()
+
+      // Simulate failed open — conversationId stays null
+      ;(apiClient.getConversations as ReturnType<typeof vi.fn>).mockRejectedValue(
+        new Error('Network'),
+      )
+      await chat.open()
+      expect(chat.isOpen.value).toBe(true)
+      expect(chat.messages.value).toHaveLength(0)
+
+      // Now send — should create conversation first
+      ;(apiClient.createConversation as ReturnType<typeof vi.fn>).mockResolvedValue({
+        id: 'recovered-conv',
+        createdAt: '2026-01-01',
+      })
+      ;(apiClient.sendMessage as ReturnType<typeof vi.fn>).mockResolvedValue({
+        userMessage: {
+          id: 's-1',
+          conversationId: 'recovered-conv',
+          role: 'user',
+          content: 'Hello',
+          createdAt: '2026-01-01',
+        },
+        assistantMessage: {
+          id: 's-2',
+          conversationId: 'recovered-conv',
+          role: 'assistant',
+          content: 'Hi',
+          createdAt: '2026-01-01',
+        },
+      })
+
+      await chat.sendMessage('Hello')
+
+      expect(apiClient.createConversation).toHaveBeenCalled()
+      expect(apiClient.sendMessage).toHaveBeenCalledWith('recovered-conv', 'Hello')
+      expect(chat.messages.value).toHaveLength(2) // user + assistant
+    })
+
+    it('shows error message when conversation creation fails during send', async () => {
+      const { apiClient, chat } = setup()
+
+      // Simulate failed open
+      ;(apiClient.getConversations as ReturnType<typeof vi.fn>).mockRejectedValue(
+        new Error('Network'),
+      )
+      await chat.open()
+
+      // Conversation creation also fails
+      ;(apiClient.createConversation as ReturnType<typeof vi.fn>).mockRejectedValue(
+        new Error('Server error'),
+      )
+
+      await chat.sendMessage('Hello')
+
+      // Should show error message and set failedMessageText
+      expect(chat.messages.value).toHaveLength(1)
+      expect(chat.messages.value[0].id).toMatch(/^error-/)
+      expect(chat.messages.value[0].role).toBe('assistant')
+      expect(chat.failedMessageText.value).toBe('Hello')
+    })
+
+    it('calls config.onError when conversation creation fails during send', async () => {
+      const onError = vi.fn()
+      const apiClient = createMockApiClient()
+      ;(apiClient.getConversations as ReturnType<typeof vi.fn>).mockRejectedValue(
+        new Error('Network'),
+      )
+
+      const chat = useChat(apiClient, { apiClient, onError })
+      await chat.open()
+      ;(apiClient.createConversation as ReturnType<typeof vi.fn>).mockRejectedValue(
+        new Error('Server error'),
+      )
+
+      await chat.sendMessage('Hello')
+
+      expect(onError).toHaveBeenCalledWith(
+        expect.objectContaining({
+          message: 'Something went wrong. You can try sending your message again.',
+        }),
+      )
+    })
+
+    it('shows optimistic message immediately before conversation creation completes', async () => {
+      const { apiClient, chat } = setup()
+
+      // Simulate failed open — conversationId stays null
+      ;(apiClient.getConversations as ReturnType<typeof vi.fn>).mockRejectedValue(
+        new Error('Network'),
+      )
+      await chat.open()
+
+      let messagesDuringCreation: number | undefined
+      let isSendingDuringCreation: boolean | undefined
+      ;(apiClient.createConversation as ReturnType<typeof vi.fn>).mockImplementation(async () => {
+        // At this point, optimistic message should already exist
+        messagesDuringCreation = chat.messages.value.length
+        isSendingDuringCreation = chat.isSending.value
+        return { id: 'recovered-conv', createdAt: '2026-01-01' }
+      })
+      ;(apiClient.sendMessage as ReturnType<typeof vi.fn>).mockResolvedValue({
+        userMessage: {
+          id: 's-1',
+          conversationId: 'recovered-conv',
+          role: 'user',
+          content: 'Hello',
+          createdAt: '2026-01-01',
+        },
+        assistantMessage: {
+          id: 's-2',
+          conversationId: 'recovered-conv',
+          role: 'assistant',
+          content: 'Hi',
+          createdAt: '2026-01-01',
+        },
+      })
+
+      await chat.sendMessage('Hello')
+
+      // Verify optimistic message existed before conversation creation
+      expect(messagesDuringCreation).toBe(1)
+      expect(isSendingDuringCreation).toBe(true)
+    })
+  })
+
   describe('readonly state', () => {
     it('all returned state refs are readonly', () => {
       const { chat } = setup()

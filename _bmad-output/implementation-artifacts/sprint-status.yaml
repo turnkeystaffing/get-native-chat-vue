@@ -51,7 +51,7 @@ development_status:
   2-1-usechat-composable-conversation-lifecycle: done
   2-2-message-list-message-bubbles: done
   2-3-chat-input-send-message: done
-  2-4-send-receive-message-flow: backlog
+  2-4-send-receive-message-flow: done
   epic-2-retrospective: optional
 
   epic-3: backlog
