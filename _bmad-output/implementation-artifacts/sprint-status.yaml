@@ -49,7 +49,7 @@ development_status:
 
   epic-2: in-progress
   2-1-usechat-composable-conversation-lifecycle: done
-  2-2-message-list-message-bubbles: backlog
+  2-2-message-list-message-bubbles: done
   2-3-chat-input-send-message: backlog
   2-4-send-receive-message-flow: backlog
   epic-2-retrospective: optional

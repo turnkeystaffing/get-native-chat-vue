@@ -4,6 +4,7 @@ import { VLayout } from 'vuetify/components'
 import ChatPanel from '@/components/ChatPanel.vue'
 import ChatHeader from '@/components/ChatHeader.vue'
 import WelcomeState from '@/components/WelcomeState.vue'
+import MessageList from '@/components/MessageList.vue'
 import { CONFIG_KEY, CHAT_STATE_KEY } from '@/keys'
 import type { NativeChatApiClient } from '@/types/api'
 import type { UseChatReturn } from '@/composables/useChat'
@@ -118,15 +119,48 @@ describe('ChatPanel', () => {
     const { wrapper } = mountChatPanel({ isOpen: true, messages: [], isLoading: false })
 
     expect(wrapper.findComponent(WelcomeState).exists()).toBe(true)
+    expect(wrapper.findComponent(MessageList).exists()).toBe(false)
   })
 
-  it('renders loading indicator when isLoading is true', () => {
-    const { wrapper } = mountChatPanel({ isOpen: true, isLoading: true })
+  it('renders MessageList when messages exist', () => {
+    const msgs: ChatMessage[] = [
+      {
+        id: 'msg-1',
+        conversationId: 'conv-1',
+        role: 'user',
+        content: 'Hello',
+        createdAt: '2026-02-20T00:00:00Z',
+      },
+    ]
+    const { wrapper } = mountChatPanel({ isOpen: true, messages: msgs, isLoading: false })
+
+    expect(wrapper.findComponent(MessageList).exists()).toBe(true)
+    expect(wrapper.findComponent(WelcomeState).exists()).toBe(false)
+  })
+
+  it('renders loading indicator when isLoading is true and no messages', () => {
+    const { wrapper } = mountChatPanel({ isOpen: true, isLoading: true, messages: [] })
 
     const loader = wrapper.findComponent({ name: 'VProgressCircular' })
     expect(loader.exists()).toBe(true)
     // WelcomeState should NOT be rendered when loading
     expect(wrapper.findComponent(WelcomeState).exists()).toBe(false)
+  })
+
+  it('renders MessageList (not spinner) when isLoading is true but messages exist', () => {
+    const msgs: ChatMessage[] = [
+      {
+        id: 'msg-1',
+        conversationId: 'conv-1',
+        role: 'user',
+        content: 'Hello',
+        createdAt: '2026-02-20T00:00:00Z',
+      },
+    ]
+    const { wrapper } = mountChatPanel({ isOpen: true, isLoading: true, messages: msgs })
+
+    expect(wrapper.findComponent(MessageList).exists()).toBe(true)
+    expect(wrapper.findComponent({ name: 'VProgressCircular' }).exists()).toBe(false)
   })
 
   it('panel has role="complementary" and aria-label="Chat with AI Assistant"', () => {

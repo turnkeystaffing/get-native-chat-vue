@@ -4,6 +4,7 @@ import { useDisplay } from 'vuetify'
 import { CONFIG_KEY, CHAT_STATE_KEY } from '@/keys'
 import ChatHeader from '@/components/ChatHeader.vue'
 import WelcomeState from '@/components/WelcomeState.vue'
+import MessageList from '@/components/MessageList.vue'
 
 const chatState = inject(CHAT_STATE_KEY)!
 
@@ -63,13 +64,16 @@ onUnmounted(() => {
     <ChatHeader />
     <div class="nc-chat-panel__body">
       <v-progress-circular
-        v-if="chatState.isLoading.value"
+        v-if="chatState.isLoading.value && chatState.messages.value.length === 0"
         indeterminate
         size="24"
         class="nc-chat-panel__loader"
       />
-      <WelcomeState v-else-if="chatState.messages.value.length === 0" :message="welcomeMessage" />
-      <!-- MessageList slot for Story 2.2 -->
+      <WelcomeState
+        v-else-if="chatState.messages.value.length === 0 && !chatState.isSending.value"
+        :message="welcomeMessage"
+      />
+      <MessageList v-else />
     </div>
   </v-navigation-drawer>
 </template>
@@ -80,7 +84,7 @@ onUnmounted(() => {
     display: flex;
     flex-direction: column;
     flex: 1;
-    overflow-y: auto;
+    overflow: hidden;
   }
 
   .nc-chat-panel__loader {
