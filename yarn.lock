@@ -2826,6 +2826,17 @@ __metadata:
   languageName: node
   linkType: hard
 
+"eslint-config-prettier@npm:^10.1.8":
+  version: 10.1.8
+  resolution: "eslint-config-prettier@npm:10.1.8"
+  peerDependencies:
+    eslint: ">=7.0.0"
+  bin:
+    eslint-config-prettier: bin/cli.js
+  checksum: 10c0/e1bcfadc9eccd526c240056b1e59c5cd26544fe59feb85f38f4f1f116caed96aea0b3b87868e68b3099e55caaac3f2e5b9f58110f85db893e83a332751192682
+  languageName: node
+  linkType: hard
+
 "eslint-plugin-vue@npm:^10.8.0":
   version: 10.8.0
   resolution: "eslint-plugin-vue@npm:10.8.0"
@@ -3948,6 +3959,7 @@ __metadata:
     "@vue/test-utils": "npm:^2.4.6"
     dompurify: "npm:^3.3.0"
     eslint: "npm:^10.0.0"
+    eslint-config-prettier: "npm:^10.1.8"
     eslint-plugin-vue: "npm:^10.8.0"
     jiti: "npm:^2.6.1"
     jsdom: "npm:^28.1.0"

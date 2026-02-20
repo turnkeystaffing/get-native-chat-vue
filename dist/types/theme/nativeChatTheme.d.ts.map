@@ -1,1 +1,1 @@
-{"version":3,"file":"nativeChatTheme.d.ts","sourceRoot":"","sources":["../../../src/theme/nativeChatTheme.ts"],"names":[],"mappings":"AAAA,eAAO,MAAM,eAAe;;;;;;;;;;;;CAY3B,CAAA"}
+{"version":3,"file":"nativeChatTheme.d.ts","sourceRoot":"","sources":["../../../src/theme/nativeChatTheme.ts"],"names":[],"mappings":"AAAA,OAAO,KAAK,EAAE,eAAe,EAAE,MAAM,SAAS,CAAA;AAE9C,KAAK,qBAAqB,GAAG,eAAe,GAAG;IAC7C,MAAM,EAAE,MAAM,CAAC,MAAM,EAAE,MAAM,CAAC,CAAA;IAC9B,SAAS,EAAE,MAAM,CAAC,MAAM,EAAE,MAAM,GAAG,MAAM,CAAC,CAAA;CAC3C,CAAA;AAED,eAAO,MAAM,eAAe,EAAE,qBAe7B,CAAA"}

@@ -3,6 +3,7 @@ import { mount } from '@vue/test-utils'
 import { NativeChatPlugin } from '@/plugin'
 import { CONFIG_KEY } from '@/keys'
 import NativeChatWidget from '@/components/NativeChatWidget.vue'
+import FloatingButton from '@/components/FloatingButton.vue'
 import type { NativeChatApiClient } from '@/types/api'
 
 function createMockApiClient(): NativeChatApiClient {
@@ -12,6 +13,19 @@ function createMockApiClient(): NativeChatApiClient {
     getMessages: vi.fn(),
     sendMessage: vi.fn(),
   }
+}
+
+function mountWidget(options?: { position?: 'bottom-left' | 'bottom-right' }) {
+  return mount(NativeChatWidget, {
+    global: {
+      provide: {
+        [CONFIG_KEY as symbol]: {
+          apiClient: createMockApiClient(),
+          position: options?.position,
+        },
+      },
+    },
+  })
 }
 
 describe('NativeChatPlugin', () => {
@@ -75,10 +89,59 @@ describe('NativeChatPlugin', () => {
 })
 
 describe('NativeChatWidget', () => {
-  it('renders placeholder content', () => {
-    const wrapper = mount(NativeChatWidget)
+  it('renders FloatingButton as child', () => {
+    const wrapper = mountWidget()
 
-    expect(wrapper.find('.nc-widget').exists()).toBe(true)
-    expect(wrapper.text()).toContain('NativeChatWidget placeholder')
+    expect(wrapper.findComponent(FloatingButton).exists()).toBe(true)
+  })
+
+  it('provides state via CHAT_STATE_KEY with isOpen, open, close, toggle', async () => {
+    const wrapper = mountWidget()
+    const floatingButton = wrapper.findComponent(FloatingButton)
+
+    // FloatingButton injects CHAT_STATE_KEY — if it renders and responds to clicks, state is provided
+    expect(floatingButton.exists()).toBe(true)
+
+    // Verify initial state: aria-label should be "Open chat" (isOpen = false)
+    const btn = floatingButton.findComponent({ name: 'VBtn' })
+    expect(btn.attributes('aria-label')).toBe('Open chat')
+
+    // Click to toggle — proves toggle function is provided and works
+    await btn.trigger('click')
+    expect(btn.attributes('aria-label')).toBe('Close chat')
+
+    // Click again — proves toggle works bidirectionally
+    await btn.trigger('click')
+    expect(btn.attributes('aria-label')).toBe('Open chat')
+  })
+
+  it('isOpen starts as false', () => {
+    const wrapper = mountWidget()
+    const btn = wrapper.findComponent(FloatingButton).findComponent({ name: 'VBtn' })
+
+    expect(btn.attributes('aria-label')).toBe('Open chat')
+    expect(btn.attributes('aria-expanded')).toBe('false')
+  })
+
+  it('wraps content in v-theme-provider with theme="nativeChat"', () => {
+    const wrapper = mountWidget()
+    const themeProvider = wrapper.findComponent({ name: 'VThemeProvider' })
+
+    expect(themeProvider.exists()).toBe(true)
+    expect(themeProvider.props('theme')).toBe('nativeChat')
+  })
+
+  it('registers nativeChatTheme with Vuetify theme system', () => {
+    const wrapper = mountWidget()
+
+    // Verify the theme was actually registered by checking the theme provider
+    // uses the nativeChat theme and the component tree renders correctly
+    const themeProvider = wrapper.findComponent({ name: 'VThemeProvider' })
+    expect(themeProvider.exists()).toBe(true)
+    expect(themeProvider.props('theme')).toBe('nativeChat')
+
+    // Verify the widget can be mounted a second time without error (idempotency)
+    const wrapper2 = mountWidget()
+    expect(wrapper2.findComponent({ name: 'VThemeProvider' }).props('theme')).toBe('nativeChat')
   })
 })

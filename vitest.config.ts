@@ -14,5 +14,10 @@ export default defineConfig({
     globals: true,
     include: ['src/**/__tests__/**/*.test.ts'],
     setupFiles: ['./vitest.setup.ts'],
+    server: {
+      deps: {
+        inline: ['vuetify'],
+      },
+    },
   },
 })

@@ -1,9 +1,8 @@
 import pluginVue from 'eslint-plugin-vue'
-import tseslint from 'typescript-eslint'
-import vueTsEslintConfig from '@vue/eslint-config-typescript'
-import type { Linter } from 'eslint'
+import { defineConfigWithVueTs, vueTsConfigs } from '@vue/eslint-config-typescript'
+import prettierConfig from 'eslint-config-prettier'
 
-export default [
+export default defineConfigWithVueTs(
   {
     ignores: [
       'dist/**',
@@ -18,12 +17,18 @@ export default [
       'design/**',
     ],
   },
-  ...tseslint.configs.recommended,
-  ...pluginVue.configs['flat/recommended'],
-  ...vueTsEslintConfig(),
+  pluginVue.configs['flat/recommended'],
+  vueTsConfigs.recommended,
   {
     rules: {
       'vue/multi-word-component-names': 'off',
     },
   },
-] satisfies Linter.Config[]
+  {
+    files: ['src/**/__tests__/**/*.ts'],
+    rules: {
+      'vue/one-component-per-file': 'off',
+    },
+  },
+  prettierConfig,
+)

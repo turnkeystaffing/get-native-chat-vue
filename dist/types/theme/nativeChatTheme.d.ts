@@ -1,14 +1,8 @@
-export declare const nativeChatTheme: {
-    dark: boolean;
-    colors: {
-        primary: string;
-        secondary: string;
-        background: string;
-        surface: string;
-        error: string;
-        success: string;
-        'on-primary': string;
-        'on-surface': string;
-    };
+import { ThemeDefinition } from 'vuetify';
+type StrictThemeDefinition = ThemeDefinition & {
+    colors: Record<string, string>;
+    variables: Record<string, string | number>;
 };
+export declare const nativeChatTheme: StrictThemeDefinition;
+export {};
 //# sourceMappingURL=nativeChatTheme.d.ts.map
