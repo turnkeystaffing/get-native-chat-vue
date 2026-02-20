@@ -10,15 +10,6 @@ import type { UseChatReturn } from '@/composables/useChat'
 import type { NativeChatApiClient } from '@/types/api'
 import type { ChatMessage } from '@/types/chat'
 
-// VLayout's createLayout uses ResizeObserver which is not available in jsdom
-beforeAll(() => {
-  global.ResizeObserver = class {
-    observe() {}
-    unobserve() {}
-    disconnect() {}
-  }
-})
-
 function createMountHelper(options?: {
   isOpen?: boolean
   isLoading?: boolean
@@ -264,7 +255,7 @@ describe('Chat Open with History Flow (AC #3)', () => {
 
     expect(wrapper.findComponent(MessageList).exists()).toBe(true)
     expect(wrapper.findComponent(WelcomeState).exists()).toBe(false)
-    expect(wrapper.findComponent({ name: 'VProgressCircular' }).exists()).toBe(false)
+    expect(wrapper.find('.nc-chat-panel__loader').exists()).toBe(false)
   })
 
   it('MessageList renders when messages exist (scroll to bottom tested via MessageList unit)', () => {

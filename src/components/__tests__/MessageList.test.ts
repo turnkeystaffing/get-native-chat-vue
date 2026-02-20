@@ -32,12 +32,12 @@ function createMessage(
   }
 }
 
-function mountMessageList(options?: { messages?: ChatMessage[] }) {
+function mountMessageList(options?: { messages?: ChatMessage[]; hasMore?: boolean }) {
   const messages = ref<ChatMessage[]>(options?.messages ?? [])
   const isOpen = ref(true)
   const isLoading = ref(false)
   const isSending = ref(false)
-  const hasMore = ref(false)
+  const hasMore = ref(options?.hasMore ?? false)
   const failedMessageText = ref<string | null>(null)
 
   const chatState: UseChatReturn = {
@@ -62,7 +62,7 @@ function mountMessageList(options?: { messages?: ChatMessage[] }) {
     },
   })
 
-  return { wrapper, messages, chatState }
+  return { wrapper, messages, hasMore, isLoading, chatState }
 }
 
 describe('MessageList', () => {
@@ -105,15 +105,28 @@ describe('MessageList', () => {
     const msgs = [createMessage('1', 'user')]
     const { wrapper, messages } = mountMessageList({ messages: msgs })
 
-    const ul = wrapper.find('ul').element as HTMLUListElement
+    const scrollContainer = wrapper.find('.v-infinite-scroll').element as HTMLElement
 
     // Mock scroll properties: user is near bottom
-    Object.defineProperty(ul, 'scrollHeight', { value: 500, writable: true, configurable: true })
-    Object.defineProperty(ul, 'scrollTop', { value: 450, writable: true, configurable: true })
-    Object.defineProperty(ul, 'clientHeight', { value: 100, writable: true, configurable: true })
+    Object.defineProperty(scrollContainer, 'scrollHeight', {
+      value: 500,
+      writable: true,
+      configurable: true,
+    })
+    Object.defineProperty(scrollContainer, 'scrollTop', {
+      value: 450,
+      writable: true,
+      configurable: true,
+    })
+    Object.defineProperty(scrollContainer, 'clientHeight', {
+      value: 100,
+      writable: true,
+      configurable: true,
+    })
 
     // Trigger scroll to update isNearBottom
-    await wrapper.find('ul').trigger('scroll')
+    scrollContainer.dispatchEvent(new Event('scroll'))
+    await nextTick()
 
     // Add a new message
     messages.value = [...messages.value, createMessage('2', 'assistant')]
@@ -121,24 +134,37 @@ describe('MessageList', () => {
     await nextTick()
 
     // scrollTop should have been set to scrollHeight
-    expect(ul.scrollTop).toBe(ul.scrollHeight)
+    expect(scrollContainer.scrollTop).toBe(scrollContainer.scrollHeight)
   })
 
   it('does NOT auto-scroll when user has scrolled up (not near bottom)', async () => {
     const msgs = [createMessage('1', 'user')]
     const { wrapper, messages } = mountMessageList({ messages: msgs })
 
-    const ul = wrapper.find('ul').element as HTMLUListElement
+    const scrollContainer = wrapper.find('.v-infinite-scroll').element as HTMLElement
 
     // Mock scroll properties: user has scrolled up (far from bottom)
-    Object.defineProperty(ul, 'scrollHeight', { value: 1000, writable: true, configurable: true })
-    Object.defineProperty(ul, 'scrollTop', { value: 100, writable: true, configurable: true })
-    Object.defineProperty(ul, 'clientHeight', { value: 100, writable: true, configurable: true })
+    Object.defineProperty(scrollContainer, 'scrollHeight', {
+      value: 1000,
+      writable: true,
+      configurable: true,
+    })
+    Object.defineProperty(scrollContainer, 'scrollTop', {
+      value: 100,
+      writable: true,
+      configurable: true,
+    })
+    Object.defineProperty(scrollContainer, 'clientHeight', {
+      value: 100,
+      writable: true,
+      configurable: true,
+    })
 
     // Trigger scroll to update isNearBottom
-    await wrapper.find('ul').trigger('scroll')
+    scrollContainer.dispatchEvent(new Event('scroll'))
+    await nextTick()
 
-    const scrollTopBefore = ul.scrollTop
+    const scrollTopBefore = scrollContainer.scrollTop
 
     // Add a new message
     messages.value = [...messages.value, createMessage('2', 'assistant')]
@@ -146,22 +172,26 @@ describe('MessageList', () => {
     await nextTick()
 
     // scrollTop should NOT have changed
-    expect(ul.scrollTop).toBe(scrollTopBefore)
+    expect(scrollContainer.scrollTop).toBe(scrollTopBefore)
   })
 
   it('scrolls to bottom on initial render with messages', async () => {
     const msgs = [createMessage('1', 'user'), createMessage('2', 'assistant')]
     const { wrapper } = mountMessageList({ messages: msgs })
 
-    const ul = wrapper.find('ul').element as HTMLUListElement
+    const scrollContainer = wrapper.find('.v-infinite-scroll').element as HTMLElement
     // Mock scrollHeight before the queued nextTick(scrollToBottom) executes
-    Object.defineProperty(ul, 'scrollHeight', { value: 500, writable: true, configurable: true })
+    Object.defineProperty(scrollContainer, 'scrollHeight', {
+      value: 500,
+      writable: true,
+      configurable: true,
+    })
 
     await nextTick()
     await nextTick()
 
     // scrollToBottom sets scrollTop = scrollHeight
-    expect(ul.scrollTop).toBe(500)
+    expect(scrollContainer.scrollTop).toBe(500)
   })
 
   it('empty messages array renders empty list (no crash)', () => {
@@ -170,5 +200,190 @@ describe('MessageList', () => {
     const ul = wrapper.find('ul')
     expect(ul.exists()).toBe(true)
     expect(wrapper.findAllComponents(MessageBubble)).toHaveLength(0)
+  })
+
+  // Task 4: Infinite scroll trigger tests
+  describe('infinite scroll', () => {
+    it('renders v-infinite-scroll with side="start" when hasMore is true', () => {
+      const msgs = [createMessage('1', 'user')]
+      const { wrapper } = mountMessageList({ messages: msgs, hasMore: true })
+
+      const infiniteScroll = wrapper.findComponent({ name: 'VInfiniteScroll' })
+      expect(infiniteScroll.exists()).toBe(true)
+      expect(infiniteScroll.props('side')).toBe('start')
+    })
+
+    it('@load event triggers loadMore() on the composable', async () => {
+      const msgs = [createMessage('1', 'user')]
+      const { wrapper, chatState } = mountMessageList({ messages: msgs, hasMore: true })
+
+      const infiniteScroll = wrapper.findComponent({ name: 'VInfiniteScroll' })
+      const doneFn = vi.fn()
+
+      await infiniteScroll.vm.$emit('load', { side: 'start', done: doneFn })
+      await nextTick()
+
+      expect(chatState.loadMore).toHaveBeenCalledOnce()
+    })
+
+    it('v-infinite-scroll is disabled when hasMore is false', () => {
+      const msgs = [createMessage('1', 'user')]
+      const { wrapper } = mountMessageList({ messages: msgs, hasMore: false })
+
+      const infiniteScroll = wrapper.findComponent({ name: 'VInfiniteScroll' })
+      expect(infiniteScroll.attributes('disabled')).toBe('true')
+    })
+
+    it('v-infinite-scroll is not disabled when hasMore is true', () => {
+      const msgs = [createMessage('1', 'user')]
+      const { wrapper } = mountMessageList({ messages: msgs, hasMore: true })
+
+      const infiniteScroll = wrapper.findComponent({ name: 'VInfiniteScroll' })
+      expect(infiniteScroll.attributes('disabled')).toBe('false')
+    })
+
+    it('loading indicator renders v-progress-circular in #loading slot', () => {
+      const msgs = [createMessage('1', 'user')]
+      const { wrapper } = mountMessageList({ messages: msgs, hasMore: true })
+
+      const loader = wrapper.find('.nc-message-list__loader')
+      expect(loader.exists()).toBe(true)
+      expect(loader.findComponent({ name: 'VProgressCircular' }).exists()).toBe(true)
+    })
+  })
+
+  // Task 5: Scroll position preservation and error handling tests
+  describe('scroll position preservation', () => {
+    it('adjusts scrollTop after messages prepend to preserve view position', async () => {
+      const msgs = [createMessage('3', 'user'), createMessage('4', 'assistant')]
+      const { wrapper, messages, chatState } = mountMessageList({
+        messages: msgs,
+        hasMore: true,
+      })
+
+      const scrollContainer = wrapper.find('.v-infinite-scroll').element as HTMLElement
+
+      // Flush onMounted's deferred scrollToBottom before setting up mocks
+      await nextTick()
+      await nextTick()
+
+      let mockScrollHeight = 400
+
+      // Mock scroll state: user scrolled up (far from bottom — triggers loadMore)
+      Object.defineProperty(scrollContainer, 'scrollHeight', {
+        get: () => mockScrollHeight,
+        configurable: true,
+      })
+      Object.defineProperty(scrollContainer, 'scrollTop', {
+        value: 10,
+        writable: true,
+        configurable: true,
+      })
+      Object.defineProperty(scrollContainer, 'clientHeight', {
+        value: 100,
+        writable: true,
+        configurable: true,
+      })
+
+      // Trigger scroll to set isNearBottom = false (user scrolled up)
+      scrollContainer.dispatchEvent(new Event('scroll'))
+      await nextTick()
+
+      // Configure loadMore to simulate prepending messages and increasing scrollHeight
+      const loadMoreFn = chatState.loadMore as ReturnType<typeof vi.fn>
+      loadMoreFn.mockImplementation(async () => {
+        const olderMessages = [createMessage('1', 'user'), createMessage('2', 'assistant')]
+        messages.value = [...olderMessages, ...messages.value]
+        // Simulate DOM growing by 200px from prepended messages
+        mockScrollHeight = 600
+      })
+
+      const infiniteScroll = wrapper.findComponent({ name: 'VInfiniteScroll' })
+      const doneFn = vi.fn()
+
+      await infiniteScroll.vm.$emit('load', { side: 'start', done: doneFn })
+      await nextTick()
+      await nextTick()
+      await nextTick()
+
+      expect(loadMoreFn).toHaveBeenCalledOnce()
+      expect(doneFn).toHaveBeenCalledWith('ok')
+      // scrollTop should be adjusted: initial 10 + delta (600 - 400) = 210
+      expect(scrollContainer.scrollTop).toBe(210)
+    })
+
+    it('failed fetch calls done with ok status allowing retry', async () => {
+      const msgs = [createMessage('1', 'user')]
+      const { wrapper, chatState } = mountMessageList({
+        messages: msgs,
+        hasMore: true,
+      })
+
+      // Configure loadMore to simulate failure (silent catch, hasMore stays true)
+      const loadMoreFn = chatState.loadMore as ReturnType<typeof vi.fn>
+      loadMoreFn.mockImplementation(async () => {
+        // Simulate silent error — hasMore stays true, no state changes
+      })
+
+      const infiniteScroll = wrapper.findComponent({ name: 'VInfiniteScroll' })
+      const doneFn = vi.fn()
+
+      await infiniteScroll.vm.$emit('load', { side: 'start', done: doneFn })
+      await nextTick()
+
+      // hasMore is still true → done('ok') allows retry
+      expect(doneFn).toHaveBeenCalledWith('ok')
+    })
+
+    it('done("empty") called when hasMore becomes false after fetch', async () => {
+      const msgs = [createMessage('1', 'user')]
+      const { wrapper, hasMore, chatState } = mountMessageList({
+        messages: msgs,
+        hasMore: true,
+      })
+
+      // Configure loadMore to set hasMore to false
+      const loadMoreFn = chatState.loadMore as ReturnType<typeof vi.fn>
+      loadMoreFn.mockImplementation(async () => {
+        hasMore.value = false
+      })
+
+      const infiniteScroll = wrapper.findComponent({ name: 'VInfiniteScroll' })
+      const doneFn = vi.fn()
+
+      await infiniteScroll.vm.$emit('load', { side: 'start', done: doneFn })
+      await nextTick()
+
+      expect(doneFn).toHaveBeenCalledWith('empty')
+    })
+
+    it('user can trigger another load after failed fetch', async () => {
+      const msgs = [createMessage('1', 'user')]
+      const { wrapper, chatState } = mountMessageList({
+        messages: msgs,
+        hasMore: true,
+      })
+
+      const loadMoreFn = chatState.loadMore as ReturnType<typeof vi.fn>
+      // First call: failure (no state change)
+      loadMoreFn.mockImplementationOnce(async () => {})
+      // Second call: success
+      loadMoreFn.mockImplementationOnce(async () => {})
+
+      const infiniteScroll = wrapper.findComponent({ name: 'VInfiniteScroll' })
+      const doneFn1 = vi.fn()
+      const doneFn2 = vi.fn()
+
+      // First trigger (failure)
+      await infiniteScroll.vm.$emit('load', { side: 'start', done: doneFn1 })
+      await nextTick()
+      expect(doneFn1).toHaveBeenCalledWith('ok')
+
+      // Second trigger (retry)
+      await infiniteScroll.vm.$emit('load', { side: 'start', done: doneFn2 })
+      await nextTick()
+      expect(loadMoreFn).toHaveBeenCalledTimes(2)
+      expect(doneFn2).toHaveBeenCalledWith('ok')
+    })
   })
 })

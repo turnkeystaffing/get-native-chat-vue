@@ -11,15 +11,6 @@ import type { NativeChatApiClient } from '@/types/api'
 import type { UseChatReturn } from '@/composables/useChat'
 import type { ChatMessage } from '@/types/chat'
 
-// VLayout's createLayout uses ResizeObserver which is not available in jsdom
-beforeAll(() => {
-  global.ResizeObserver = class {
-    observe() {}
-    unobserve() {}
-    disconnect() {}
-  }
-})
-
 function createMockApiClient(): NativeChatApiClient {
   return {
     createConversation: vi.fn(),
@@ -161,7 +152,7 @@ describe('ChatPanel', () => {
     const { wrapper } = mountChatPanel({ isOpen: true, isLoading: true, messages: msgs })
 
     expect(wrapper.findComponent(MessageList).exists()).toBe(true)
-    expect(wrapper.findComponent({ name: 'VProgressCircular' }).exists()).toBe(false)
+    expect(wrapper.find('.nc-chat-panel__loader').exists()).toBe(false)
   })
 
   it('panel has role="complementary" and aria-label="Chat with AI Assistant"', () => {
