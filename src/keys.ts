@@ -1,7 +1,7 @@
 import type { InjectionKey } from 'vue'
 import type { NativeChatPluginOptions } from '@/types/config'
+import type { UseChatReturn } from '@/composables/useChat'
 
 export const CONFIG_KEY: InjectionKey<NativeChatPluginOptions> = Symbol('native-chat-config')
 
-// TODO: Type as InjectionKey<UseChatReturn> in Story 2.1 when composable is created
-export const CHAT_STATE_KEY = Symbol('native-chat-state')
+export const CHAT_STATE_KEY: InjectionKey<UseChatReturn> = Symbol('native-chat-state')

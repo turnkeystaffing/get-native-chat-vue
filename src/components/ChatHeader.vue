@@ -4,16 +4,7 @@ import { CHAT_STATE_KEY } from '@/keys'
 import IconStar from '@/icons/IconStar.vue'
 import IconClose from '@/icons/IconClose.vue'
 
-const chatState = inject(CHAT_STATE_KEY) as {
-  isOpen: { value: boolean }
-  open: () => void
-  close: () => void
-  toggle: () => void
-}
-
-if (!chatState) {
-  throw new Error('[NativeChat] ChatHeader must be used inside NativeChatWidget')
-}
+const chatState = inject(CHAT_STATE_KEY)!
 </script>
 
 <template>

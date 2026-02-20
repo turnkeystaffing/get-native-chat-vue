@@ -1,7 +1,8 @@
 <script setup lang="ts">
-import { ref, readonly, provide, watch, nextTick } from 'vue'
+import { ref, provide, watch, nextTick, inject } from 'vue'
 import { useTheme } from 'vuetify'
-import { CHAT_STATE_KEY } from '@/keys'
+import { CONFIG_KEY, CHAT_STATE_KEY } from '@/keys'
+import { useChat } from '@/composables/useChat'
 import { nativeChatTheme } from '@/theme/nativeChatTheme'
 import FloatingButton from '@/components/FloatingButton.vue'
 import ChatPanel from '@/components/ChatPanel.vue'
@@ -23,34 +24,24 @@ if (!theme.themes.value.nativeChat) {
   }
 }
 
+const config = inject(CONFIG_KEY)!
+const chatState = useChat(config.apiClient, config)
+
+provide(CHAT_STATE_KEY, chatState)
+
 const floatingButtonRef = ref<InstanceType<typeof FloatingButton> | null>(null)
-const isOpen = ref(false)
-
-const open = () => {
-  isOpen.value = true
-}
-const close = () => {
-  isOpen.value = false
-}
-const toggle = () => {
-  isOpen.value = !isOpen.value
-}
-
-provide(CHAT_STATE_KEY, {
-  isOpen: readonly(isOpen),
-  open,
-  close,
-  toggle,
-})
 
 // Return focus to floating button on close
-watch(isOpen, (val) => {
-  if (!val) {
-    nextTick(() => {
-      floatingButtonRef.value?.focus()
-    })
-  }
-})
+watch(
+  () => chatState.isOpen.value,
+  (val) => {
+    if (!val) {
+      nextTick(() => {
+        floatingButtonRef.value?.focus()
+      })
+    }
+  },
+)
 </script>
 
 <template>

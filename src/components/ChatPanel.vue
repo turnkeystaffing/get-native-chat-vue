@@ -5,23 +5,14 @@ import { CONFIG_KEY, CHAT_STATE_KEY } from '@/keys'
 import ChatHeader from '@/components/ChatHeader.vue'
 import WelcomeState from '@/components/WelcomeState.vue'
 
-const chatState = inject(CHAT_STATE_KEY) as {
-  isOpen: { value: boolean }
-  open: () => void
-  close: () => void
-  toggle: () => void
-}
+const chatState = inject(CHAT_STATE_KEY)!
 
-if (!chatState) {
-  throw new Error('[NativeChat] ChatPanel must be used inside NativeChatWidget')
-}
-
-// Computed proxy: only forwards opens — ignores Vuetify-initiated closes
-// (prevents click-outside-to-close per UX spec)
+// Computed proxy: reads isOpen state, ignores all Vuetify-initiated changes
+// (prevents click-outside-to-close per UX spec; open/close managed by composable actions)
 const drawerModel = computed({
   get: () => chatState.isOpen.value,
-  set: (val: boolean) => {
-    if (val) chatState.open()
+  set: () => {
+    // Intentional no-op: drawer state is managed exclusively via chatState.open()/close()
   },
 })
 
@@ -71,7 +62,14 @@ onUnmounted(() => {
   >
     <ChatHeader />
     <div class="nc-chat-panel__body">
-      <WelcomeState :message="welcomeMessage" />
+      <v-progress-circular
+        v-if="chatState.isLoading.value"
+        indeterminate
+        size="24"
+        class="nc-chat-panel__loader"
+      />
+      <WelcomeState v-else-if="chatState.messages.value.length === 0" :message="welcomeMessage" />
+      <!-- MessageList slot for Story 2.2 -->
     </div>
   </v-navigation-drawer>
 </template>
@@ -83,6 +81,11 @@ onUnmounted(() => {
     flex-direction: column;
     flex: 1;
     overflow-y: auto;
+  }
+
+  .nc-chat-panel__loader {
+    align-self: center;
+    margin-top: 32px;
   }
 
   .nc-chat-panel--mobile {

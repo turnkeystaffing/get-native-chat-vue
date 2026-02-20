@@ -10,3 +10,5 @@ export type {
 export type { MessageStatus, ChatMessage, ChatError } from './chat'
 
 export type { NativeChatPluginOptions } from './config'
+
+export type { UseChatReturn } from '@/composables/useChat'

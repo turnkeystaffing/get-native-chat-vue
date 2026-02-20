@@ -6,6 +6,8 @@ import ChatHeader from '@/components/ChatHeader.vue'
 import WelcomeState from '@/components/WelcomeState.vue'
 import { CONFIG_KEY, CHAT_STATE_KEY } from '@/keys'
 import type { NativeChatApiClient } from '@/types/api'
+import type { UseChatReturn } from '@/composables/useChat'
+import type { ChatMessage } from '@/types/chat'
 
 // VLayout's createLayout uses ResizeObserver which is not available in jsdom
 beforeAll(() => {
@@ -25,28 +27,43 @@ function createMockApiClient(): NativeChatApiClient {
   }
 }
 
-function mountChatPanel(options?: { isOpen?: boolean; welcomeMessage?: string }) {
+function mountChatPanel(options?: {
+  isOpen?: boolean
+  welcomeMessage?: string
+  isLoading?: boolean
+  messages?: ChatMessage[]
+}) {
   const config = {
     apiClient: createMockApiClient(),
     welcomeMessage: options?.welcomeMessage,
   }
 
   const isOpen = ref(options?.isOpen ?? false)
+  const isLoading = ref(options?.isLoading ?? false)
+  const isSending = ref(false)
+  const hasMore = ref(false)
+  const failedMessageText = ref<string | null>(null)
+  const messages = ref<ChatMessage[]>(options?.messages ?? [])
+
   const closeFn = vi.fn(() => {
     isOpen.value = false
   })
-  const openFn = vi.fn(() => {
+  const openFn = vi.fn(async () => {
     isOpen.value = true
   })
-  const toggleFn = vi.fn(() => {
-    isOpen.value = !isOpen.value
-  })
 
-  const chatState = {
+  const chatState: UseChatReturn = {
     isOpen: readonly(isOpen),
+    isLoading: readonly(isLoading),
+    isSending: readonly(isSending),
+    hasMore: readonly(hasMore),
+    failedMessageText: readonly(failedMessageText),
+    messages: readonly(messages),
     open: openFn,
     close: closeFn,
-    toggle: toggleFn,
+    sendMessage: vi.fn(),
+    loadMore: vi.fn(),
+    retry: vi.fn(),
   }
 
   // VNavigationDrawer requires a layout parent — wrap in VLayout
@@ -65,7 +82,7 @@ function mountChatPanel(options?: { isOpen?: boolean; welcomeMessage?: string })
     },
   })
 
-  return { wrapper, config, chatState, isOpen, closeFn, openFn }
+  return { wrapper, config, chatState, isOpen, isLoading, messages, closeFn, openFn }
 }
 
 describe('ChatPanel', () => {
@@ -97,10 +114,19 @@ describe('ChatPanel', () => {
     expect(wrapper.findComponent(ChatHeader).exists()).toBe(true)
   })
 
-  it('renders WelcomeState as child', () => {
-    const { wrapper } = mountChatPanel({ isOpen: true })
+  it('renders WelcomeState when messages are empty and not loading', () => {
+    const { wrapper } = mountChatPanel({ isOpen: true, messages: [], isLoading: false })
 
     expect(wrapper.findComponent(WelcomeState).exists()).toBe(true)
+  })
+
+  it('renders loading indicator when isLoading is true', () => {
+    const { wrapper } = mountChatPanel({ isOpen: true, isLoading: true })
+
+    const loader = wrapper.findComponent({ name: 'VProgressCircular' })
+    expect(loader.exists()).toBe(true)
+    // WelcomeState should NOT be rendered when loading
+    expect(wrapper.findComponent(WelcomeState).exists()).toBe(false)
   })
 
   it('panel has role="complementary" and aria-label="Chat with AI Assistant"', () => {
@@ -143,8 +169,19 @@ describe('ChatPanel', () => {
     // Simulate Vuetify trying to close via update:modelValue (click-outside)
     drawer.vm.$emit('update:modelValue', false)
 
-    // close() should NOT have been called — setter only forwards opens
+    // close() should NOT have been called — setter is a no-op
     expect(closeFn).not.toHaveBeenCalled()
+  })
+
+  it('computed setter ignores Vuetify open attempts (state managed by composable)', () => {
+    const { wrapper, openFn } = mountChatPanel({ isOpen: false })
+    const drawer = wrapper.findComponent({ name: 'VNavigationDrawer' })
+
+    // Simulate Vuetify trying to open via update:modelValue
+    drawer.vm.$emit('update:modelValue', true)
+
+    // open() should NOT have been called — setter is a no-op
+    expect(openFn).not.toHaveBeenCalled()
   })
 
   it('passes welcomeMessage from config to WelcomeState', () => {

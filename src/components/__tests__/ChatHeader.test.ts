@@ -2,6 +2,8 @@ import { mount } from '@vue/test-utils'
 import { ref, readonly } from 'vue'
 import ChatHeader from '@/components/ChatHeader.vue'
 import { CHAT_STATE_KEY } from '@/keys'
+import type { UseChatReturn } from '@/composables/useChat'
+import type { ChatMessage } from '@/types/chat'
 
 function mountChatHeader() {
   const isOpen = ref(true)
@@ -9,11 +11,18 @@ function mountChatHeader() {
     isOpen.value = false
   })
 
-  const chatState = {
+  const chatState: UseChatReturn = {
     isOpen: readonly(isOpen),
+    isLoading: readonly(ref(false)),
+    isSending: readonly(ref(false)),
+    hasMore: readonly(ref(false)),
+    failedMessageText: readonly(ref<string | null>(null)),
+    messages: readonly(ref<ChatMessage[]>([])),
     open: vi.fn(),
     close: closeFn,
-    toggle: vi.fn(),
+    sendMessage: vi.fn(),
+    loadMore: vi.fn(),
+    retry: vi.fn(),
   }
 
   const wrapper = mount(ChatHeader, {

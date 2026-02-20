@@ -3,6 +3,8 @@ import { ref, readonly } from 'vue'
 import FloatingButton from '@/components/FloatingButton.vue'
 import { CONFIG_KEY, CHAT_STATE_KEY } from '@/keys'
 import type { NativeChatApiClient } from '@/types/api'
+import type { UseChatReturn } from '@/composables/useChat'
+import type { ChatMessage } from '@/types/chat'
 
 function createMockApiClient(): NativeChatApiClient {
   return {
@@ -15,18 +17,31 @@ function createMockApiClient(): NativeChatApiClient {
 
 function createState(isOpenValue = false) {
   const isOpen = ref(isOpenValue)
-  return {
+  const isLoading = ref(false)
+  const isSending = ref(false)
+  const hasMore = ref(false)
+  const failedMessageText = ref<string | null>(null)
+  const messages = ref<ChatMessage[]>([])
+
+  const state: UseChatReturn = {
     isOpen: readonly(isOpen),
-    open: () => {
+    isLoading: readonly(isLoading),
+    isSending: readonly(isSending),
+    hasMore: readonly(hasMore),
+    failedMessageText: readonly(failedMessageText),
+    messages: readonly(messages),
+    open: vi.fn(async () => {
       isOpen.value = true
-    },
-    close: () => {
-      isOpen.value = false
-    },
-    toggle: vi.fn(() => {
-      isOpen.value = !isOpen.value
     }),
+    close: vi.fn(() => {
+      isOpen.value = false
+    }),
+    sendMessage: vi.fn(),
+    loadMore: vi.fn(),
+    retry: vi.fn(),
   }
+
+  return state
 }
 
 function mountFloatingButton(options?: {
@@ -75,13 +90,24 @@ describe('FloatingButton', () => {
     expect(icon.exists()).toBe(true)
   })
 
-  it('clicking button calls toggle() from injected state', async () => {
-    const { wrapper, state } = mountFloatingButton()
+  it('clicking button calls open() when closed', async () => {
+    const { wrapper, state } = mountFloatingButton({ isOpen: false })
     const btn = wrapper.findComponent({ name: 'VBtn' })
 
     await btn.trigger('click')
 
-    expect(state.toggle).toHaveBeenCalled()
+    expect(state.open).toHaveBeenCalled()
+    expect(state.close).not.toHaveBeenCalled()
+  })
+
+  it('clicking button calls close() when open', async () => {
+    const { wrapper, state } = mountFloatingButton({ isOpen: true })
+    const btn = wrapper.findComponent({ name: 'VBtn' })
+
+    await btn.trigger('click')
+
+    expect(state.close).toHaveBeenCalled()
+    expect(state.open).not.toHaveBeenCalled()
   })
 
   it('aria-label is "Open chat" when isOpen is false', () => {

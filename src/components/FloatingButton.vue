@@ -5,19 +5,21 @@ import { CONFIG_KEY, CHAT_STATE_KEY } from '@/keys'
 import IconStar from '@/icons/IconStar.vue'
 
 const config = inject(CONFIG_KEY)
-const state = inject(CHAT_STATE_KEY) as
-  | { isOpen: { value: boolean }; open: () => void; close: () => void; toggle: () => void }
-  | undefined
+const chatState = inject(CHAT_STATE_KEY)!
 
-if (!state) {
-  throw new Error('[NativeChat] FloatingButton must be used inside NativeChatWidget')
-}
-
-const isOpen = computed(() => state.isOpen.value)
+const isOpen = computed(() => chatState.isOpen.value)
 const position = computed(() => config?.position ?? 'bottom-right')
 const positionClass = computed(
   () => `nc-floating-button-wrapper--${position.value === 'bottom-left' ? 'left' : 'right'}`,
 )
+
+function toggle() {
+  if (chatState.isOpen.value) {
+    chatState.close()
+  } else {
+    chatState.open()
+  }
+}
 
 const triggerBtn = ref<InstanceType<typeof VBtn> | null>(null)
 
@@ -38,7 +40,7 @@ defineExpose({ focus })
       elevation="4"
       :aria-label="isOpen ? 'Close chat' : 'Open chat'"
       :aria-expanded="isOpen.toString()"
-      @click="state.toggle"
+      @click="toggle"
     >
       <v-icon :icon="IconStar" color="white" />
     </v-btn>
