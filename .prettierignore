@@ -1,0 +1,10 @@
+dist
+node_modules
+docs/.vitepress/dist
+docs/.vitepress/cache
+coverage
+.yarn
+_bmad
+_bmad-output
+.claude
+design

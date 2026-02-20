@@ -1,0 +1,14 @@
+node_modules
+docs/.vitepress/dist
+docs/.vitepress/cache
+coverage
+*.local
+
+# Yarn v4
+.pnp.*
+.yarn/*
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/sdks
+!.yarn/versions
