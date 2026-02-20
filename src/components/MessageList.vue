@@ -1,11 +1,11 @@
 <script setup lang="ts">
-import { ref, watch, nextTick, onMounted, onBeforeUnmount, inject } from 'vue'
+import { ref, watch, nextTick, onMounted, onBeforeUnmount, inject, useTemplateRef } from 'vue'
 import { CHAT_STATE_KEY } from '@/keys'
 import MessageBubble from '@/components/MessageBubble.vue'
 
 const chatState = inject(CHAT_STATE_KEY)!
 
-const listRef = ref<HTMLUListElement | null>(null)
+const listRef = useTemplateRef<HTMLUListElement>('listRef')
 const isNearBottom = ref(true)
 
 const SCROLL_THRESHOLD = 50

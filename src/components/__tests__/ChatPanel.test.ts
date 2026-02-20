@@ -5,6 +5,7 @@ import ChatPanel from '@/components/ChatPanel.vue'
 import ChatHeader from '@/components/ChatHeader.vue'
 import WelcomeState from '@/components/WelcomeState.vue'
 import MessageList from '@/components/MessageList.vue'
+import ChatInput from '@/components/ChatInput.vue'
 import { CONFIG_KEY, CHAT_STATE_KEY } from '@/keys'
 import type { NativeChatApiClient } from '@/types/api'
 import type { UseChatReturn } from '@/composables/useChat'
@@ -234,6 +235,12 @@ describe('ChatPanel', () => {
 
     // jsdom defaults to 1024px width — above 768px breakpoint
     expect(drawer.props('width')).toBe(400)
+  })
+
+  it('renders ChatInput component when panel is open', () => {
+    const { wrapper } = mountChatPanel({ isOpen: true })
+
+    expect(wrapper.findComponent(ChatInput).exists()).toBe(true)
   })
 
   it('cleans up Escape listener on unmount', () => {

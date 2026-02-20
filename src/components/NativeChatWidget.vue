@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, provide, watch, nextTick, inject } from 'vue'
+import { provide, watch, nextTick, inject, useTemplateRef } from 'vue'
 import { useTheme } from 'vuetify'
 import { CONFIG_KEY, CHAT_STATE_KEY } from '@/keys'
 import { useChat } from '@/composables/useChat'
@@ -29,7 +29,7 @@ const chatState = useChat(config.apiClient, config)
 
 provide(CHAT_STATE_KEY, chatState)
 
-const floatingButtonRef = ref<InstanceType<typeof FloatingButton> | null>(null)
+const floatingButtonRef = useTemplateRef<InstanceType<typeof FloatingButton>>('floatingButtonRef')
 
 // Return focus to floating button on close
 watch(

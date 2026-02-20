@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, inject, ref } from 'vue'
+import { computed, inject, useTemplateRef } from 'vue'
 import type { VBtn } from 'vuetify/components'
 import { CONFIG_KEY, CHAT_STATE_KEY } from '@/keys'
 import IconStar from '@/icons/IconStar.vue'
@@ -21,7 +21,7 @@ function toggle() {
   }
 }
 
-const triggerBtn = ref<InstanceType<typeof VBtn> | null>(null)
+const triggerBtn = useTemplateRef<InstanceType<typeof VBtn>>('triggerBtn')
 
 function focus() {
   triggerBtn.value?.$el?.focus()

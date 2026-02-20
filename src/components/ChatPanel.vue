@@ -5,6 +5,7 @@ import { CONFIG_KEY, CHAT_STATE_KEY } from '@/keys'
 import ChatHeader from '@/components/ChatHeader.vue'
 import WelcomeState from '@/components/WelcomeState.vue'
 import MessageList from '@/components/MessageList.vue'
+import ChatInput from '@/components/ChatInput.vue'
 
 const chatState = inject(CHAT_STATE_KEY)!
 
@@ -75,6 +76,7 @@ onUnmounted(() => {
       />
       <MessageList v-else />
     </div>
+    <ChatInput />
   </v-navigation-drawer>
 </template>
 
