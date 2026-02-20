@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { computed, inject } from 'vue'
+import { computed, inject, ref } from 'vue'
+import type { VBtn } from 'vuetify/components'
 import { CONFIG_KEY, CHAT_STATE_KEY } from '@/keys'
 import IconStar from '@/icons/IconStar.vue'
 
@@ -17,11 +18,20 @@ const position = computed(() => config?.position ?? 'bottom-right')
 const positionClass = computed(
   () => `nc-floating-button-wrapper--${position.value === 'bottom-left' ? 'left' : 'right'}`,
 )
+
+const triggerBtn = ref<InstanceType<typeof VBtn> | null>(null)
+
+function focus() {
+  triggerBtn.value?.$el?.focus()
+}
+
+defineExpose({ focus })
 </script>
 
 <template>
   <div class="nc-floating-button-wrapper" :class="positionClass">
     <v-btn
+      ref="triggerBtn"
       icon
       size="56"
       color="secondary"

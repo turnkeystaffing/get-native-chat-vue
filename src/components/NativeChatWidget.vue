@@ -1,9 +1,10 @@
 <script setup lang="ts">
-import { ref, readonly, provide } from 'vue'
+import { ref, readonly, provide, watch, nextTick } from 'vue'
 import { useTheme } from 'vuetify'
 import { CHAT_STATE_KEY } from '@/keys'
 import { nativeChatTheme } from '@/theme/nativeChatTheme'
 import FloatingButton from '@/components/FloatingButton.vue'
+import ChatPanel from '@/components/ChatPanel.vue'
 
 const theme = useTheme()
 if (!theme.themes.value.nativeChat) {
@@ -22,6 +23,7 @@ if (!theme.themes.value.nativeChat) {
   }
 }
 
+const floatingButtonRef = ref<InstanceType<typeof FloatingButton> | null>(null)
 const isOpen = ref(false)
 
 const open = () => {
@@ -40,11 +42,21 @@ provide(CHAT_STATE_KEY, {
   close,
   toggle,
 })
+
+// Return focus to floating button on close
+watch(isOpen, (val) => {
+  if (!val) {
+    nextTick(() => {
+      floatingButtonRef.value?.focus()
+    })
+  }
+})
 </script>
 
 <template>
   <v-theme-provider theme="nativeChat">
-    <FloatingButton />
+    <FloatingButton ref="floatingButtonRef" />
+    <ChatPanel />
   </v-theme-provider>
 </template>
 

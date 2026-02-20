@@ -18,6 +18,7 @@ export const nativeChatTheme: StrictThemeDefinition = {
     'on-primary': '#FDFDFD',
     'on-secondary': '#FFFFFF',
     'on-surface': '#002B38',
+    'welcome-text': '#B0BCC0',
   },
   variables: {},
 }

@@ -4,6 +4,7 @@ import { NativeChatPlugin } from '@/plugin'
 import { CONFIG_KEY } from '@/keys'
 import NativeChatWidget from '@/components/NativeChatWidget.vue'
 import FloatingButton from '@/components/FloatingButton.vue'
+import ChatPanel from '@/components/ChatPanel.vue'
 import type { NativeChatApiClient } from '@/types/api'
 
 function createMockApiClient(): NativeChatApiClient {
@@ -23,6 +24,9 @@ function mountWidget(options?: { position?: 'bottom-left' | 'bottom-right' }) {
           apiClient: createMockApiClient(),
           position: options?.position,
         },
+      },
+      stubs: {
+        ChatPanel: true,
       },
     },
   })
@@ -92,6 +96,13 @@ describe('NativeChatWidget', () => {
   it('renders FloatingButton as child', () => {
     const wrapper = mountWidget()
 
+    expect(wrapper.findComponent(FloatingButton).exists()).toBe(true)
+  })
+
+  it('renders ChatPanel as child alongside FloatingButton', () => {
+    const wrapper = mountWidget()
+
+    expect(wrapper.findComponent(ChatPanel).exists()).toBe(true)
     expect(wrapper.findComponent(FloatingButton).exists()).toBe(true)
   })
 
