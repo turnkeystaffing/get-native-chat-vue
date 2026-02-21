@@ -1,13 +1,8 @@
 import { mount } from '@vue/test-utils'
 import { ref, readonly, nextTick } from 'vue'
-import { createVuetify } from 'vuetify'
-import * as components from 'vuetify/components'
-import * as directives from 'vuetify/directives'
 import ChatInput from '@/components/ChatInput.vue'
 import { CHAT_STATE_KEY } from '@/keys'
 import type { UseChatReturn } from '@/composables/useChat'
-
-const vuetify = createVuetify({ components, directives })
 
 function createMockChatState(overrides?: Partial<UseChatReturn>): UseChatReturn {
   const isSending = ref(false)
@@ -32,7 +27,6 @@ function mountChatInput(chatState?: UseChatReturn) {
   const state = chatState ?? createMockChatState()
   const wrapper = mount(ChatInput, {
     global: {
-      plugins: [vuetify],
       provide: {
         [CHAT_STATE_KEY as symbol]: state,
       },
