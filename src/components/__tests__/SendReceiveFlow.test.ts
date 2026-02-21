@@ -466,6 +466,103 @@ describe('Error Display Flow Integration (Story 4.1)', () => {
   })
 })
 
+describe('Message Retry Flow Integration (Story 4.2)', () => {
+  function createMockApiClientLocal(): NativeChatApiClient {
+    return {
+      createConversation: vi.fn(),
+      getConversations: vi.fn(),
+      getMessages: vi.fn(),
+      sendMessage: vi.fn(),
+    }
+  }
+
+  it('full retry flow: send → fail → error shown + input pre-filled → retry → success → error in history', async () => {
+    const apiClient = createMockApiClientLocal()
+    ;(apiClient.getConversations as ReturnType<typeof vi.fn>).mockResolvedValue({
+      conversations: [{ id: 'conv-1', createdAt: '2026-01-01' }],
+      has_more: false,
+    })
+    ;(apiClient.getMessages as ReturnType<typeof vi.fn>).mockResolvedValue({
+      messages: [],
+      has_more: false,
+    })
+
+    // First send fails
+    ;(apiClient.sendMessage as ReturnType<typeof vi.fn>).mockRejectedValueOnce(
+      new Error('Network error'),
+    )
+
+    const chatState = useChat(apiClient, { apiClient })
+    await chatState.open()
+
+    const Wrapper = defineComponent({
+      setup() {
+        return () => h(VLayout, null, () => h(ChatPanel))
+      },
+    })
+
+    const wrapper = mount(Wrapper, {
+      global: {
+        provide: {
+          [CONFIG_KEY as symbol]: { apiClient },
+          [CHAT_STATE_KEY as symbol]: chatState,
+        },
+      },
+    })
+
+    // Step 1: Send message that fails
+    await chatState.sendMessage('Hello')
+    await nextTick()
+
+    // Verify error message shown
+    expect(chatState.messages.value).toHaveLength(1)
+    expect(chatState.messages.value[0].id).toMatch(/^error-/)
+    expect(chatState.messages.value[0].status).toBe('failed')
+
+    // Verify input pre-filled with failed text
+    expect(chatState.failedMessageText.value).toBe('Hello')
+
+    // Verify isSending is false (input re-enabled)
+    expect(chatState.isSending.value).toBe(false)
+
+    // Step 2: Retry — second send succeeds
+    ;(apiClient.sendMessage as ReturnType<typeof vi.fn>).mockResolvedValue({
+      userMessage: {
+        id: 's-1',
+        conversationId: 'conv-1',
+        role: 'user',
+        content: 'Hello',
+        createdAt: '2026-01-01',
+      },
+      assistantMessage: {
+        id: 's-2',
+        conversationId: 'conv-1',
+        role: 'assistant',
+        content: 'Hi there!',
+        createdAt: '2026-01-01',
+      },
+    })
+
+    await chatState.sendMessage('Hello')
+    await nextTick()
+
+    // Verify: error message REMAINS in history (AC#6)
+    expect(chatState.messages.value.some((m) => m.id.startsWith('error-'))).toBe(true)
+
+    // Verify: user + assistant messages present
+    expect(chatState.messages.value).toHaveLength(3) // error + user + assistant
+    expect(chatState.messages.value[1].id).toBe('s-1')
+    expect(chatState.messages.value[2].id).toBe('s-2')
+
+    // Verify: failedMessageText cleared after success
+    expect(chatState.failedMessageText.value).toBeNull()
+
+    // Verify: error bubble still renders in DOM
+    const errorBubble = wrapper.find('.nc-message-bubble--error')
+    expect(errorBubble.exists()).toBe(true)
+  })
+})
+
 describe('Real useChat Integration (AC #5 — null conversationId recovery)', () => {
   function createMockApiClient(): NativeChatApiClient {
     return {

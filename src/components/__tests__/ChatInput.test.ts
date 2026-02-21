@@ -9,15 +9,6 @@ import type { UseChatReturn } from '@/composables/useChat'
 
 const vuetify = createVuetify({ components, directives })
 
-// VTextarea's auto-grow uses ResizeObserver which is not available in jsdom
-beforeAll(() => {
-  global.ResizeObserver = class {
-    observe() {}
-    unobserve() {}
-    disconnect() {}
-  }
-})
-
 function createMockChatState(overrides?: Partial<UseChatReturn>): UseChatReturn {
   const isSending = ref(false)
   const failedMessageText = ref<string | null>(null)
@@ -239,6 +230,47 @@ describe('ChatInput', () => {
     // so textarea should not be focused when isOpen is already true at mount
     const textarea = wrapper.find('textarea')
     expect(textarea.element).not.toBe(document.activeElement)
+  })
+
+  it('restores focus to textarea when isSending transitions true→false (after error)', async () => {
+    const isSending = ref(true)
+    const chatState = createMockChatState({ isSending: readonly(isSending) })
+    const { wrapper } = mountChatInput(chatState)
+
+    const textarea = wrapper.find('textarea')
+    const focusSpy = vi.spyOn(textarea.element, 'focus')
+
+    // Simulate send failure: isSending goes from true to false
+    isSending.value = false
+    await nextTick()
+    await nextTick() // Double nextTick: watcher fires → nextTick inside watcher
+
+    expect(focusSpy).toHaveBeenCalled()
+  })
+
+  it('user can edit pre-populated failed text and send edited version', async () => {
+    const failedMessageText = ref<string | null>(null)
+    const chatState = createMockChatState({ failedMessageText: readonly(failedMessageText) })
+    const { wrapper } = mountChatInput(chatState)
+
+    // Simulate failed message pre-population
+    failedMessageText.value = 'original failed text'
+    await nextTick()
+
+    const textarea = wrapper.find('textarea')
+    expect(textarea.element.value).toBe('original failed text')
+
+    // User edits the text
+    await textarea.setValue('edited text')
+    await nextTick()
+
+    // User presses Enter to send
+    await textarea.trigger('keydown', { key: 'Enter', shiftKey: false })
+    await nextTick()
+
+    // sendMessage should be called with the edited text
+    expect(chatState.sendMessage).toHaveBeenCalledWith('edited text')
+    expect(textarea.element.value).toBe('')
   })
 
   it('failedMessageText being cleared does not empty user-typed text', async () => {

@@ -59,6 +59,7 @@ export function useChat(
     }
     messages.value = [...messages.value, errorMessage]
 
+    failedMessageText.value = null
     failedMessageText.value = text
 
     if (config.onError) {
@@ -145,7 +146,7 @@ export function useChat(
 
     try {
       const response = await apiClient.sendMessage(conversationId.value!, text)
-      // Replace optimistic message with server response, remove old error messages
+      // Replace optimistic message with server response (error messages preserved as history)
       const serverUserMessage: ChatMessage = {
         ...response.userMessage,
         status: 'sent',
@@ -154,7 +155,7 @@ export function useChat(
         ...response.assistantMessage,
       }
       messages.value = [
-        ...messages.value.filter((m) => m.id !== tempId && !m.id.startsWith('error-')),
+        ...messages.value.filter((m) => m.id !== tempId),
         serverUserMessage,
         assistantMessage,
       ]

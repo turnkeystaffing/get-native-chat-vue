@@ -394,7 +394,7 @@ describe('useChat', () => {
       expect(chat.failedMessageText.value).toBe('Hello')
     })
 
-    it('cleans up previous error messages on successful send', async () => {
+    it('preserves error messages in history on successful send', async () => {
       const { apiClient, chat } = await setupWithOpenChat()
 
       // First send fails — adds error message
@@ -403,7 +403,7 @@ describe('useChat', () => {
       expect(chat.messages.value).toHaveLength(1)
       expect(chat.messages.value[0].id).toMatch(/^error-/)
 
-      // Second send succeeds — error message should be cleaned up
+      // Second send succeeds — error message should REMAIN in history as a record
       ;(apiClient.sendMessage as ReturnType<typeof vi.fn>).mockResolvedValue({
         userMessage: {
           id: 's-1',
@@ -422,9 +422,11 @@ describe('useChat', () => {
       })
       await chat.sendMessage('Hello again')
 
-      // Should have 2 messages (user + assistant), no error messages
-      expect(chat.messages.value).toHaveLength(2)
-      expect(chat.messages.value.every((m) => !m.id.startsWith('error-'))).toBe(true)
+      // Should have 3 messages: error + user + assistant (error preserved)
+      expect(chat.messages.value).toHaveLength(3)
+      expect(chat.messages.value[0].id).toMatch(/^error-/)
+      expect(chat.messages.value[1].id).toBe('s-1')
+      expect(chat.messages.value[2].id).toBe('s-2')
     })
 
     it('replaces previous error message on subsequent failure', async () => {
@@ -1052,6 +1054,182 @@ describe('useChat', () => {
       expect(chat.failedMessageText.value).toBe('Hello')
       expect(chat.isSending.value).toBe(false)
       expect(onError).toHaveBeenCalled()
+    })
+  })
+
+  describe('message retry and error recovery', () => {
+    async function setupWithOpenChat() {
+      const apiClient = createMockApiClient()
+      const config = createConfig({ apiClient })
+      ;(apiClient.getConversations as ReturnType<typeof vi.fn>).mockResolvedValue({
+        conversations: [{ id: 'conv-1', createdAt: '2026-01-01' }],
+        has_more: false,
+      })
+      ;(apiClient.getMessages as ReturnType<typeof vi.fn>).mockResolvedValue({
+        messages: [],
+        has_more: false,
+      })
+      const chat = useChat(apiClient, config)
+      await chat.open()
+      return { apiClient, config, chat }
+    }
+
+    it('user can send edited text after failure — treated as new message', async () => {
+      const { apiClient, chat } = await setupWithOpenChat()
+
+      // First send fails
+      ;(apiClient.sendMessage as ReturnType<typeof vi.fn>).mockRejectedValueOnce(new Error('fail'))
+      await chat.sendMessage('Original text')
+      expect(chat.failedMessageText.value).toBe('Original text')
+
+      // User edits the text and sends — succeeds
+      ;(apiClient.sendMessage as ReturnType<typeof vi.fn>).mockResolvedValue({
+        userMessage: {
+          id: 's-1',
+          conversationId: 'conv-1',
+          role: 'user',
+          content: 'Edited text',
+          createdAt: '2026-01-01',
+        },
+        assistantMessage: {
+          id: 's-2',
+          conversationId: 'conv-1',
+          role: 'assistant',
+          content: 'Response',
+          createdAt: '2026-01-01',
+        },
+      })
+      await chat.sendMessage('Edited text')
+
+      // failedMessageText should be cleared
+      expect(chat.failedMessageText.value).toBeNull()
+      // Error message preserved + new user + assistant = 3
+      expect(chat.messages.value).toHaveLength(3)
+      expect(chat.messages.value[1].content).toBe('Edited text')
+      expect(chat.messages.value[2].content).toBe('Response')
+    })
+
+    it('chat remains functional after error — can send new messages', async () => {
+      const { apiClient, chat } = await setupWithOpenChat()
+
+      // First send fails
+      ;(apiClient.sendMessage as ReturnType<typeof vi.fn>).mockRejectedValueOnce(new Error('fail'))
+      await chat.sendMessage('First')
+      expect(chat.messages.value).toHaveLength(1)
+      expect(chat.messages.value[0].id).toMatch(/^error-/)
+
+      // Second send succeeds
+      ;(apiClient.sendMessage as ReturnType<typeof vi.fn>).mockResolvedValue({
+        userMessage: {
+          id: 's-1',
+          conversationId: 'conv-1',
+          role: 'user',
+          content: 'Second',
+          createdAt: '2026-01-01',
+        },
+        assistantMessage: {
+          id: 's-2',
+          conversationId: 'conv-1',
+          role: 'assistant',
+          content: 'Reply',
+          createdAt: '2026-01-01',
+        },
+      })
+      await chat.sendMessage('Second')
+
+      // Error + user + assistant = 3
+      expect(chat.messages.value).toHaveLength(3)
+      expect(chat.messages.value[0].id).toMatch(/^error-/)
+      expect(chat.messages.value[1].id).toBe('s-1')
+      expect(chat.messages.value[2].id).toBe('s-2')
+    })
+
+    it('hasMore stays true after loadMore failure — user can retry', async () => {
+      const apiClient = createMockApiClient()
+      ;(apiClient.getConversations as ReturnType<typeof vi.fn>).mockResolvedValue({
+        conversations: [{ id: 'conv-1', createdAt: '2026-01-01' }],
+        has_more: false,
+      })
+      ;(apiClient.getMessages as ReturnType<typeof vi.fn>).mockResolvedValue({
+        messages: [
+          {
+            id: 'msg-1',
+            conversationId: 'conv-1',
+            role: 'user',
+            content: 'Hello',
+            createdAt: '2026-01-01',
+          },
+        ],
+        has_more: true,
+      })
+
+      const chat = useChat(apiClient, { apiClient })
+      await chat.open()
+      expect(chat.hasMore.value).toBe(true)
+
+      // loadMore fails
+      ;(apiClient.getMessages as ReturnType<typeof vi.fn>).mockRejectedValue(new Error('Network'))
+      await chat.loadMore()
+
+      // hasMore should still be true, isLoading should be false
+      expect(chat.hasMore.value).toBe(true)
+      expect(chat.isLoading.value).toBe(false)
+      // No error messages added
+      expect(chat.messages.value.every((m) => !m.id.startsWith('error-'))).toBe(true)
+    })
+
+    it('consecutive same-text failures re-populate failedMessageText each time', async () => {
+      const { apiClient, chat } = await setupWithOpenChat()
+
+      // First failure
+      ;(apiClient.sendMessage as ReturnType<typeof vi.fn>).mockRejectedValue(new Error('fail'))
+      await chat.sendMessage('Hello')
+      expect(chat.failedMessageText.value).toBe('Hello')
+
+      // Simulate user pressing Enter again (same text) — clears failedMessageText first via sendMessage path
+      // The key: failedMessageText must go null → "Hello" so the watcher fires
+      await chat.sendMessage('Hello')
+      expect(chat.failedMessageText.value).toBe('Hello')
+    })
+
+    it('multiple errors followed by success — only last error remains plus success messages', async () => {
+      const { apiClient, chat } = await setupWithOpenChat()
+
+      // First failure
+      ;(apiClient.sendMessage as ReturnType<typeof vi.fn>).mockRejectedValueOnce(new Error('fail1'))
+      await chat.sendMessage('First')
+      expect(chat.messages.value).toHaveLength(1)
+
+      // Second failure — replaces old error
+      ;(apiClient.sendMessage as ReturnType<typeof vi.fn>).mockRejectedValueOnce(new Error('fail2'))
+      await chat.sendMessage('Second')
+      expect(chat.messages.value).toHaveLength(1)
+      const errorId = chat.messages.value[0].id
+
+      // Third send succeeds
+      ;(apiClient.sendMessage as ReturnType<typeof vi.fn>).mockResolvedValue({
+        userMessage: {
+          id: 's-1',
+          conversationId: 'conv-1',
+          role: 'user',
+          content: 'Third',
+          createdAt: '2026-01-01',
+        },
+        assistantMessage: {
+          id: 's-2',
+          conversationId: 'conv-1',
+          role: 'assistant',
+          content: 'Response',
+          createdAt: '2026-01-01',
+        },
+      })
+      await chat.sendMessage('Third')
+
+      // Last error preserved + user + assistant = 3
+      expect(chat.messages.value).toHaveLength(3)
+      expect(chat.messages.value[0].id).toBe(errorId)
+      expect(chat.messages.value[1].id).toBe('s-1')
+      expect(chat.messages.value[2].id).toBe('s-2')
     })
   })
 
