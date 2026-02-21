@@ -8,4 +8,6 @@ title: Scroll Performance Benchmark
 import PerfBenchmark from '../.vitepress/components/PerfBenchmark.vue'
 </script>
 
-<PerfBenchmark />
+<ClientOnly>
+  <PerfBenchmark />
+</ClientOnly>

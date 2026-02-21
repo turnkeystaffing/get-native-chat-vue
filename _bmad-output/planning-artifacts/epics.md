@@ -14,7 +14,7 @@ inputDocuments:
 
 ## Overview
 
-This document provides the complete epic and story breakdown for native-chat-vue, decomposing the requirements from the PRD, UX Design if it exists, and Architecture requirements into implementable stories.
+This document provides the complete epic and story breakdown for native-chat-vue, decomposing the requirements from the PRD, UX Design if it exists, and Architecture requirements into implementable stories. Includes Epic 5 added via Correct Course workflow (2026-02-21) to address missing documentation planning.
 
 ## Requirements Inventory
 
@@ -185,6 +185,12 @@ User encounters errors gracefully — failures appear as calm chat messages, inp
 **FRs covered:** FR24, FR25, FR26, FR27
 **User outcome:** Journey 2 (error recovery). The chat remains stable and usable even when things go wrong. No page reloads needed.
 **Implementation notes:** Error-as-message pattern, failedMessageText retry mechanism, network failure resilience during history loading, no-reload recovery. Error states modeled in message lifecycle ('failed' status).
+
+### Epic 5: VitePress Documentation & Interactive Playground
+Developer finds comprehensive documentation with live interactive demos, enabling quick integration and exploration of the plugin's capabilities.
+**FRs covered:** Supports FR1-FR4 delivery (Journey 3 — Developer Integration)
+**User outcome:** Journey 3 complete. Developer reads docs, sees live demos, integrates confidently.
+**Implementation notes:** DemoBlock.vue for source+preview, mock API client for demos, guide pages, component demo pages, VitePress sidebar navigation, landing page.
 
 ## Epic 1: Plugin Foundation & Chat Shell
 
@@ -632,3 +638,96 @@ So that I don't have to retype my question after a failure.
 **And** the new message flow proceeds normally
 
 *Covers: FR25 (network failure resilience), FR26 (retry failed message), FR27 (no-reload recovery).*
+
+## Epic 5: VitePress Documentation & Interactive Playground
+
+Developer finds comprehensive documentation with live interactive demos, enabling quick integration and exploration of the plugin's capabilities.
+
+*Added via Correct Course workflow (2026-02-21) to address missing documentation planning.*
+
+### Story 5.1: DemoBlock Component & Mock API Client
+
+As a developer browsing the docs,
+I want to see live interactive demos with their source code displayed alongside,
+So that I can understand how each component works and copy working examples.
+
+**Acceptance Criteria:**
+
+**Given** a VitePress documentation page uses `<DemoBlock>`
+**When** the page renders
+**Then** a live preview of the plugin component renders inside the block
+**And** the source code is displayed below/beside the preview with syntax highlighting
+**And** the demo is interactive (buttons click, input accepts text, messages display)
+
+**Given** the docs site needs a working chat widget in demos
+**When** a demo page renders `<NativeChatWidget />`
+**Then** a mock API client provides simulated responses without a real backend
+**And** the mock supports: returning canned conversations, simulating send/response, simulating errors
+
+**Given** the VitePress theme setup
+**When** the docs site loads
+**Then** the plugin is registered in the VitePress app via `app.use(NativeChatPlugin, { apiClient: mockApiClient })`
+**And** `<NativeChatWidget />` and all plugin components are available in demo pages
+
+*Creates: `docs/.vitepress/components/DemoBlock.vue`, `docs/.vitepress/mock/mockApiClient.ts`, updates `docs/.vitepress/theme/index.ts`.*
+
+### Story 5.2: Guide Documentation Pages
+
+As a developer integrating the plugin,
+I want clear documentation covering installation, configuration, and API client setup,
+So that I can integrate the plugin into my application without guesswork.
+
+**Acceptance Criteria:**
+
+**Given** the docs site
+**When** a developer navigates to the Getting Started guide
+**Then** the page covers: installation (`yarn add`), peer dependency requirements (Vue 3, Vuetify 3), basic `app.use()` registration, placing `<NativeChatWidget />` in a template, and a minimal working example
+
+**Given** the docs site
+**When** a developer navigates to the Configuration guide
+**Then** the page documents all `NativeChatPluginOptions` properties with types, defaults, and descriptions
+**And** includes code examples for common configuration scenarios (custom position, welcome message, error callback)
+
+**Given** the docs site
+**When** a developer navigates to the API Client guide
+**Then** the page documents the `NativeChatApiClient` interface with all method signatures
+**And** explains the `createNativeChatApiClient` helper with usage example
+**And** shows how to provide a custom API client implementation
+
+**Given** the VitePress config
+**When** the site renders
+**Then** a sidebar navigation shows: Getting Started, Configuration, API Client under a "Guide" group
+
+*Creates: `docs/guide/getting-started.md`, `docs/guide/configuration.md`, `docs/guide/api-client.md`. Updates `docs/.vitepress/config.ts` sidebar.*
+
+### Story 5.3: Component Demo Pages & Landing Page
+
+As a developer exploring the plugin,
+I want interactive demos of key components with live playground,
+So that I can see the plugin in action and experiment before integrating.
+
+**Acceptance Criteria:**
+
+**Given** the docs site
+**When** a developer navigates to the Full Widget demo page
+**Then** a complete `<NativeChatWidget />` renders with mock API client
+**And** the developer can open the chat, send messages, receive simulated responses, scroll history, and trigger errors
+**And** the source code for the demo setup is visible via DemoBlock
+
+**Given** the docs site
+**When** a developer navigates to individual component demo pages
+**Then** MessageBubble demos show user, assistant, and error variants with markdown rendering
+**And** ChatInput demo shows auto-expand, send, and keyboard behavior
+**And** each demo includes source code via DemoBlock
+
+**Given** the docs landing page (`docs/index.md`)
+**When** a developer visits the docs site root
+**Then** a VitePress hero section with plugin name, tagline, and quick-start links renders
+**And** feature highlights summarize key capabilities
+
+**Given** the VitePress config
+**When** the site renders
+**Then** sidebar navigation shows component demos under a "Components" group
+**And** `yarn docs:build` completes without errors
+
+*Creates: `docs/index.md` (new consumer-facing landing page), `docs/components/widget.md`, `docs/components/message-bubble.md`, `docs/components/chat-input.md`. Updates `docs/.vitepress/config.ts` sidebar.*

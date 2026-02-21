@@ -748,9 +748,11 @@ All 27 FRs have explicit architectural support.
 3. **Runtime deps constraint** — Resolved: Updated to explicitly allow `marked` + `dompurify` as the only runtime deps beyond Vue/Vuetify peers
 
 **Nice-to-Have (post-MVP):**
-- Detailed VitePress `DemoBlock.vue` implementation pattern (can be figured out during implementation)
-- Mock API client for VitePress playground demos
 - CI pipeline configuration (linting, testing, build)
+
+**Resolved via Correct Course (2026-02-21):**
+- ~~Detailed VitePress `DemoBlock.vue` implementation pattern~~ → Epic 5, Story 5.1
+- ~~Mock API client for VitePress playground demos~~ → Epic 5, Story 5.1
 
 ### Architecture Completeness Checklist
 

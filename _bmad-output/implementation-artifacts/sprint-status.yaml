@@ -63,3 +63,9 @@ development_status:
   4-1-error-display-as-chat-messages: done
   4-2-message-retry-error-recovery: done
   epic-4-retrospective: optional
+
+  epic-5: in-progress
+  5-1-demoblock-component-mock-api-client: done
+  5-2-guide-documentation-pages: backlog
+  5-3-component-demo-pages-landing-page: backlog
+  epic-5-retrospective: optional
