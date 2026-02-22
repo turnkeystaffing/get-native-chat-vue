@@ -1,5 +1,6 @@
 import { fileURLToPath, URL } from 'node:url'
 import { defineConfig } from 'vitepress'
+import vuetify from 'vite-plugin-vuetify'
 
 export default defineConfig({
   title: 'Native Chat Vue',
@@ -8,6 +9,7 @@ export default defineConfig({
     nav: [
       { text: 'Home', link: '/' },
       { text: 'Guide', link: '/guide/getting-started' },
+      { text: 'Components', link: '/components/widget' },
     ],
     sidebar: [
       {
@@ -18,9 +20,24 @@ export default defineConfig({
           { text: 'API Client', link: '/guide/api-client' },
         ],
       },
+      {
+        text: 'Components',
+        items: [
+          { text: 'Full Widget', link: '/components/widget' },
+          { text: 'Message Bubble', link: '/components/message-bubble' },
+          { text: 'Chat Input', link: '/components/chat-input' },
+        ],
+      },
     ],
   },
   vite: {
+    plugins: [
+      vuetify({
+        styles: {
+          configFile: '.vitepress/styles/vuetify-settings.scss',
+        },
+      }),
+    ],
     resolve: {
       alias: {
         '@': fileURLToPath(new URL('../../src', import.meta.url)),
@@ -28,6 +45,12 @@ export default defineConfig({
     },
     ssr: {
       noExternal: ['vuetify'],
+    },
+    css: {
+      preprocessorOptions: {
+        sass: { api: 'modern-compiler' },
+        scss: { api: 'modern-compiler' },
+      },
     },
   },
 })
