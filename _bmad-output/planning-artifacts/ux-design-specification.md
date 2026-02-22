@@ -212,7 +212,7 @@ The plugin consumes the host app's Vuetify installation but applies its own them
 - Declare `vuetify ^3.x` and `vue ^3.x` as peer dependencies
 - Plugin registers its own Vuetify theme (e.g., `nativeChatTheme`) during `app.use()` initialization
 - All plugin components render within a scoped theme provider to prevent style leakage in both directions
-- Use only the Vuetify components needed for MVP: `v-btn`, `v-navigation-drawer`, `v-textarea`, `v-infinite-scroll`, `v-icon`, `v-theme-provider`, `v-progress-circular`
+- Use only the Vuetify components needed for MVP: `v-btn`, `v-textarea`, `v-infinite-scroll`, `v-icon`, `v-theme-provider`, `v-progress-circular`
 - Wrap all plugin styles in CSS `@layer native-chat` for specificity control against host app global styles
 - No global Vuetify configuration modifications — the plugin is a theme consumer, not a theme modifier
 
@@ -422,7 +422,7 @@ The design direction was established through direct Figma design work rather tha
 ### Implementation Approach
 
 - Implement the Figma design as-is using Vuetify 3 components within a scoped theme provider
-- Use `v-navigation-drawer` for the chat panel, `v-btn` for floating button and actions, `v-textarea` for input
+- Use `Teleport` + CSS fixed positioning for the chat panel, `v-btn` for floating button and actions, `v-textarea` for input
 - Map Figma color tokens directly to Vuetify theme variables (`nativeChatTheme`)
 - Message bubbles as custom styled components (no direct Vuetify equivalent for chat bubbles)
 - Rich text rendering for assistant messages (markdown or structured HTML)
@@ -580,7 +580,6 @@ app.use(NativeChatPlugin, {
 | Vuetify Component | Usage in Chat Plugin | Customization |
 |---|---|---|
 | `v-btn` | Floating agent button, send button, copy action, close button | Themed via `nativeChatTheme`; FAB variant for floating button |
-| `v-navigation-drawer` | Chat panel container | `location="right"`, `temporary`, custom width (~400px), border-radius (20px) |
 | `v-textarea` | Auto-expanding message input | Max 6 rows, pill border-radius, custom placeholder |
 | `v-icon` | Close (X), send arrow, copy, star icon | Magenta for send/star, gray for actions |
 | `v-theme-provider` | Scoped theme wrapper for all plugin components | Wraps entire plugin tree in `nativeChatTheme` |
@@ -594,7 +593,7 @@ app.use(NativeChatPlugin, {
 **Purpose:** Root container — the overlay panel that holds header, message list, and input area.
 **States:** Open, closed (controlled by floating button toggle)
 **Anatomy:** Header bar (top) → message list (scrollable middle) → input area (bottom-pinned)
-**Vuetify component:** `v-navigation-drawer` with `location="right"` and `temporary` prop
+**Implementation:** `Teleport` to body + fixed-positioned div with CSS layout (no Vuetify container component)
 **Accessibility:** `role="complementary"`, `aria-label="Chat with AI Assistant"`
 
 #### MessageBubble

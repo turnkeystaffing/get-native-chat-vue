@@ -40,38 +40,38 @@ tracking_system: file-system
 story_location: _bmad-output/implementation-artifacts
 
 development_status:
-  epic-1: in-progress
+  epic-1: done
   1-1-project-scaffold-build-configuration: done
   1-2-core-types-api-client-helper-plugin-install: done
   1-3-floating-agent-button: done
   1-4-chat-panel-with-header-welcome-state: done
   epic-1-retrospective: optional
 
-  epic-2: in-progress
+  epic-2: done
   2-1-usechat-composable-conversation-lifecycle: done
   2-2-message-list-message-bubbles: done
   2-3-chat-input-send-message: done
   2-4-send-receive-message-flow: done
   epic-2-retrospective: optional
 
-  epic-3: in-progress
+  epic-3: done
   3-1-infinite-scroll-with-history-loading: done
   3-2-performance-validation: done
   epic-3-retrospective: optional
 
-  epic-4: in-progress
+  epic-4: done
   4-1-error-display-as-chat-messages: done
   4-2-message-retry-error-recovery: done
   epic-4-retrospective: optional
 
-  epic-5: in-progress
+  epic-5: done
   5-1-demoblock-component-mock-api-client: done
   5-2-guide-documentation-pages: done
   5-3-component-demo-pages-landing-page: done
   epic-5-retrospective: optional
 
-  epic-6: in-progress
+  epic-6: done
   6-1-floating-panel-layout-scroll-containment: done
   6-2-visual-polish-figma-spacing: done
-  6-3-update-planning-artifacts: backlog
+  6-3-update-planning-artifacts: done
   epic-6-retrospective: optional

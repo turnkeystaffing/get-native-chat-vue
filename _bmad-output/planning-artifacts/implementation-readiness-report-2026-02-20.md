@@ -197,7 +197,7 @@ Component hierarchy match: Both documents define the same 8 components (NativeCh
 Technology decisions fully aligned:
 - Vuetify 3.x peer dependency with custom nativeChatTheme
 - `v-infinite-scroll` with `side="start"` for upward loading
-- `v-navigation-drawer` for chat panel
+- `Teleport` + CSS fixed positioning for chat panel
 - `useDisplay()` composable for responsive breakpoints
 - `marked` + DOMPurify for assistant markdown rendering
 - CSS `@layer native-chat` + `<style scoped>` + `v-theme-provider`

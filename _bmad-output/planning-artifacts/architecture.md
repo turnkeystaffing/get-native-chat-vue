@@ -58,7 +58,7 @@ NFRs that will drive architectural decisions:
 ### Technical Constraints & Dependencies
 
 - **Vue 3.x** as peer dependency (required)
-- **Vuetify 3.x lock-in (deliberate):** The plugin depends on Vuetify components (`v-infinite-scroll`, `v-navigation-drawer`, `v-textarea`, `v-btn`, `v-theme-provider`) for core functionality. This is a deliberate scope decision — all target host applications already use Vuetify, making it zero-cost for adopters. Trade-off: the plugin cannot be used in non-Vuetify Vue apps without a rewrite.
+- **Vuetify 3.x lock-in (deliberate):** The plugin depends on Vuetify components (`v-infinite-scroll`, `v-textarea`, `v-btn`, `v-theme-provider`) for core functionality. This is a deliberate scope decision — all target host applications already use Vuetify, making it zero-cost for adopters. Trade-off: the plugin cannot be used in non-Vuetify Vue apps without a rewrite.
 - **Minimal runtime dependencies** — `marked` (~11.8KB gzip) and `dompurify` (~6-7KB gzip) are the only runtime dependencies beyond Vue and Vuetify peer deps. Total plugin budget remains under 50KB gzipped.
 - **API client is injected, not owned** — plugin cannot assume Axios, fetch, or any specific HTTP library. Must define a minimal interface contract (send message, fetch history, error shape)
 - **No real-time/WebSocket for MVP** — responses are complete messages via request/response. Architecture must not preclude future streaming support
@@ -318,7 +318,7 @@ export interface NativeChatPluginOptions {
 - All data-touching components depend on the API client interface
 - MessageList and ChatInput both depend on `useChat()` composable
 - MessageBubble depends on markdown rendering (marked + DOMPurify)
-- ChatPanel depends on Vuetify `v-navigation-drawer` + responsive breakpoint logic
+- ChatPanel uses `Teleport` to body + CSS fixed positioning + Vuetify `useDisplay()` for responsive breakpoint logic
 - All components depend on CSS isolation (`@layer native-chat` + `v-theme-provider`)
 
 ## Implementation Patterns & Consistency Rules
@@ -588,7 +588,7 @@ native-chat-vue/
 │ │                                            ││
 │ │  FloatingButton       [toggle open/close]  ││
 │ │                                            ││
-│ │  ChatPanel            [v-navigation-drawer]││
+│ │  ChatPanel           [Teleport + fixed div]││
 │ │   ├─ ChatHeader       [close action]       ││
 │ │   ├─ WelcomeState     [if no messages]     ││
 │ │   ├─ MessageList      [scrollable]         ││
