@@ -9,9 +9,12 @@ import IconCheck from '@/icons/IconCheck.vue'
 
 interface MessageBubbleProps {
   message: ChatMessage
+  animate?: boolean
 }
 
-const props = defineProps<MessageBubbleProps>()
+const props = withDefaults(defineProps<MessageBubbleProps>(), {
+  animate: false,
+})
 
 const isUser = computed(() => props.message.role === 'user')
 const isError = computed(
@@ -63,6 +66,7 @@ onBeforeUnmount(() => {
       'nc-message-bubble--assistant': isAssistant,
       'nc-message-bubble--error': isError,
       'nc-message-bubble--sending': isSending,
+      'nc-message-bubble--animate-in': props.animate,
     }"
   >
     <div v-if="!isError" class="nc-message-bubble__header">
@@ -209,6 +213,46 @@ onBeforeUnmount(() => {
   .nc-message-bubble__content :deep(a) {
     color: rgb(var(--v-theme-secondary));
     text-decoration: underline;
+  }
+
+  /* Message entrance animations */
+  @keyframes nc-bubble-slide-right {
+    from {
+      opacity: 0;
+      transform: translateX(16px);
+    }
+    to {
+      opacity: 1;
+      transform: translateX(0);
+    }
+  }
+
+  @keyframes nc-bubble-slide-left {
+    from {
+      opacity: 0;
+      transform: translateX(-16px);
+    }
+    to {
+      opacity: 1;
+      transform: translateX(0);
+    }
+  }
+
+  .nc-message-bubble--animate-in.nc-message-bubble--user {
+    animation: nc-bubble-slide-right 250ms cubic-bezier(0.16, 1, 0.3, 1) both;
+  }
+
+  .nc-message-bubble--animate-in.nc-message-bubble--assistant,
+  .nc-message-bubble--animate-in.nc-message-bubble--error {
+    animation: nc-bubble-slide-left 250ms cubic-bezier(0.16, 1, 0.3, 1) both;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .nc-message-bubble--animate-in.nc-message-bubble--user,
+    .nc-message-bubble--animate-in.nc-message-bubble--assistant,
+    .nc-message-bubble--animate-in.nc-message-bubble--error {
+      animation: none;
+    }
   }
 }
 </style>

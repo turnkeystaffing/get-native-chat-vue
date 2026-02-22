@@ -318,7 +318,9 @@ export interface NativeChatPluginOptions {
 - All data-touching components depend on the API client interface
 - MessageList and ChatInput both depend on `useChat()` composable
 - MessageBubble depends on markdown rendering (marked + DOMPurify)
-- ChatPanel uses `Teleport` to body + CSS fixed positioning + Vuetify `useDisplay()` for responsive breakpoint logic
+- ChatPanel uses `Teleport` to body + CSS fixed positioning + Vuetify `useDisplay()` for responsive breakpoint logic + Vue `<Transition>` for open/close animation
+- FloatingButton uses Vue `<Transition>` for icon swap animation (star ↔ close)
+- MessageList tracks animation state (`knownIds`/`animatingIds`) and passes `animate` prop to MessageBubble for entrance animations
 - All components depend on CSS isolation (`@layer native-chat` + `v-theme-provider`)
 
 ## Implementation Patterns & Consistency Rules
@@ -586,9 +588,9 @@ native-chat-vue/
 │ NativeChatWidget (root)                       │
 │ ┌─ creates & provides: useChat() state ─────┐│
 │ │                                            ││
-│ │  FloatingButton       [toggle open/close]  ││
+│ │  FloatingButton       [toggle + icon swap] ││
 │ │                                            ││
-│ │  ChatPanel           [Teleport + fixed div]││
+│ │  ChatPanel        [Teleport + Transition]  ││
 │ │   ├─ ChatHeader       [close action]       ││
 │ │   ├─ WelcomeState     [if no messages]     ││
 │ │   ├─ MessageList      [scrollable]         ││
@@ -600,10 +602,10 @@ native-chat-vue/
 ```
 
 - **NativeChatWidget** is the public root component — host places `<NativeChatWidget />` in their template. Creates `useChat()` instance and provides it to all children (FloatingButton + ChatPanel subtree). Registered as a global component during `app.use()`.
-- **FloatingButton** reads `isOpen` from injected state; calls `open()` / `close()` actions
+- **FloatingButton** reads `isOpen` from injected state; calls `open()` / `close()` actions; swaps icon (star ↔ close) with rotate+scale transition
 - **ChatPanel** renders the chat drawer — reads `isOpen` from injected state, contains ChatHeader, MessageList, ChatInput, WelcomeState
-- **MessageList** reads `messages`, `isLoading`, `hasMore` from injected state; emits `@load-more`
-- **MessageBubble** is a pure display component — receives a single message via props, no state access
+- **MessageList** reads `messages`, `isLoading`, `hasMore` from injected state; emits `@load-more`; tracks animation state via `knownIds`/`animatingIds` sets — suppresses animation on initial load and history prepend, enables it only for newly appended messages
+- **MessageBubble** is a pure display component — receives a single message and optional `animate` flag via props, no state access; entrance animation slides from left (assistant/error) or right (user) when `animate` is true
 - **ChatInput** reads `isSending`, `failedMessageText` from state; calls `sendMessage()` / `retry()` actions
 - **ChatHeader** calls `close()` action
 - **WelcomeState** is a pure display component — no state, no props beyond `welcomeMessage`

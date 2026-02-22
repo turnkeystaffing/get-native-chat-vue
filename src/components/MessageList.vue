@@ -12,6 +12,30 @@ const isNearBottom = ref(true)
 
 const SCROLL_THRESHOLD = 50
 
+// Animation tracking — watcher-based approach (no side effects during render).
+// knownIds tracks all message IDs that have been seen; animatingIds holds only
+// the IDs that should play their entrance animation on the current render.
+const knownIds = new Set<string>()
+const animatingIds = ref(new Set<string>())
+let initialLoadComplete = false
+let suppressAnimation = false
+
+watch(
+  () => chatState.messages.value,
+  (messages) => {
+    const newAnimating = new Set<string>()
+    if (initialLoadComplete && !suppressAnimation) {
+      messages.forEach((msg) => {
+        if (!knownIds.has(msg.id)) {
+          newAnimating.add(msg.id)
+        }
+      })
+    }
+    messages.forEach((msg) => knownIds.add(msg.id))
+    animatingIds.value = newAnimating
+  },
+)
+
 function getScrollElement(): HTMLElement | null {
   const el = scrollContainerRef.value?.$el
   return el instanceof HTMLElement ? el : null
@@ -40,6 +64,12 @@ watch(
 )
 
 onMounted(() => {
+  // Seed known IDs with all initial messages — they should not animate
+  chatState.messages.value.forEach((msg) => knownIds.add(msg.id))
+  nextTick(() => {
+    initialLoadComplete = true
+  })
+
   if (chatState.messages.value.length > 0) {
     nextTick(scrollToBottom)
   }
@@ -53,6 +83,7 @@ onBeforeUnmount(() => {
 })
 
 async function handleLoadMore({ done }: { done: (status: InfiniteScrollStatus) => void }) {
+  suppressAnimation = true
   const el = getScrollElement()
   const prevScrollHeight = el?.scrollHeight ?? 0
 
@@ -64,6 +95,8 @@ async function handleLoadMore({ done }: { done: (status: InfiniteScrollStatus) =
   }
 
   await nextTick()
+  suppressAnimation = false
+
   if (el) {
     const newScrollHeight = el.scrollHeight
     el.scrollTop = el.scrollTop + (newScrollHeight - prevScrollHeight)
@@ -80,7 +113,12 @@ async function handleLoadMore({ done }: { done: (status: InfiniteScrollStatus) =
     @load="handleLoadMore"
   >
     <ul role="list" aria-live="polite" class="nc-message-list">
-      <MessageBubble v-for="msg in chatState.messages.value" :key="msg.id" :message="msg" />
+      <MessageBubble
+        v-for="msg in chatState.messages.value"
+        :key="msg.id"
+        :message="msg"
+        :animate="animatingIds.has(msg.id)"
+      />
     </ul>
 
     <template #loading>

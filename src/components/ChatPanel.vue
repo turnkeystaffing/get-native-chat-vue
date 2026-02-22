@@ -42,29 +42,31 @@ onUnmounted(() => {
 
 <template>
   <Teleport to="body">
-    <div
-      v-if="chatState.isOpen.value"
-      class="nc-chat-panel"
-      :class="{ 'nc-chat-panel--mobile': isMobile }"
-      role="complementary"
-      aria-label="Chat with AI Assistant"
-    >
-      <ChatHeader />
-      <div class="nc-chat-panel__body">
-        <v-progress-circular
-          v-if="chatState.isLoading.value && chatState.messages.value.length === 0"
-          indeterminate
-          size="24"
-          class="nc-chat-panel__loader"
-        />
-        <WelcomeState
-          v-else-if="chatState.messages.value.length === 0 && !chatState.isSending.value"
-          :message="welcomeMessage"
-        />
-        <MessageList v-else />
+    <Transition name="nc-panel">
+      <div
+        v-if="chatState.isOpen.value"
+        class="nc-chat-panel"
+        :class="{ 'nc-chat-panel--mobile': isMobile }"
+        role="complementary"
+        aria-label="Chat with AI Assistant"
+      >
+        <ChatHeader />
+        <div class="nc-chat-panel__body">
+          <v-progress-circular
+            v-if="chatState.isLoading.value && chatState.messages.value.length === 0"
+            indeterminate
+            size="24"
+            class="nc-chat-panel__loader"
+          />
+          <WelcomeState
+            v-else-if="chatState.messages.value.length === 0 && !chatState.isSending.value"
+            :message="welcomeMessage"
+          />
+          <MessageList v-else />
+        </div>
+        <ChatInput />
       </div>
-      <ChatInput />
-    </div>
+    </Transition>
   </Teleport>
 </template>
 
@@ -106,6 +108,46 @@ onUnmounted(() => {
   .nc-chat-panel__loader {
     align-self: center;
     margin-top: 32px;
+  }
+
+  /* Panel open/close transition — grows from bottom-right (floating button) */
+  .nc-panel-enter-active {
+    transition:
+      opacity 280ms cubic-bezier(0.16, 1, 0.3, 1),
+      transform 280ms cubic-bezier(0.16, 1, 0.3, 1);
+    transform-origin: bottom right;
+  }
+
+  .nc-panel-leave-active {
+    transition:
+      opacity 200ms cubic-bezier(0.4, 0, 1, 1),
+      transform 200ms cubic-bezier(0.4, 0, 1, 1);
+    transform-origin: bottom right;
+  }
+
+  .nc-panel-enter-from,
+  .nc-panel-leave-to {
+    opacity: 0;
+    transform: scale(0.9) translateY(20px);
+  }
+
+  /* Mobile: slide up from bottom instead of scale */
+  .nc-chat-panel--mobile.nc-panel-enter-active,
+  .nc-chat-panel--mobile.nc-panel-leave-active {
+    transform-origin: bottom center;
+  }
+
+  .nc-chat-panel--mobile.nc-panel-enter-from,
+  .nc-chat-panel--mobile.nc-panel-leave-to {
+    opacity: 1;
+    transform: translateY(100%);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .nc-panel-enter-active,
+    .nc-panel-leave-active {
+      transition-duration: 0ms;
+    }
   }
 }
 </style>

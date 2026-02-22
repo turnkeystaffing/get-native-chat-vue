@@ -117,7 +117,7 @@ The core experience is a single, uninterrupted loop: **open chat → ask → get
 
 - **Utilitarian aesthetic** — Clean, minimal, no decorative elements. Every pixel serves a function. No confetti, no emoji reactions, no typing animation theatrics.
 - **Muted error treatment** — Errors displayed as calm, informational chat messages. Neutral tone, not alarming. Suggest retry without pressure.
-- **Instant transitions** — Open/close should feel snappy, not animated for show. If transitions exist, they're fast (<150ms) and functional (orientation aid), not decorative.
+- **Smooth, purposeful transitions** — Open/close transitions use quick, functional timing (280ms enter / 200ms leave for panel, 120ms for icon swap). Transitions serve as orientation aids — the panel scales from the floating button's position so the user understands where it came from. Message entrance animations (250ms slide) provide a visual cue for new content. All animations are disabled when `prefers-reduced-motion: reduce` is active.
 - **Silent reliability** — Loading states are subtle (a small spinner or skeleton), not dramatic. The UI communicates "working on it" without demanding the user watch.
 - **No empty states that feel broken** — First open with no history should still feel complete and ready, not empty or sad.
 
@@ -593,7 +593,8 @@ app.use(NativeChatPlugin, {
 **Purpose:** Root container — the overlay panel that holds header, message list, and input area.
 **States:** Open, closed (controlled by floating button toggle)
 **Anatomy:** Header bar (top) → message list (scrollable middle) → input area (bottom-pinned)
-**Implementation:** `Teleport` to body + fixed-positioned div with CSS layout (no Vuetify container component)
+**Implementation:** `Teleport` to body + fixed-positioned div with CSS layout, wrapped in Vue `<Transition name="nc-panel">` for open/close animation
+**Transition:** Desktop: scale(0.9)+translateY(20px) with opacity fade (280ms enter, 200ms leave, easeOutExpo/easeInExpo). Mobile: translateY(100%) slide. `prefers-reduced-motion` disables all transitions.
 **Accessibility:** `role="complementary"`, `aria-label="Chat with AI Assistant"`
 
 #### MessageBubble
@@ -609,6 +610,7 @@ app.use(NativeChatPlugin, {
 - Assistant: rich text — bold headings, paragraphs, bullet lists
 
 **Actions:** Copy icon below assistant messages only (MVP)
+**Entrance animation:** When `animate` prop is true, user bubbles slide from right (16px, 250ms), assistant/error bubbles slide from left (16px, 250ms). Disabled via `prefers-reduced-motion`.
 **Accessibility:** `role="listitem"`, `aria-label` indicating sender role
 
 #### MessageList
@@ -621,6 +623,7 @@ app.use(NativeChatPlugin, {
 - History fetch triggered automatically by `v-infinite-scroll` when scrolling near the top
 - Shows subtle loading indicator at top during fetch
 
+**Animation tracking:** Maintains `knownIds` and `animatingIds` sets. Entrance animations play only for newly appended messages (send/receive). Suppressed on initial load and history prepend (loadMore) to prevent visual noise.
 **States:** Loading (fetching history), loaded, empty (welcome state), error
 **Accessibility:** `role="list"`, `aria-live="polite"` for new message announcements
 
@@ -648,10 +651,11 @@ app.use(NativeChatPlugin, {
 #### FloatingButton
 
 **Purpose:** Entry point — always-visible button that toggles the chat panel.
-**Anatomy:** Circular magenta (`#C4105B`) button with white star icon
+**Anatomy:** Circular magenta (`#C4105B`) button with white icon — star when chat is closed, close (X) when chat is open
 **Size:** ~56px diameter
 **Position:** Configurable (`bottom-left` or `bottom-right`, default `bottom-right`)
-**States:** Default, hover (slight elevation change), chat-open (panel visible)
+**States:** Default, hover (slight elevation change), chat-open (close icon visible)
+**Icon transition:** Star ↔ close icon swap with rotate+scale animation (120ms, `out-in` mode)
 **Accessibility:** `aria-label="Open chat"` / `aria-label="Close chat"` (toggles), `aria-expanded` attribute
 
 ### Component Implementation Strategy
@@ -738,9 +742,13 @@ All six custom components plus Vuetify integration constitute the MVP. No phasin
 
 **Panel Toggle:**
 - Floating button click → panel opens (if closed) or closes (if open)
+- Floating button icon swaps between star (closed) and close/X (open) with a rotate+scale transition (120ms)
+- Panel open: scale-up from bottom-right + opacity fade (280ms, easeOutExpo); mobile: slide-up from bottom
+- Panel close: scale-down + opacity fade (200ms, easeInExpo); mobile: slide-down
 - Close (X) in header → panel closes
 - No click-outside-to-close — the chat is a persistent side panel; users interact with host app and chat simultaneously
 - Panel state (open/closed) is not persisted across page reloads
+- All transitions respect `prefers-reduced-motion: reduce` (instant, 0ms duration)
 
 ### Scroll Behavior Patterns
 

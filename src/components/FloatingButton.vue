@@ -3,6 +3,7 @@ import { computed, inject, useTemplateRef } from 'vue'
 import type { VBtn } from 'vuetify/components'
 import { CONFIG_KEY, CHAT_STATE_KEY } from '@/keys'
 import IconStar from '@/icons/IconStar.vue'
+import IconClose from '@/icons/IconClose.vue'
 
 const config = inject(CONFIG_KEY)
 const chatState = inject(CHAT_STATE_KEY)!
@@ -42,7 +43,11 @@ defineExpose({ focus })
       :aria-expanded="isOpen.toString()"
       @click="toggle"
     >
-      <v-icon :icon="IconStar" color="white" />
+      <Transition name="nc-fab-icon" mode="out-in">
+        <span :key="isOpen ? 'close' : 'star'" class="nc-floating-button__icon-wrap">
+          <v-icon :icon="isOpen ? IconClose : IconStar" color="white" />
+        </span>
+      </Transition>
     </v-btn>
   </div>
 </template>
@@ -61,6 +66,36 @@ defineExpose({ focus })
 
   .nc-floating-button-wrapper--left {
     left: 24px;
+  }
+
+  .nc-floating-button__icon-wrap {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .nc-fab-icon-enter-active,
+  .nc-fab-icon-leave-active {
+    transition:
+      opacity 120ms ease,
+      transform 120ms ease;
+  }
+
+  .nc-fab-icon-enter-from {
+    opacity: 0;
+    transform: rotate(-90deg) scale(0.6);
+  }
+
+  .nc-fab-icon-leave-to {
+    opacity: 0;
+    transform: rotate(90deg) scale(0.6);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .nc-fab-icon-enter-active,
+    .nc-fab-icon-leave-active {
+      transition-duration: 0ms;
+    }
   }
 }
 </style>

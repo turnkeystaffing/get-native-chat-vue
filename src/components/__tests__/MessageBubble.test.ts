@@ -26,9 +26,9 @@ function createMessage(overrides: Partial<ChatMessage> = {}): ChatMessage {
   }
 }
 
-function mountBubble(message: ChatMessage) {
+function mountBubble(message: ChatMessage, animate = false) {
   return mount(MessageBubble, {
-    props: { message },
+    props: { message, animate },
   })
 }
 
@@ -267,5 +267,26 @@ describe('MessageBubble', () => {
     vi.advanceTimersByTime(2000)
 
     vi.useRealTimers()
+  })
+
+  describe('entrance animation', () => {
+    it('does not have animate-in class when animate prop is false (default)', () => {
+      const wrapper = mountBubble(createMessage({ role: 'user' }))
+
+      expect(wrapper.classes()).not.toContain('nc-message-bubble--animate-in')
+    })
+
+    it('has animate-in class when animate prop is true', () => {
+      const wrapper = mountBubble(createMessage({ role: 'user' }), true)
+
+      expect(wrapper.classes()).toContain('nc-message-bubble--animate-in')
+    })
+
+    it('animate-in class works with assistant messages', () => {
+      const wrapper = mountBubble(createMessage({ role: 'assistant' }), true)
+
+      expect(wrapper.classes()).toContain('nc-message-bubble--animate-in')
+      expect(wrapper.classes()).toContain('nc-message-bubble--assistant')
+    })
   })
 })

@@ -386,4 +386,59 @@ describe('MessageList', () => {
       expect(doneFn2).toHaveBeenCalledWith('ok')
     })
   })
+
+  describe('message entrance animation', () => {
+    it('does not pass animate=true for messages present on initial mount', async () => {
+      const msgs = [createMessage('1', 'user'), createMessage('2', 'assistant')]
+      const { wrapper } = mountMessageList({ messages: msgs })
+      await nextTick()
+
+      const bubbles = wrapper.findAllComponents(MessageBubble)
+      bubbles.forEach((bubble) => {
+        expect(bubble.props('animate')).toBe(false)
+      })
+    })
+
+    it('passes animate=true for messages added after initial mount', async () => {
+      const msgs = [createMessage('1', 'user')]
+      const { wrapper, messages } = mountMessageList({ messages: msgs })
+      await nextTick()
+      await nextTick() // ensure initialLoadComplete is true
+
+      // Add a new message (simulates sendMessage appending)
+      messages.value = [...messages.value, createMessage('2', 'assistant', 'New reply')]
+      await nextTick()
+
+      const bubbles = wrapper.findAllComponents(MessageBubble)
+      expect(bubbles[0].props('animate')).toBe(false) // existing
+      expect(bubbles[1].props('animate')).toBe(true) // new
+    })
+
+    it('does not animate messages loaded via loadMore (prepended)', async () => {
+      const msgs = [createMessage('3', 'user')]
+      const { wrapper, messages, chatState } = mountMessageList({
+        messages: msgs,
+        hasMore: true,
+      })
+      await nextTick()
+      await nextTick()
+
+      // Configure loadMore to prepend older messages
+      const loadMoreFn = chatState.loadMore as ReturnType<typeof vi.fn>
+      loadMoreFn.mockImplementation(async () => {
+        messages.value = [createMessage('1', 'user'), createMessage('2', 'assistant'), ...messages.value]
+      })
+
+      const infiniteScroll = wrapper.findComponent({ name: 'VInfiniteScroll' })
+      const doneFn = vi.fn()
+      await infiniteScroll.vm.$emit('load', { side: 'start', done: doneFn })
+      await nextTick()
+      await nextTick()
+
+      const bubbles = wrapper.findAllComponents(MessageBubble)
+      bubbles.forEach((bubble) => {
+        expect(bubble.props('animate')).toBe(false)
+      })
+    })
+  })
 })

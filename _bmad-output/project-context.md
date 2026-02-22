@@ -60,6 +60,7 @@ _This file contains critical rules and patterns that AI agents must follow when 
 - **Colors via theme tokens only**: `rgb(var(--v-theme-primary))` — no hardcoded hex values
 - **Theme**: `nativeChatTheme` registered lazily, merged with Vuetify light defaults
 - **Responsive**: use Vuetify `useDisplay()` — no custom media query JS
+- **Animations**: use Vue `<Transition>` for enter/leave, CSS `@keyframes` for element animations. Always include `@media (prefers-reduced-motion: reduce)` block to disable. Naming: `nc-{name}` prefix for transition names and keyframes
 
 ### Testing Rules
 
@@ -109,11 +110,12 @@ _This file contains critical rules and patterns that AI agents must follow when 
 - Add runtime `dependencies` beyond `marked` + `dompurify`
 - Relative imports — always `@/` alias
 - `!important` in CSS
+- CSS animations without `prefers-reduced-motion: reduce` fallback
 
 **CSS isolation (all four layers required):**
 1. `@layer native-chat { ... }` wrapping all styles
 2. `<style scoped>` on every component
-3. `nc-` prefix on all custom CSS classes
+3. `nc-` prefix on all custom CSS classes and transition/keyframe names
 4. `<v-theme-provider theme="nativeChat">` at root
 
 **Error handling:**

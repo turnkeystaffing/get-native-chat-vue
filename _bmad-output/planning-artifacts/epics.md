@@ -14,7 +14,7 @@ inputDocuments:
 
 ## Overview
 
-This document provides the complete epic and story breakdown for native-chat-vue, decomposing the requirements from the PRD, UX Design if it exists, and Architecture requirements into implementable stories. Includes Epic 5 added via Correct Course workflow (2026-02-21) to address missing documentation planning. Includes Epic 6 added via Correct Course workflow (2026-02-22) to align visual implementation with the approved Figma design.
+This document provides the complete epic and story breakdown for native-chat-vue, decomposing the requirements from the PRD, UX Design if it exists, and Architecture requirements into implementable stories. Includes Epic 5 added via Correct Course workflow (2026-02-21) to address missing documentation planning. Includes Epic 6 added via Correct Course workflow (2026-02-22) to align visual implementation with the approved Figma design. Stories 6.4-6.5 added via Correct Course workflow (2026-02-22b) to document animation changes made outside BMAD workflow.
 
 ## Requirements Inventory
 
@@ -193,7 +193,7 @@ Developer finds comprehensive documentation with live interactive demos, enablin
 **Implementation notes:** DemoBlock.vue for source+preview, mock API client for demos, guide pages, component demo pages, VitePress sidebar navigation, landing page.
 
 ### Epic 6: Figma Design Alignment
-The chat widget's layout and visual styling match the approved Figma design — floating panel with edge gaps, pinned input, and polished message spacing.
+The chat widget's layout, visual styling, and motion design match the approved Figma design — floating panel with edge gaps, pinned input, polished message spacing, and smooth transitions.
 **FRs reinforced:** FR7 (overlay/panel position), FR8 (responsive viewports), FR12 (scroll position)
 **User outcome:** The widget looks and behaves exactly as designed in Figma. Input is always accessible, panel feels like a lightweight floating assistant rather than a rigid sidebar.
 **Implementation notes:** Replaces v-navigation-drawer with Teleport + positioned div for floating panel. Fixes scroll containment so only MessageList scrolls. CSS polish for bubble padding, message spacing, welcome state positioning.
@@ -843,6 +843,76 @@ So that future implementation work references accurate component descriptions.
 
 **Given** `epics.md`
 **When** reading the document
-**Then** Epic 6 with all 3 stories and full acceptance criteria is present
+**Then** Epic 6 with all stories and full acceptance criteria is present
 
 *Modifies: `architecture.md`, `ux-design-specification.md`, `project-context.md`. Already partially updated: `epics.md`, `sprint-status.yaml`.*
+
+### Story 6.4: Chat Panel & FAB Transitions
+
+As a user,
+I want the chat panel to animate smoothly when opening and closing, and the floating button icon to transition between states,
+So that the widget feels polished and responsive rather than abruptly appearing/disappearing.
+
+**Acceptance Criteria:**
+
+**Given** the user clicks the floating button to open the chat
+**When** the panel appears
+**Then** it scales up from the bottom-right with an opacity fade (280ms, easeOutExpo)
+**And** the floating button icon transitions from star to close (X) with a rotate+scale animation (120ms)
+
+**Given** the user closes the chat (via close button, floating button, or Escape)
+**When** the panel disappears
+**Then** it scales down with an opacity fade (200ms, easeInExpo)
+**And** the floating button icon transitions from close (X) back to star
+
+**Given** the viewport is below 768px (mobile)
+**When** the chat opens or closes
+**Then** the panel slides up from the bottom (translateY) instead of scaling
+
+**Given** the user has `prefers-reduced-motion: reduce` enabled
+**When** any transition fires
+**Then** the transition duration is 0ms (instant, no animation)
+
+**Given** the existing test suite
+**When** running `yarn test`
+**Then** all tests pass with the Transition wrapper
+
+*Modifies: `ChatPanel.vue` (adds `<Transition>`), `FloatingButton.vue` (adds icon swap + `<Transition>`). Restores transitions lost when Story 6.1 replaced `v-navigation-drawer`.*
+
+*Added via Correct Course workflow (2026-02-22b) to document animation changes made outside BMAD workflow.*
+
+### Story 6.5: Message Bubble Entrance Animations
+
+As a user,
+I want new messages to slide into view when they appear in the conversation,
+So that I have a clear visual cue of new content arriving.
+
+**Acceptance Criteria:**
+
+**Given** the user sends a message
+**When** it appears in the message list (optimistic UI)
+**Then** the bubble slides in from the right (16px translateX, 250ms, easeOutExpo)
+
+**Given** the assistant responds
+**When** the response appears in the message list
+**Then** the bubble slides in from the left (16px translateX, 250ms, easeOutExpo)
+
+**Given** the chat opens and initial history loads
+**When** messages render for the first time
+**Then** no entrance animation plays — messages appear instantly
+
+**Given** the user scrolls up and triggers loadMore (infinite scroll)
+**When** older messages prepend to the list
+**Then** no entrance animation plays — messages appear instantly
+
+**Given** the user has `prefers-reduced-motion: reduce` enabled
+**When** any message animation would fire
+**Then** the animation is disabled (CSS `animation: none`)
+
+**Given** the MessageBubble component
+**When** the `animate` prop is `false` (default)
+**Then** no `nc-message-bubble--animate-in` class is applied
+
+*Modifies: `MessageBubble.vue` (adds `animate` prop + CSS keyframes), `MessageList.vue` (adds watcher-based animation tracking with `knownIds`/`animatingIds`). Tests added for animation prop toggling and suppression.*
+
+*Added via Correct Course workflow (2026-02-22b) to document animation changes made outside BMAD workflow.*
