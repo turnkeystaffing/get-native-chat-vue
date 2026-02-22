@@ -105,7 +105,7 @@ async function handleLoadMore({ done }: { done: (status: InfiniteScrollStatus) =
   .nc-message-list {
     display: flex;
     flex-direction: column;
-    gap: 14px;
+    gap: 16px;
     list-style: none;
     padding: 8px 16px;
     margin: 0;

@@ -76,7 +76,7 @@ watch(
       hide-details
       variant="outlined"
       density="compact"
-      placeholder="Type a message"
+      placeholder="How can I help you? Ask me anything..."
       aria-label="Type a message"
       :disabled="chatState.isSending.value"
       class="nc-chat-input__textarea"

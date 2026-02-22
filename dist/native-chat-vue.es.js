@@ -2033,7 +2033,7 @@ const na = /* @__PURE__ */ Z(Jr, [["render", ta]]), sa = ["aria-label"], ra = {
       ], 8, ca)) : Ct("", !0)
     ], 10, sa));
   }
-}), pa = /* @__PURE__ */ Z(ua, [["__scopeId", "data-v-53d7ea52"]]), ha = {
+}), pa = /* @__PURE__ */ Z(ua, [["__scopeId", "data-v-6af74610"]]), ha = {
   role: "list",
   "aria-live": "polite",
   class: "nc-message-list"
@@ -2108,7 +2108,7 @@ const na = /* @__PURE__ */ Z(Jr, [["render", ta]]), sa = ["aria-label"], ra = {
       }, 8, ["disabled"]);
     };
   }
-}), ma = /* @__PURE__ */ Z(da, [["__scopeId", "data-v-9964e052"]]), ka = {}, ba = {
+}), ma = /* @__PURE__ */ Z(da, [["__scopeId", "data-v-b90d60e0"]]), ka = {}, ba = {
   xmlns: "http://www.w3.org/2000/svg",
   viewBox: "0 0 24 24",
   width: "1em",
@@ -2174,7 +2174,7 @@ const xa = /* @__PURE__ */ Z(ka, [["render", _a]]), wa = { class: "nc-chat-input
           "hide-details": "",
           variant: "outlined",
           density: "compact",
-          placeholder: "Type a message",
+          placeholder: "How can I help you? Ask me anything...",
           "aria-label": "Type a message",
           disabled: oe(e).isSending.value,
           class: "nc-chat-input__textarea",
@@ -2198,7 +2198,7 @@ const xa = /* @__PURE__ */ Z(ka, [["render", _a]]), wa = { class: "nc-chat-input
       ]);
     };
   }
-}), ya = /* @__PURE__ */ Z(Ta, [["__scopeId", "data-v-b603cd34"]]), va = { class: "nc-chat-panel__body" }, Sa = /* @__PURE__ */ pe({
+}), ya = /* @__PURE__ */ Z(Ta, [["__scopeId", "data-v-4a7e7d61"]]), va = { class: "nc-chat-panel__body" }, Sa = /* @__PURE__ */ pe({
   __name: "ChatPanel",
   setup(s) {
     const e = ue(Ce), n = ue(st), r = j(() => n?.welcomeMessage), t = ks(), i = j(() => t.width.value < 768), l = (c) => {

@@ -130,7 +130,7 @@ onBeforeUnmount(() => {
 
   .nc-message-bubble__bubble {
     max-width: 80%;
-    padding: 8px 12px;
+    padding: 12px 16px;
     border-radius: 12px;
     word-break: break-word;
   }
