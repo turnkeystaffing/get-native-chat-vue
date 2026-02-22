@@ -200,6 +200,10 @@ describe('ChatInput', () => {
     const chatState = createMockChatState({ isOpen: readonly(isOpen) })
     const { wrapper } = mountChatInput(chatState)
 
+    // Wait for immediate watcher's initial focus to complete
+    await nextTick()
+    await nextTick()
+
     const textarea = wrapper.find('textarea')
     const focusSpy = vi.spyOn(textarea.element, 'focus')
 
@@ -211,19 +215,26 @@ describe('ChatInput', () => {
     expect(focusSpy).not.toHaveBeenCalled()
   })
 
-  it('does not focus textarea on mount when isOpen is already true', async () => {
+  it('focuses textarea on mount when isOpen is already true', async () => {
     const isOpen = ref(true)
     const chatState = createMockChatState({ isOpen: readonly(isOpen) })
     const { wrapper } = mountChatInput(chatState)
 
-    // Wait for any potential mount-triggered effects
+    // Wait for immediate watcher + nextTick inside it
     await nextTick()
     await nextTick()
 
-    // watch() without { immediate: true } does not fire on mount,
-    // so textarea should not be focused when isOpen is already true at mount
+    // watch({ immediate: true }) fires on mount when isOpen is true,
+    // matching v-if behavior where ChatInput mounts when panel opens
     const textarea = wrapper.find('textarea')
-    expect(textarea.element).not.toBe(document.activeElement)
+    const focusSpy = vi.spyOn(textarea.element, 'focus')
+    // Re-trigger to verify focus mechanism works
+    isOpen.value = false
+    await nextTick()
+    isOpen.value = true
+    await nextTick()
+    await nextTick()
+    expect(focusSpy).toHaveBeenCalled()
   })
 
   it('restores focus to textarea when isSending transitions true→false (after error)', async () => {

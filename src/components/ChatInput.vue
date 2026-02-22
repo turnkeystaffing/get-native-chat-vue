@@ -37,7 +37,8 @@ watch(
   },
 )
 
-// Focus textarea when chat opens
+// Focus textarea when chat opens (immediate: true needed because v-if in
+// ChatPanel means ChatInput mounts when isOpen is already true)
 watch(
   () => chatState.isOpen.value,
   (isOpen) => {
@@ -47,6 +48,7 @@ watch(
       })
     }
   },
+  { immediate: true },
 )
 
 // Restore focus to textarea after send completes

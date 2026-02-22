@@ -9,21 +9,11 @@ import ChatInput from '@/components/ChatInput.vue'
 
 const chatState = inject(CHAT_STATE_KEY)!
 
-// Computed proxy: reads isOpen state, ignores all Vuetify-initiated changes
-// (prevents click-outside-to-close per UX spec; open/close managed by composable actions)
-const drawerModel = computed({
-  get: () => chatState.isOpen.value,
-  set: () => {
-    // Intentional no-op: drawer state is managed exclusively via chatState.open()/close()
-  },
-})
-
 const config = inject(CONFIG_KEY)
 const welcomeMessage = computed(() => config?.welcomeMessage)
 
 const display = useDisplay()
 const isMobile = computed(() => display.width.value < 768)
-const panelWidth = computed(() => (isMobile.value ? '100%' : 400))
 
 // Global Escape key handler — works regardless of focus location
 const onEscapeKey = (e: KeyboardEvent) => {
@@ -51,37 +41,61 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <v-navigation-drawer
-    v-model="drawerModel"
-    location="right"
-    temporary
-    :scrim="false"
-    :width="panelWidth"
-    role="complementary"
-    aria-label="Chat with AI Assistant"
-    class="nc-chat-panel"
-    :class="{ 'nc-chat-panel--mobile': isMobile }"
-  >
-    <ChatHeader />
-    <div class="nc-chat-panel__body">
-      <v-progress-circular
-        v-if="chatState.isLoading.value && chatState.messages.value.length === 0"
-        indeterminate
-        size="24"
-        class="nc-chat-panel__loader"
-      />
-      <WelcomeState
-        v-else-if="chatState.messages.value.length === 0 && !chatState.isSending.value"
-        :message="welcomeMessage"
-      />
-      <MessageList v-else />
+  <Teleport to="body">
+    <div
+      v-if="chatState.isOpen.value"
+      class="nc-chat-panel"
+      :class="{ 'nc-chat-panel--mobile': isMobile }"
+      role="complementary"
+      aria-label="Chat with AI Assistant"
+    >
+      <ChatHeader />
+      <div class="nc-chat-panel__body">
+        <v-progress-circular
+          v-if="chatState.isLoading.value && chatState.messages.value.length === 0"
+          indeterminate
+          size="24"
+          class="nc-chat-panel__loader"
+        />
+        <WelcomeState
+          v-else-if="chatState.messages.value.length === 0 && !chatState.isSending.value"
+          :message="welcomeMessage"
+        />
+        <MessageList v-else />
+      </div>
+      <ChatInput />
     </div>
-    <ChatInput />
-  </v-navigation-drawer>
+  </Teleport>
 </template>
 
 <style scoped>
 @layer native-chat {
+  .nc-chat-panel {
+    position: fixed;
+    right: 24px;
+    bottom: 24px;
+    top: 24px;
+    width: 420px;
+    border-radius: 20px;
+    box-shadow: 0 8px 40px rgba(0, 0, 0, 0.12);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    z-index: 10000;
+    background: rgb(var(--v-theme-surface));
+  }
+
+  .nc-chat-panel--mobile {
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    width: 100%;
+    height: 100dvh;
+    border-radius: 0;
+    box-shadow: none;
+  }
+
   .nc-chat-panel__body {
     display: flex;
     flex-direction: column;
@@ -92,17 +106,6 @@ onUnmounted(() => {
   .nc-chat-panel__loader {
     align-self: center;
     margin-top: 32px;
-  }
-
-  .nc-chat-panel--mobile {
-    height: 100dvh;
-  }
-
-  @media (min-width: 768px) {
-    .nc-chat-panel {
-      border-top-left-radius: 20px;
-      border-top-right-radius: 20px;
-    }
   }
 }
 </style>

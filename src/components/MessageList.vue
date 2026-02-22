@@ -99,6 +99,7 @@ async function handleLoadMore({ done }: { done: (status: InfiniteScrollStatus) =
 @layer native-chat {
   .nc-message-list-scroll {
     flex: 1;
+    overflow-y: auto;
   }
 
   .nc-message-list {

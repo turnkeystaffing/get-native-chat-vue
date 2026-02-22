@@ -69,3 +69,9 @@ development_status:
   5-2-guide-documentation-pages: done
   5-3-component-demo-pages-landing-page: done
   epic-5-retrospective: optional
+
+  epic-6: in-progress
+  6-1-floating-panel-layout-scroll-containment: done
+  6-2-visual-polish-figma-spacing: backlog
+  6-3-update-planning-artifacts: backlog
+  epic-6-retrospective: optional

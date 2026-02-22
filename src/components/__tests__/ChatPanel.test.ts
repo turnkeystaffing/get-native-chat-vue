@@ -1,6 +1,5 @@
 import { mount } from '@vue/test-utils'
-import { defineComponent, h, ref, readonly } from 'vue'
-import { VLayout } from 'vuetify/components'
+import { ref, readonly } from 'vue'
 import ChatPanel from '@/components/ChatPanel.vue'
 import ChatHeader from '@/components/ChatHeader.vue'
 import WelcomeState from '@/components/WelcomeState.vue'
@@ -59,15 +58,11 @@ function mountChatPanel(options?: {
     retry: vi.fn(),
   }
 
-  // VNavigationDrawer requires a layout parent — wrap in VLayout
-  const Wrapper = defineComponent({
-    setup() {
-      return () => h(VLayout, null, () => h(ChatPanel))
-    },
-  })
-
-  const wrapper = mount(Wrapper, {
+  const wrapper = mount(ChatPanel, {
     global: {
+      stubs: {
+        teleport: true,
+      },
       provide: {
         [CONFIG_KEY as symbol]: config,
         [CHAT_STATE_KEY as symbol]: chatState,
@@ -79,26 +74,32 @@ function mountChatPanel(options?: {
 }
 
 describe('ChatPanel', () => {
-  it('renders v-navigation-drawer with location="right"', () => {
+  it('renders panel div when isOpen is true', () => {
     const { wrapper } = mountChatPanel({ isOpen: true })
-    const drawer = wrapper.findComponent({ name: 'VNavigationDrawer' })
 
-    expect(drawer.exists()).toBe(true)
-    expect(drawer.props('location')).toBe('right')
+    expect(wrapper.find('.nc-chat-panel').exists()).toBe(true)
   })
 
-  it('drawer is visible when isOpen is true', () => {
-    const { wrapper } = mountChatPanel({ isOpen: true })
-    const drawer = wrapper.findComponent({ name: 'VNavigationDrawer' })
-
-    expect(drawer.props('modelValue')).toBe(true)
-  })
-
-  it('drawer is hidden when isOpen is false', () => {
+  it('does not render panel div when isOpen is false', () => {
     const { wrapper } = mountChatPanel({ isOpen: false })
-    const drawer = wrapper.findComponent({ name: 'VNavigationDrawer' })
 
-    expect(drawer.props('modelValue')).toBe(false)
+    expect(wrapper.find('.nc-chat-panel').exists()).toBe(false)
+  })
+
+  it('panel renders inside Teleport to body when open', () => {
+    const { wrapper } = mountChatPanel({ isOpen: true })
+    const panel = wrapper.find('[role="complementary"]')
+
+    expect(panel.exists()).toBe(true)
+    expect(panel.classes()).toContain('nc-chat-panel')
+  })
+
+  it('panel has floating CSS class and proper structure', () => {
+    const { wrapper } = mountChatPanel({ isOpen: true })
+    const panel = wrapper.find('.nc-chat-panel')
+
+    expect(panel.exists()).toBe(true)
+    expect(panel.find('.nc-chat-panel__body').exists()).toBe(true)
   })
 
   it('renders ChatHeader as child', () => {
@@ -157,11 +158,11 @@ describe('ChatPanel', () => {
 
   it('panel has role="complementary" and aria-label="Chat with AI Assistant"', () => {
     const { wrapper } = mountChatPanel({ isOpen: true })
-    const nav = wrapper.find('nav.nc-chat-panel')
+    const panel = wrapper.find('[role="complementary"]')
 
-    expect(nav.exists()).toBe(true)
-    expect(nav.attributes('role')).toBe('complementary')
-    expect(nav.attributes('aria-label')).toBe('Chat with AI Assistant')
+    expect(panel.exists()).toBe(true)
+    expect(panel.attributes('role')).toBe('complementary')
+    expect(panel.attributes('aria-label')).toBe('Chat with AI Assistant')
   })
 
   it('global Escape key calls close() regardless of focus location', () => {
@@ -181,35 +182,6 @@ describe('ChatPanel', () => {
     expect(closeFn).not.toHaveBeenCalled()
   })
 
-  it('scrim is disabled (no click-outside-to-close)', () => {
-    const { wrapper } = mountChatPanel({ isOpen: true })
-    const drawer = wrapper.findComponent({ name: 'VNavigationDrawer' })
-
-    expect(drawer.props('scrim')).toBe(false)
-  })
-
-  it('computed setter ignores Vuetify close attempts (prevents click-outside)', () => {
-    const { wrapper, closeFn } = mountChatPanel({ isOpen: true })
-    const drawer = wrapper.findComponent({ name: 'VNavigationDrawer' })
-
-    // Simulate Vuetify trying to close via update:modelValue (click-outside)
-    drawer.vm.$emit('update:modelValue', false)
-
-    // close() should NOT have been called — setter is a no-op
-    expect(closeFn).not.toHaveBeenCalled()
-  })
-
-  it('computed setter ignores Vuetify open attempts (state managed by composable)', () => {
-    const { wrapper, openFn } = mountChatPanel({ isOpen: false })
-    const drawer = wrapper.findComponent({ name: 'VNavigationDrawer' })
-
-    // Simulate Vuetify trying to open via update:modelValue
-    drawer.vm.$emit('update:modelValue', true)
-
-    // open() should NOT have been called — setter is a no-op
-    expect(openFn).not.toHaveBeenCalled()
-  })
-
   it('passes welcomeMessage from config to WelcomeState', () => {
     const { wrapper } = mountChatPanel({
       isOpen: true,
@@ -218,14 +190,6 @@ describe('ChatPanel', () => {
     const welcomeState = wrapper.findComponent(WelcomeState)
 
     expect(welcomeState.props('message')).toBe('Custom welcome!')
-  })
-
-  it('uses 400px width on desktop (default jsdom viewport)', () => {
-    const { wrapper } = mountChatPanel({ isOpen: true })
-    const drawer = wrapper.findComponent({ name: 'VNavigationDrawer' })
-
-    // jsdom defaults to 1024px width — above 768px breakpoint
-    expect(drawer.props('width')).toBe(400)
   })
 
   it('renders ChatInput component when panel is open', () => {

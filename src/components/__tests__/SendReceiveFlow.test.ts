@@ -1,6 +1,5 @@
-import { mount } from '@vue/test-utils'
-import { defineComponent, h, ref, readonly, nextTick } from 'vue'
-import { VLayout } from 'vuetify/components'
+import { mount, flushPromises } from '@vue/test-utils'
+import { ref, readonly, nextTick } from 'vue'
 import ChatPanel from '@/components/ChatPanel.vue'
 import WelcomeState from '@/components/WelcomeState.vue'
 import MessageList from '@/components/MessageList.vue'
@@ -9,6 +8,8 @@ import { CONFIG_KEY, CHAT_STATE_KEY } from '@/keys'
 import type { UseChatReturn } from '@/composables/useChat'
 import type { NativeChatApiClient } from '@/types/api'
 import type { ChatMessage } from '@/types/chat'
+
+const activeWrappers: ReturnType<typeof mount>[] = []
 
 function createMountHelper(options?: {
   isOpen?: boolean
@@ -66,23 +67,28 @@ function createMountHelper(options?: {
     },
   }
 
-  const Wrapper = defineComponent({
-    setup() {
-      return () => h(VLayout, null, () => h(ChatPanel))
-    },
-  })
-
-  const wrapper = mount(Wrapper, {
+  const wrapper = mount(ChatPanel, {
+    attachTo: document.body,
     global: {
+      stubs: {
+        teleport: true,
+      },
       provide: {
         [CONFIG_KEY as symbol]: config,
         [CHAT_STATE_KEY as symbol]: chatState,
       },
     },
   })
+  activeWrappers.push(wrapper)
 
   return { wrapper, chatState, isOpen, isLoading, isSending, messages, failedMessageText }
 }
+
+afterEach(() => {
+  activeWrappers.forEach((w) => w.unmount())
+  activeWrappers.length = 0
+  document.body.innerHTML = ''
+})
 
 describe('Send/Receive Flow Integration (AC #1, #2)', () => {
   it('user sends message → optimistic message appears in MessageList with status sending → input clears and disables', async () => {
@@ -98,7 +104,7 @@ describe('Send/Receive Flow Integration (AC #1, #2)', () => {
 
     // Trigger send via Enter key
     await textarea.trigger('keydown', { key: 'Enter', shiftKey: false })
-    await nextTick()
+    await flushPromises()
 
     // sendMessage should have been called
     expect(chatState.sendMessage).toHaveBeenCalledWith('Hello world')
@@ -110,13 +116,16 @@ describe('Send/Receive Flow Integration (AC #1, #2)', () => {
     expect(isSending.value).toBe(true)
 
     // Wait for DOM update
-    await nextTick()
+    await flushPromises()
+
+    // Re-query textarea — Vuetify may replace the DOM node when disabled toggles
+    const freshTextarea = wrapper.find('textarea')
 
     // Input should be cleared
-    expect(textarea.element.value).toBe('')
+    expect(freshTextarea.element.value).toBe('')
 
     // Textarea should be disabled
-    expect(textarea.attributes('disabled')).toBeDefined()
+    expect(freshTextarea.attributes('disabled')).toBeDefined()
   })
 
   it('after successful API response → user message status sent, assistant response appears, input re-enables', async () => {
@@ -168,17 +177,17 @@ describe('Send/Receive Flow Integration (AC #1, #2)', () => {
   })
 
   it('focus remains on input after send completes', async () => {
-    const { wrapper, isSending } = createMountHelper({ isOpen: true, isSending: true })
+    const { isSending } = createMountHelper({ isOpen: true, isSending: true })
 
-    const textarea = wrapper.find('textarea')
-    const focusSpy = vi.spyOn(textarea.element, 'focus')
+    // Spy on prototype to catch focus regardless of how Vuetify's v-textarea delegates
+    const focusSpy = vi.spyOn(HTMLTextAreaElement.prototype, 'focus')
 
     // Simulate send completing: isSending goes from true to false
     isSending.value = false
-    await nextTick()
-    await nextTick() // Double nextTick: watcher fires → nextTick inside watcher
+    await flushPromises()
 
     expect(focusSpy).toHaveBeenCalled()
+    focusSpy.mockRestore()
   })
 })
 
@@ -315,41 +324,40 @@ describe('Empty and Failed Open Flows (AC #4, #5)', () => {
       retry: vi.fn(async () => {}),
     }
 
-    const Wrapper = defineComponent({
-      setup() {
-        return () => h(VLayout, null, () => h(ChatPanel))
-      },
-    })
-
-    const wrapper = mount(Wrapper, {
-      global: {
-        provide: {
-          [CONFIG_KEY as symbol]: {
-            apiClient: {
-              createConversation: vi.fn(),
-              getConversations: vi.fn(),
-              getMessages: vi.fn(),
-              sendMessage: vi.fn(),
-            },
+    activeWrappers.push(
+      mount(ChatPanel, {
+        attachTo: document.body,
+        global: {
+          stubs: {
+            teleport: true,
           },
-          [CHAT_STATE_KEY as symbol]: chatState,
+          provide: {
+            [CONFIG_KEY as symbol]: {
+              apiClient: {
+                createConversation: vi.fn(),
+                getConversations: vi.fn(),
+                getMessages: vi.fn(),
+                sendMessage: vi.fn(),
+              },
+            },
+            [CHAT_STATE_KEY as symbol]: chatState,
+          },
         },
-      },
-    })
+      }),
+    )
 
-    const textarea = wrapper.find('textarea')
-    const focusSpy = vi.spyOn(textarea.element, 'focus')
+    // Spy on prototype before textarea exists (v-if means no DOM until open)
+    const focusSpy = vi.spyOn(HTMLTextAreaElement.prototype, 'focus')
 
-    // Open the chat
+    // Open the chat — ChatInput mounts and focuses textarea
     isOpen.value = true
-    await nextTick()
-    await nextTick()
+    await flushPromises()
 
     expect(focusSpy).toHaveBeenCalled()
+    focusSpy.mockRestore()
   })
 
   it('welcome message shown as fallback when initial fetch fails', () => {
-    // After a failed open(), messages are empty, isLoading is false, isOpen is true
     const { wrapper } = createMountHelper({ isOpen: true, isLoading: false, messages: [] })
 
     expect(wrapper.findComponent(WelcomeState).exists()).toBe(true)
@@ -403,20 +411,19 @@ describe('Error Display Flow Integration (Story 4.1)', () => {
     const chatState = useChat(apiClient, { apiClient, onError })
     await chatState.open()
 
-    const Wrapper = defineComponent({
-      setup() {
-        return () => h(VLayout, null, () => h(ChatPanel))
-      },
-    })
-
-    const wrapper = mount(Wrapper, {
+    const wrapper = mount(ChatPanel, {
+      attachTo: document.body,
       global: {
+        stubs: {
+          teleport: true,
+        },
         provide: {
           [CONFIG_KEY as symbol]: { apiClient },
           [CHAT_STATE_KEY as symbol]: chatState,
         },
       },
     })
+    activeWrappers.push(wrapper)
 
     // Send message that will fail
     await chatState.sendMessage('Hello')
@@ -495,20 +502,19 @@ describe('Message Retry Flow Integration (Story 4.2)', () => {
     const chatState = useChat(apiClient, { apiClient })
     await chatState.open()
 
-    const Wrapper = defineComponent({
-      setup() {
-        return () => h(VLayout, null, () => h(ChatPanel))
-      },
-    })
-
-    const wrapper = mount(Wrapper, {
+    const wrapper = mount(ChatPanel, {
+      attachTo: document.body,
       global: {
+        stubs: {
+          teleport: true,
+        },
         provide: {
           [CONFIG_KEY as symbol]: { apiClient },
           [CHAT_STATE_KEY as symbol]: chatState,
         },
       },
     })
+    activeWrappers.push(wrapper)
 
     // Step 1: Send message that fails
     await chatState.sendMessage('Hello')
@@ -610,20 +616,19 @@ describe('Real useChat Integration (AC #5 — null conversationId recovery)', ()
     })
 
     // Mount ChatPanel with real useChat state
-    const Wrapper = defineComponent({
-      setup() {
-        return () => h(VLayout, null, () => h(ChatPanel))
-      },
-    })
-
-    const wrapper = mount(Wrapper, {
+    const wrapper = mount(ChatPanel, {
+      attachTo: document.body,
       global: {
+        stubs: {
+          teleport: true,
+        },
         provide: {
           [CONFIG_KEY as symbol]: { apiClient },
           [CHAT_STATE_KEY as symbol]: chatState,
         },
       },
     })
+    activeWrappers.push(wrapper)
 
     // Initially: welcome state (no messages)
     expect(wrapper.findComponent(WelcomeState).exists()).toBe(true)

@@ -14,7 +14,7 @@ inputDocuments:
 
 ## Overview
 
-This document provides the complete epic and story breakdown for native-chat-vue, decomposing the requirements from the PRD, UX Design if it exists, and Architecture requirements into implementable stories. Includes Epic 5 added via Correct Course workflow (2026-02-21) to address missing documentation planning.
+This document provides the complete epic and story breakdown for native-chat-vue, decomposing the requirements from the PRD, UX Design if it exists, and Architecture requirements into implementable stories. Includes Epic 5 added via Correct Course workflow (2026-02-21) to address missing documentation planning. Includes Epic 6 added via Correct Course workflow (2026-02-22) to align visual implementation with the approved Figma design.
 
 ## Requirements Inventory
 
@@ -191,6 +191,14 @@ Developer finds comprehensive documentation with live interactive demos, enablin
 **FRs covered:** Supports FR1-FR4 delivery (Journey 3 — Developer Integration)
 **User outcome:** Journey 3 complete. Developer reads docs, sees live demos, integrates confidently.
 **Implementation notes:** DemoBlock.vue for source+preview, mock API client for demos, guide pages, component demo pages, VitePress sidebar navigation, landing page.
+
+### Epic 6: Figma Design Alignment
+The chat widget's layout and visual styling match the approved Figma design — floating panel with edge gaps, pinned input, and polished message spacing.
+**FRs reinforced:** FR7 (overlay/panel position), FR8 (responsive viewports), FR12 (scroll position)
+**User outcome:** The widget looks and behaves exactly as designed in Figma. Input is always accessible, panel feels like a lightweight floating assistant rather than a rigid sidebar.
+**Implementation notes:** Replaces v-navigation-drawer with Teleport + positioned div for floating panel. Fixes scroll containment so only MessageList scrolls. CSS polish for bubble padding, message spacing, welcome state positioning.
+
+*Added via Correct Course workflow (2026-02-22) to align visual implementation with the approved Figma design.*
 
 ## Epic 1: Plugin Foundation & Chat Shell
 
@@ -731,3 +739,110 @@ So that I can see the plugin in action and experiment before integrating.
 **And** `yarn docs:build` completes without errors
 
 *Creates: `docs/index.md` (new consumer-facing landing page), `docs/components/widget.md`, `docs/components/message-bubble.md`, `docs/components/chat-input.md`. Updates `docs/.vitepress/config.ts` sidebar.*
+
+## Epic 6: Figma Design Alignment
+
+The chat widget's layout and visual styling match the approved Figma design — floating panel with edge gaps, pinned input, and polished message spacing.
+
+*Added via Correct Course workflow (2026-02-22) to align visual implementation with the approved Figma design.*
+
+### Story 6.1: Floating Panel Layout & Scroll Containment
+
+As a user,
+I want the chat panel to float with gaps from the window edges and the input to always stay pinned at the bottom,
+So that the widget feels like a lightweight overlay and I can always type without scrolling.
+
+**Acceptance Criteria:**
+
+**Given** the chat is open on desktop (>=768px)
+**When** inspecting the panel
+**Then** it has ~24px gaps from the right, top, and bottom window edges
+**And** all four corners are rounded (20px border-radius)
+**And** a prominent drop shadow is visible (`box-shadow: 0 8px 40px rgba(0,0,0,0.12)`)
+
+**Given** the chat is open with messages
+**When** messages fill the panel beyond its height
+**Then** only the message list area scrolls
+**And** the header remains fixed at the top
+**And** the input remains fixed at the bottom
+**And** the input never scrolls away regardless of message content length
+
+**Given** the chat is open on mobile (<768px)
+**When** inspecting the panel
+**Then** it renders as a full-screen takeover with no edge gaps
+**And** height is `100dvh`
+**And** border-radius is 0
+
+**Given** the chat panel is open
+**When** the user presses Escape
+**Then** the panel closes and focus returns to the floating button
+
+**Given** the panel implementation
+**When** inspecting the DOM
+**Then** `v-navigation-drawer` is no longer used
+**And** the panel is rendered via `Teleport` to body with a fixed-positioned div
+
+**Given** the existing test suite
+**When** running `yarn test`
+**Then** all ChatPanel and integration tests pass with updated selectors
+
+*Modifies: `ChatPanel.vue`, `ChatPanel.test.ts`, `SendReceiveFlow.test.ts`. Removes: `v-navigation-drawer` dependency from ChatPanel.*
+
+### Story 6.2: Visual Polish & Figma Spacing
+
+As a user,
+I want message bubbles, spacing, and input to match the Figma design precisely,
+So that the chat feels polished and professional.
+
+**Acceptance Criteria:**
+
+**Given** a user or assistant message bubble
+**When** rendered
+**Then** the bubble has `12px 16px` padding (increased from `8px 12px`)
+
+**Given** the message list with multiple messages
+**When** displayed
+**Then** the vertical gap between messages is `16px` (increased from `14px`)
+
+**Given** the chat input field
+**When** rendered with no text
+**Then** the placeholder reads "How can I help you? Ask me anything..."
+
+**Given** the welcome state (no messages, first open)
+**When** displayed
+**Then** the greeting text is positioned in the upper area of the panel (not vertically centered)
+**And** there is approximately `48px` top padding
+
+**Given** all visual changes
+**When** running `yarn test`
+**Then** all tests pass
+
+*Modifies: `MessageBubble.vue` (CSS), `MessageList.vue` (CSS), `ChatInput.vue` (template), `WelcomeState.vue` (CSS).*
+
+### Story 6.3: Update Planning Artifacts
+
+As a project maintainer,
+I want the architecture, UX spec, and project context documents to reflect the ChatPanel architectural change,
+So that future implementation work references accurate component descriptions.
+
+**Acceptance Criteria:**
+
+**Given** `architecture.md`
+**When** reading the ChatPanel component description and hierarchy diagram
+**Then** it describes `Teleport` + positioned div (not `v-navigation-drawer`)
+**And** the Vuetify components table for ChatPanel is updated
+
+**Given** `ux-design-specification.md`
+**When** reading Component Strategy > ChatPanel
+**Then** it describes the floating panel approach with Teleport + positioned div
+**And** the Vuetify components table no longer lists `v-navigation-drawer` for the chat panel
+
+**Given** `project-context.md`
+**When** reading the Vuetify components or Vue rules section
+**Then** `v-navigation-drawer` is not listed as a ChatPanel dependency
+
+**Given** `epics.md`
+**When** reading the document
+**Then** Epic 6 with all 3 stories and full acceptance criteria is present
+
+*Modifies: `architecture.md`, `ux-design-specification.md`, `project-context.md`. Already partially updated: `epics.md`, `sprint-status.yaml`.*
