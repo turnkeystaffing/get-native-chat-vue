@@ -43,8 +43,10 @@ onUnmounted(() => {
 <template>
   <Teleport to="body">
     <Transition name="nc-panel">
-      <div
+      <v-theme-provider
         v-if="chatState.isOpen.value"
+        theme="nativeChat"
+        with-background
         class="nc-chat-panel"
         :class="{ 'nc-chat-panel--mobile': isMobile }"
         role="complementary"
@@ -65,7 +67,7 @@ onUnmounted(() => {
           <MessageList v-else />
         </div>
         <ChatInput />
-      </div>
+      </v-theme-provider>
     </Transition>
   </Teleport>
 </template>

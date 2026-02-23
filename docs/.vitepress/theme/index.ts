@@ -8,6 +8,7 @@ import { nativeChatTheme } from '../../../src/theme/nativeChatTheme'
 import { NativeChatPlugin } from '@/plugin'
 import { mockApiClient } from '../mock/mockApiClient'
 import Layout from './Layout.vue'
+import './overrides.css'
 
 const vuetify = createVuetify({
   components,

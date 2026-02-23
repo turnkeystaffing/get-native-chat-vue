@@ -193,10 +193,23 @@ onBeforeUnmount(() => {
   .nc-message-bubble__content :deep(ol) {
     padding-left: 20px;
     margin: 4px 0;
+    list-style-position: outside;
+  }
+
+  .nc-message-bubble__content :deep(ul) {
+    list-style-type: disc;
+  }
+
+  .nc-message-bubble__content :deep(ol) {
+    list-style-type: decimal;
+  }
+
+  .nc-message-bubble__content :deep(li) {
+    display: list-item;
   }
 
   .nc-message-bubble__content :deep(code) {
-    background: rgba(0, 0, 0, 0.05);
+    background: rgba(var(--v-theme-on-surface), 0.05);
     padding: 2px 4px;
     border-radius: 3px;
     font-family: monospace;
@@ -204,7 +217,7 @@ onBeforeUnmount(() => {
   }
 
   .nc-message-bubble__content :deep(pre) {
-    background: rgba(0, 0, 0, 0.05);
+    background: rgba(var(--v-theme-on-surface), 0.05);
     padding: 8px;
     border-radius: 4px;
     overflow-x: auto;
