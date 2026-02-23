@@ -71,57 +71,57 @@ watch(
       v-model="inputText"
       auto-grow
       :rows="1"
-      :max-rows="6"
+      :max-rows="10"
       no-resize
       hide-details
       variant="outlined"
       density="compact"
+      rounded="xl"
       placeholder="How can I help you? Ask me anything..."
       aria-label="Type a message"
       :disabled="chatState.isSending.value"
       class="nc-chat-input__textarea"
       @keydown="handleKeydown"
-    />
-    <v-btn
-      icon
-      variant="flat"
-      color="secondary"
-      size="small"
-      :disabled="!canSend"
-      aria-label="Send message"
-      class="nc-chat-input__send-btn"
-      @click="handleSend"
     >
-      <IconSend />
-    </v-btn>
+      <template #append-inner>
+        <v-btn
+          icon
+          variant="text"
+          density="comfortable"
+          :color="canSend || chatState.isSending.value ? 'primary' : undefined"
+          :disabled="!canSend"
+          aria-label="Send message"
+          class="nc-chat-input__send-btn"
+          @click="handleSend"
+        >
+          <v-progress-circular
+            v-if="chatState.isSending.value"
+            indeterminate
+            :size="16"
+            :width="2"
+            color="primary"
+          />
+          <v-icon v-else :icon="IconSend" color="secondary"></v-icon>
+        </v-btn>
+      </template>
+    </v-textarea>
   </div>
 </template>
 
 <style scoped>
 @layer native-chat {
   .nc-chat-input {
-    display: flex;
-    align-items: flex-end;
-    gap: 8px;
-    padding: 12px 16px;
+    padding: 8px 16px 16px;
     flex-shrink: 0;
-  }
-
-  .nc-chat-input__textarea {
-    flex: 1;
-  }
-
-  .nc-chat-input__textarea :deep(.v-field) {
-    border-radius: 24px;
   }
 
   .nc-chat-input__textarea :deep(textarea) {
     max-height: 120px;
   }
 
-  .nc-chat-input__send-btn {
-    flex-shrink: 0;
-    margin-bottom: 2px;
+  .nc-chat-input__textarea :deep(.v-field__append-inner) {
+    align-self: flex-end;
+    padding-bottom: 2px;
   }
 }
 </style>

@@ -14,7 +14,7 @@ inputDocuments:
 
 ## Overview
 
-This document provides the complete epic and story breakdown for native-chat-vue, decomposing the requirements from the PRD, UX Design if it exists, and Architecture requirements into implementable stories. Includes Epic 5 added via Correct Course workflow (2026-02-21) to address missing documentation planning. Includes Epic 6 added via Correct Course workflow (2026-02-22) to align visual implementation with the approved Figma design. Stories 6.4-6.5 added via Correct Course workflow (2026-02-22b) to document animation changes made outside BMAD workflow.
+This document provides the complete epic and story breakdown for native-chat-vue, decomposing the requirements from the PRD, UX Design if it exists, and Architecture requirements into implementable stories. Includes Epic 5 added via Correct Course workflow (2026-02-21) to address missing documentation planning. Includes Epic 6 added via Correct Course workflow (2026-02-22) to align visual implementation with the approved Figma design. Stories 6.4-6.5 added via Correct Course workflow (2026-02-22b) to document animation changes made outside BMAD workflow. Stories 6.6-6.9 added via Correct Course workflow (2026-02-22c) for input redesign, VitePress environment fixes, error message distinction, and panel/header UI polish.
 
 ## Requirements Inventory
 
@@ -193,12 +193,12 @@ Developer finds comprehensive documentation with live interactive demos, enablin
 **Implementation notes:** DemoBlock.vue for source+preview, mock API client for demos, guide pages, component demo pages, VitePress sidebar navigation, landing page.
 
 ### Epic 6: Figma Design Alignment
-The chat widget's layout, visual styling, and motion design match the approved Figma design — floating panel with edge gaps, pinned input, polished message spacing, and smooth transitions.
-**FRs reinforced:** FR7 (overlay/panel position), FR8 (responsive viewports), FR12 (scroll position)
-**User outcome:** The widget looks and behaves exactly as designed in Figma. Input is always accessible, panel feels like a lightweight floating assistant rather than a rigid sidebar.
-**Implementation notes:** Replaces v-navigation-drawer with Teleport + positioned div for floating panel. Fixes scroll containment so only MessageList scrolls. CSS polish for bubble padding, message spacing, welcome state positioning.
+The chat widget's layout, visual styling, and motion design match the approved Figma design — floating panel with edge gaps, pinned input, polished message spacing, smooth transitions, modern input area, correct theming, and error distinction.
+**FRs reinforced:** FR7 (overlay/panel position), FR8 (responsive viewports), FR12 (scroll position), FR18 (disable during pending — loading spinner), FR24 (error display — visual distinction)
+**User outcome:** The widget looks and behaves exactly as designed in Figma. Input is always accessible, panel feels like a lightweight floating assistant rather than a rigid sidebar. Errors are visually recognizable. Demo site displays correctly.
+**Implementation notes:** Replaces v-navigation-drawer with Teleport + positioned div for floating panel. Fixes scroll containment so only MessageList scrolls. CSS polish for bubble padding, message spacing, welcome state positioning. Stories 6.6-6.9 add input redesign (action bar pattern), VitePress theme/CSS fixes, error message distinction, and header/panel polish.
 
-*Added via Correct Course workflow (2026-02-22) to align visual implementation with the approved Figma design.*
+*Added via Correct Course workflow (2026-02-22) to align visual implementation with the approved Figma design. Extended via Correct Course workflow (2026-02-22c) with stories 6.6-6.9 for input redesign, VitePress fixes, error distinction, and UI polish.*
 
 ## Epic 1: Plugin Foundation & Chat Shell
 
@@ -916,3 +916,158 @@ So that I have a clear visual cue of new content arriving.
 *Modifies: `MessageBubble.vue` (adds `animate` prop + CSS keyframes), `MessageList.vue` (adds watcher-based animation tracking with `knownIds`/`animatingIds`). Tests added for animation prop toggling and suppression.*
 
 *Added via Correct Course workflow (2026-02-22b) to document animation changes made outside BMAD workflow.*
+
+### Story 6.6: Chat Input Redesign
+
+As a user,
+I want the chat input to have a full-width textarea with an action bar below and a clean icon-only send button,
+So that the input area feels modern and uncluttered like ChatGPT or Claude desktop.
+
+**Acceptance Criteria:**
+
+**Given** the chat is open
+**When** the input area renders
+**Then** the textarea spans the full width of the chat panel
+**And** the textarea has a pill-shaped border radius (28px)
+**And** the send button sits on a separate action row below the textarea, anchored to the bottom-right
+
+**Given** the send button is visible
+**When** inspecting its styling
+**Then** it uses `variant="plain"` (no background by default)
+**And** visual feedback (opacity change) appears only on hover, focus, or click
+**And** the button uses `color="secondary"` (magenta icon)
+
+**Given** the user sends a message
+**When** `isSending` is true
+**Then** the send icon (`IconSend`) is replaced by a `v-progress-circular` spinner (indeterminate, size 18)
+**And** the spinner uses `color="secondary"`
+
+**Given** the send completes (success or error)
+**When** `isSending` returns to false
+**Then** the spinner is replaced by the send icon
+
+**Given** the input area is rendered
+**When** testing keyboard and focus behavior
+**Then** Enter-to-send, Shift+Enter for newline, auto-grow (1-6 rows), disabled during sending, and focus management all work identically to before
+
+**Given** the existing test suite
+**When** running `yarn test`
+**Then** all ChatInput tests pass (selectors may need updating for new DOM structure)
+
+*Modifies: `ChatInput.vue` (template restructure + CSS). No composable or state changes.*
+
+*Added via Correct Course workflow (2026-02-22c) to align input area with ChatGPT/Claude desktop action-bar pattern.*
+
+### Story 6.7: VitePress Demo Environment Fixes
+
+As a developer viewing the docs site,
+I want the chat widget to display with correct theme colors and unbroken markdown rendering,
+So that the demo accurately represents how the plugin looks in production.
+
+**Acceptance Criteria:**
+
+**Given** the VitePress docs site is running (`yarn docs:dev`)
+**When** the chat widget opens
+**Then** user message bubbles use primary color `#002B38` (not Vuetify default `#1867C0`)
+**And** the send button and floating button use secondary color `#C4105B`
+**And** the chat panel has a white (`#FFFFFF`) background
+**And** all theme token CSS variables resolve to nativeChatTheme values
+
+**Given** the chat panel is rendered via Teleport to body
+**When** inspecting the DOM
+**Then** the teleported content is wrapped in `<v-theme-provider theme="nativeChat">`
+**And** theme CSS variables (`--v-theme-primary`, `--v-theme-surface`, etc.) are available inside the panel
+
+**Given** an assistant message contains markdown with bullet lists (`ul`, `li`)
+**When** rendered in the VitePress docs site
+**Then** the list renders with proper bullet markers (not stripped by VitePress global CSS)
+**And** list item spacing matches the plugin's own styles, not VitePress defaults
+
+**Given** the chat panel is open
+**When** inspecting the panel background
+**Then** the background is fully opaque (`rgb(var(--v-theme-surface))` resolves to `#FFFFFF`)
+**And** the floating button shadow is not visible through the panel
+
+**Given** the existing test suite
+**When** running `yarn test`
+**Then** all tests pass
+
+*Modifies: `ChatPanel.vue` (add v-theme-provider inside Teleport, CSS list resets), `MessageBubble.vue` (CSS list style resets).*
+
+*Added via Correct Course workflow (2026-02-22c) to fix Teleport-breaks-theme-provider root cause and VitePress CSS bleed.*
+
+### Story 6.8: Error Message Visual Distinction
+
+As a user,
+I want error messages to look visually different from assistant messages,
+So that I can immediately recognize when something went wrong.
+
+**Acceptance Criteria:**
+
+**Given** an error message is displayed in the chat
+**When** comparing it to an assistant message
+**Then** the error bubble has a subtle red-tinted background (`rgba(error, 0.06)`)
+**And** the error bubble has a red-tinted border (`rgba(error, 0.2)`)
+**And** the styling is calm and not alarming — no solid red backgrounds or large alert icons
+
+**Given** an error message is displayed
+**When** inspecting its header
+**Then** it shows a small muted warning icon and "Error" label (left-aligned)
+**And** the icon uses the error theme color at reduced opacity
+
+**Given** the error styling
+**When** the nativeChat theme is applied
+**Then** the error color (`#DE3232`) is used via theme tokens, not hardcoded
+
+**Given** the existing calm tone principle
+**When** evaluating the error visual treatment
+**Then** the distinction is subtle enough to not feel alarming
+**And** the error text content remains calm and informational
+
+**Given** the existing test suite
+**When** running `yarn test`
+**Then** all MessageBubble tests pass (new selectors may need tests added)
+
+*Modifies: `MessageBubble.vue` (template: add error header; CSS: split error from assistant bubble styling).*
+
+*Added via Correct Course workflow (2026-02-22c). Note: This is a refinement of the UX spec's "no red backgrounds" guideline — the 6% opacity tint is nearly invisible but provides the needed distinction.*
+
+### Story 6.9: Panel & Header UI Polish
+
+As a user,
+I want the chat header and panel to have polished visual details,
+So that the widget feels refined and professional.
+
+**Acceptance Criteria:**
+
+**Given** the chat panel is open
+**When** inspecting the floating trigger button
+**Then** its elevation is `0` (no shadow)
+**And** the button shadow does not bleed through the panel
+
+**Given** the chat panel is closed
+**When** inspecting the floating trigger button
+**Then** its elevation is `4` (normal shadow)
+
+**Given** the chat header is rendered
+**When** inspecting the bottom edge
+**Then** a subtle divider line is visible (`1px solid` at 12% opacity of the on-surface color)
+
+**Given** the close (X) button in the header
+**When** inspecting its size
+**Then** the button uses `size="default"` (not `size="small"`)
+**And** the icon uses `size="22"` (not `size="18"`)
+**And** the button meets the 44px minimum tap target
+
+**Given** the close button
+**When** the user hovers over it
+**Then** no dark background appears
+**And** the button uses `variant="plain"` (opacity change only on hover)
+
+**Given** the existing test suite
+**When** running `yarn test`
+**Then** all tests pass
+
+*Modifies: `FloatingButton.vue` (dynamic elevation), `ChatHeader.vue` (border-bottom, close button size and variant).*
+
+*Added via Correct Course workflow (2026-02-22c) for UI polish items identified during design review.*

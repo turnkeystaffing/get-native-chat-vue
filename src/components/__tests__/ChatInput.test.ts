@@ -1,6 +1,7 @@
 import { mount } from '@vue/test-utils'
 import { ref, readonly, nextTick } from 'vue'
 import ChatInput from '@/components/ChatInput.vue'
+import IconSend from '@/icons/IconSend.vue'
 import { CHAT_STATE_KEY } from '@/keys'
 import type { UseChatReturn } from '@/composables/useChat'
 
@@ -276,6 +277,22 @@ describe('ChatInput', () => {
     // sendMessage should be called with the edited text
     expect(chatState.sendMessage).toHaveBeenCalledWith('edited text')
     expect(textarea.element.value).toBe('')
+  })
+
+  it('shows spinner instead of IconSend when isSending is true', () => {
+    const isSending = ref(true)
+    const chatState = createMockChatState({ isSending: readonly(isSending) })
+    const { wrapper } = mountChatInput(chatState)
+
+    expect(wrapper.find('.v-progress-circular').exists()).toBe(true)
+    expect(wrapper.findComponent(IconSend).exists()).toBe(false)
+  })
+
+  it('shows IconSend instead of spinner when isSending is false', () => {
+    const { wrapper } = mountChatInput()
+
+    expect(wrapper.findComponent(IconSend).exists()).toBe(true)
+    expect(wrapper.find('.v-progress-circular').exists()).toBe(false)
   })
 
   it('failedMessageText being cleared does not empty user-typed text', async () => {

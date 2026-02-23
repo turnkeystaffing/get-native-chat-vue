@@ -70,10 +70,14 @@ development_status:
   5-3-component-demo-pages-landing-page: done
   epic-5-retrospective: optional
 
-  epic-6: done
+  epic-6: in-progress
   6-1-floating-panel-layout-scroll-containment: done
   6-2-visual-polish-figma-spacing: done
   6-3-update-planning-artifacts: done
   6-4-chat-panel-fab-transitions: done
   6-5-message-bubble-entrance-animations: done
+  6-6-chat-input-redesign: done
+  6-7-vitepress-demo-environment-fixes: backlog
+  6-8-error-message-visual-distinction: backlog
+  6-9-panel-header-ui-polish: backlog
   epic-6-retrospective: optional
