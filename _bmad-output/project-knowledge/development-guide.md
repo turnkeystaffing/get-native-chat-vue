@@ -1,5 +1,7 @@
 # Development Guide — native-chat-vue
 
+> Generated: 2026-02-23 | Scan Level: Exhaustive | Mode: Full Rescan
+
 ## Prerequisites
 
 | Requirement | Version | Notes |
@@ -17,6 +19,8 @@ corepack enable
 # Install dependencies
 yarn install
 ```
+
+Yarn 4 is configured with `nodeLinker: node-modules` (`.yarnrc.yml`), so dependencies install into a standard `node_modules/` folder.
 
 ## Available Scripts
 
@@ -43,12 +47,13 @@ The library is built using Vite in **library mode**:
    - `dist/native-chat-vue.css` — Compiled CSS (single file, no code splitting)
    - `dist/types/` — TypeScript declaration files (via `vite-plugin-dts`)
 
-**Build configuration highlights:**
+**Build configuration highlights** (`vite.config.ts`):
 - Entry point: `src/index.ts`
-- Format: ES module only
-- External dependencies: `vue` and `vuetify` are not bundled (peer deps)
+- Format: ES module only (`formats: ['es']`)
+- External dependencies: `vue` and `vuetify` are not bundled (peer deps, regex-matched)
 - CSS: No code splitting (`cssCodeSplit: false`)
 - Public directory: Disabled (`copyPublicDir: false`)
+- Plugins: `@vitejs/plugin-vue` + `vite-plugin-dts` (type generation from `tsconfig.build.json`)
 
 ## Testing
 
@@ -67,12 +72,16 @@ yarn test:watch    # Watch mode
   - Polyfills `ResizeObserver` for jsdom (required by Vuetify)
   - Registers global Vuetify instance with all components + directives
 
-**Test coverage:** 210+ test cases across 12 files:
-- Component tests: 127 tests (mock provide/inject pattern)
-- Composable tests: 75+ tests (exhaustive `useChat` coverage)
-- Helper tests: 13 tests (API client HTTP methods)
-- Type tests: 11 tests (interface shape verification)
-- Integration: 24 tests (`SendReceiveFlow` — full composable + components)
+**Test coverage:** 175+ test cases across 12 files:
+
+| Category | Files | Tests | Key Coverage Areas |
+|----------|-------|-------|-------------------|
+| Components | 9 | ~105 | Rendering, interactions, a11y, focus, animations |
+| Composable | 1 | ~70 | State machine: open/close/send/loadMore/retry/error |
+| Helper | 1 | ~12 | HTTP methods, auth headers, URL encoding, errors |
+| Types | 1 | ~10 | Interface shape verification |
+
+Notable integration coverage in `SendReceiveFlow.test.ts`: full send/receive/error/retry lifecycle across composable + component layers.
 
 ### Performance Tests (Playwright)
 
@@ -87,8 +96,8 @@ yarn perf
 - Web server: Starts VitePress dev on port 5174
 
 **Benchmarks** (`scroll-benchmark.spec.ts`):
-- Static scroll: 1000 messages, measures FPS (target: ≥30fps, no frame >50ms)
-- Infinite scroll: Progressive load 20→1000 messages, measures scroll position preservation (<1px drift)
+- **Static scroll**: 1000 messages, measures FPS (target: >=30fps avg, no frame >50ms)
+- **Infinite scroll**: Progressive load 20->1000 messages, measures scroll position preservation (<1px drift)
 
 ## Linting & Formatting
 
@@ -101,16 +110,18 @@ yarn perf
 - Prettier integration via `eslint-config-prettier`
 - Ignores: `dist/`, `node_modules/`, `docs/.vitepress/dist|cache/`, `coverage/`, `_bmad/`, `_bmad-output/`, `.claude/`, `.yarn/`, `design/`
 
-**Prettier**: Standard configuration, check with `yarn lint`, fix with `yarn format`
+**Prettier** (`.prettierrc`):
+- Single quotes, no semicolons, trailing commas (all), print width 100
 
 ## TypeScript Configuration
 
 **Base** (`tsconfig.json`):
 - Strict mode enabled
 - Target: ES2022, Module: ESNext, Resolution: bundler
-- Path alias: `@/*` → `./src/*`
+- Path alias: `@/*` -> `./src/*`
 - Globals: `vitest/globals` types included
 - Source maps and declaration maps enabled
+- Includes: `src/**/*`, `src/**/*.vue`, `docs/**/*`, `*.config.ts`, `vitest.setup.ts`
 
 **Build** (`tsconfig.build.json`):
 - Extends base config
@@ -129,30 +140,51 @@ yarn perf
 ### Adding a new component
 
 1. Create `src/components/NewComponent.vue` using `<script setup lang="ts">`
-2. Inject `CHAT_STATE_KEY` if state access needed
-3. Use scoped styles within `@layer native-chat { ... }`
-4. Add to parent component's template
-5. Create `src/components/__tests__/NewComponent.test.ts`
-6. Export from `src/index.ts` if public API
+2. Inject `CHAT_STATE_KEY` if state access needed: `const chatState = inject(CHAT_STATE_KEY)!`
+3. Use scoped styles within `@layer native-chat { ... }` for CSS isolation
+4. Use Vuetify theme variables: `rgb(var(--v-theme-primary))`, etc.
+5. Add to parent component's template
+6. Create `src/components/__tests__/NewComponent.test.ts`
+7. Export from `src/index.ts` if public API
 
-### Adding a new type
+### Adding a new icon
 
-1. Define in appropriate file under `src/types/`
-2. Re-export from `src/types/index.ts`
-3. Add to public exports in `src/index.ts` if consumer-facing
-4. Add shape verification test in `src/types/__tests__/types.test.ts`
+1. Create `src/icons/IconName.vue` as a simple SVG template component
+2. Use `width="1em" height="1em" fill="currentColor"` for consistent sizing
+3. Add `aria-hidden="true" focusable="false"` for a11y
+4. Import in the component that uses it: `import IconName from '@/icons/IconName.vue'`
+5. Pass to Vuetify `<v-icon :icon="IconName" />`
+
+### Adding a new config option
+
+1. Add the property to `NativeChatPluginOptions` in `src/types/config.ts`
+2. Access via `inject(CONFIG_KEY)` in the consuming component
+3. Add shape test in `src/types/__tests__/types.test.ts`
+4. Document in `docs/guide/configuration.md`
 
 ### Modifying the API client interface
 
 1. Update `NativeChatApiClient` in `src/types/api.ts`
 2. Update default implementation in `src/helpers/createApiClient.ts`
 3. Update `useChat.ts` if new methods are used
-4. Update tests in `createApiClient.test.ts` and `useChat.test.ts`
+4. Update mock in `docs/.vitepress/mock/mockApiClient.ts`
+5. Update tests in `createApiClient.test.ts` and `useChat.test.ts`
 
 ### Testing patterns
 
-- **Component tests**: Mock `UseChatReturn` via `provide(CHAT_STATE_KEY, mockState)`
+- **Component tests**: Mock `UseChatReturn` via `provide(CHAT_STATE_KEY, mockState)` and `provide(CONFIG_KEY, mockConfig)`
 - **Composable tests**: Create real `useChat()` with mock `NativeChatApiClient`
-- **Integration tests**: Use `VLayout` wrapper for Vuetify navigation drawer context
+- **Integration tests**: Full component tree with real composable for end-to-end flows
+- **Teleport testing**: ChatPanel uses `<Teleport to="body">` — test with `document.body.innerHTML` assertions
 - **Keyboard events**: Use `wrapper.trigger('keydown', { key: 'Enter' })`
 - **Focus testing**: Spy on `HTMLElement.prototype.focus`
+- **Animation testing**: Check CSS classes (`nc-message-bubble--animate-in`)
+
+### Working with the docs site
+
+1. Start dev server: `yarn docs:dev`
+2. Edit pages in `docs/` (markdown + Vue components)
+3. Demo components live in `docs/components/demos/`
+4. Mock API client in `docs/.vitepress/mock/mockApiClient.ts` — provides canned data with simulated latency
+5. CSS overrides for VitePress resets in `docs/.vitepress/theme/overrides.css`
+6. Build static site: `yarn docs:build` (output: `docs/.vitepress/dist/`)

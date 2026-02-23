@@ -10,7 +10,9 @@ const chatState = inject(CHAT_STATE_KEY)!
 <template>
   <div class="nc-chat-header">
     <div class="nc-chat-header__left">
-      <v-icon :icon="IconStar" color="secondary" size="20" />
+      <v-avatar color="secondary" size="44">
+        <v-icon :icon="IconStar" color="white" size="20"></v-icon>
+      </v-avatar>
       <span class="nc-chat-header__title">AI Assistant</span>
     </div>
     <v-btn icon variant="plain" size="default" aria-label="Close chat" @click="chatState.close()">

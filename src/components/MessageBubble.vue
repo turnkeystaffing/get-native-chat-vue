@@ -79,7 +79,9 @@ onBeforeUnmount(() => {
         <span class="nc-message-bubble__label">Error</span>
       </template>
       <template v-else>
-        <IconStar class="nc-message-bubble__star" />
+        <v-avatar color="secondary" size="29">
+          <v-icon :icon="IconStar" color="white" size="15"></v-icon>
+        </v-avatar>
         <span class="nc-message-bubble__label">AI Assistant</span>
       </template>
     </div>
@@ -125,19 +127,14 @@ onBeforeUnmount(() => {
   .nc-message-bubble__header {
     display: flex;
     align-items: center;
-    gap: 4px;
-    margin-bottom: 4px;
+    gap: 10px;
+    margin-bottom: 10px;
   }
 
   .nc-message-bubble__label {
     font-size: 14px;
     font-weight: 600;
     color: rgb(var(--v-theme-on-surface));
-  }
-
-  .nc-message-bubble__star {
-    font-size: 14px;
-    color: rgb(var(--v-theme-secondary));
   }
 
   .nc-message-bubble__bubble {

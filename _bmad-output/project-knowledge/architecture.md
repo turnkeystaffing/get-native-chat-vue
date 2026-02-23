@@ -1,8 +1,10 @@
 # Architecture — native-chat-vue
 
+> Generated: 2026-02-23 | Scan Level: Exhaustive | Mode: Full Rescan
+
 ## Executive Summary
 
-native-chat-vue is a Vue 3 chat widget library distributed as an npm package. It provides an embeddable, AI-powered chat interface built on Vuetify 3, designed for integration into any Vue 3 application. The library follows a plugin architecture with dependency injection, a composable-based state machine, and an interface-driven API client abstraction that decouples the UI from any specific backend.
+native-chat-vue is a Vue 3 chat widget library distributed as an npm package. It provides an embeddable, AI-powered chat interface built on Vuetify 3, designed for integration into any Vue 3 application. The library follows a plugin architecture with dependency injection, a composable-based state machine, and an interface-driven API client abstraction that decouples the UI from any specific backend. The chat panel renders as a floating overlay via Teleport, ensuring it works independently of the host app's layout.
 
 ## Technology Stack
 
@@ -29,7 +31,7 @@ The library uses three core patterns working together:
 ### 1. Plugin Registration (Entry Point)
 
 ```
-app.use(NativeChatPlugin, { apiClient, position?, welcomeMessage?, ... })
+app.use(NativeChatPlugin, { apiClient, position?, welcomeMessage?, hideToggleWhenOpen?, ... })
 ```
 
 - `NativeChatPlugin.install()` validates the required `apiClient` option
@@ -41,12 +43,12 @@ app.use(NativeChatPlugin, { apiClient, position?, welcomeMessage?, ... })
 `useChat(apiClient, config)` is the sole state management layer:
 
 **State (all readonly refs):**
-- `messages: ChatMessage[]` — chronological message array
-- `isOpen: boolean` — panel visibility
-- `isLoading: boolean` — loading indicator (open, loadMore)
-- `isSending: boolean` — send in progress
-- `hasMore: boolean` — pagination flag
-- `failedMessageText: string | null` — last failed message for retry
+- `messages: DeepReadonly<Ref<ChatMessage[]>>` — chronological message array
+- `isOpen: Readonly<Ref<boolean>>` — panel visibility
+- `isLoading: Readonly<Ref<boolean>>` — loading indicator (open, loadMore)
+- `isSending: Readonly<Ref<boolean>>` — send in progress
+- `hasMore: Readonly<Ref<boolean>>` — pagination flag
+- `failedMessageText: Readonly<Ref<string | null>>` — last failed message for retry
 
 **Actions:**
 - `open()` — resolves conversation (existing or new), fetches initial messages
@@ -57,10 +59,10 @@ app.use(NativeChatPlugin, { apiClient, position?, welcomeMessage?, ... })
 
 **Key behaviors:**
 - **Optimistic UI**: User messages appear immediately with `status: 'sending'`, replaced by server response on success
-- **Error recovery**: On failure, optimistic message is removed, error message displayed as assistant bubble, original text preserved in `failedMessageText`
-- **Error history**: Previous error messages are preserved in the message array when retry succeeds
-- **Status code mapping**: 429 → rate limit, 503/504 → unavailable, other → generic
-- **Re-entrance guards**: Concurrent `open()`, `sendMessage()`, `loadMore()` calls are prevented
+- **Error recovery**: On failure, optimistic message is removed, error message displayed as assistant bubble with `status: 'failed'`, original text preserved in `failedMessageText`
+- **Error history**: Previous error messages are preserved in the message array when retry succeeds (not removed, treated as conversation history)
+- **Status code mapping**: 429 → rate limit, 503/504 → unavailable, other → generic fallback
+- **Re-entrance guards**: Concurrent `open()`, `sendMessage()`, `loadMore()` calls are prevented via boolean checks
 - **Null conversation recovery**: If `open()` fails to establish a conversation, `sendMessage()` creates one on-demand
 
 ### 3. API Client Abstraction (Backend Interface)
@@ -85,15 +87,24 @@ interface NativeChatApiClient {
 
 ```
 NativeChatWidget                    ← Root: theme + state provider
-├── FloatingButton                  ← Fixed FAB: toggle open/close
-└── ChatPanel                       ← VNavigationDrawer (right)
-    ├── ChatHeader                  ← Title bar + close
-    ├── [VProgressCircular]         ← Loading (conditional)
-    ├── [WelcomeState]              ← Empty state (conditional)
-    ├── [MessageList]               ← When messages exist
-    │   └── MessageBubble × N       ← Per-message rendering
-    └── ChatInput                   ← Always visible
+├── FloatingButton                  ← Fixed FAB: toggle open/close, hideToggleWhenOpen
+└── ChatPanel                       ← Teleport to body, floating panel (fixed position)
+    ├── ChatHeader                  ← Star icon + "AI Assistant" + close button + divider
+    ├── [VProgressCircular]         ← Loading (conditional: loading + no messages)
+    ├── [WelcomeState]              ← Empty state (conditional: no messages + not sending)
+    ├── [MessageList]               ← When messages exist (v-infinite-scroll)
+    │   └── MessageBubble × N       ← Per-message: user/assistant/error bubbles
+    └── ChatInput                   ← Always visible: textarea + inline send/spinner
 ```
+
+### Layout Strategy
+
+The chat panel uses `<Teleport to="body">` to render outside the host app's DOM tree:
+
+- **Desktop**: Fixed-position panel (420px wide, right: 25px, top: 20px to bottom: 20px, rounded corners, box-shadow)
+- **Mobile** (<768px): Full-screen overlay (100% width, 100dvh, no border-radius)
+- **Z-index**: Panel at 10000, FloatingButton at 9999
+- **Transitions**: Scale+translate from bottom-right (desktop), slide-up (mobile), `prefers-reduced-motion` respected
 
 ### Dependency Injection Flow
 
@@ -104,6 +115,7 @@ NativeChatPlugin.install()
 NativeChatWidget
   ├── inject(CONFIG_KEY) → config
   ├── useChat(config.apiClient, config) → chatState
+  ├── Register nativeChat Vuetify theme (merged at runtime, idempotent)
   └── provide(CHAT_STATE_KEY, chatState)    ← Widget-level
 
 All child components
@@ -114,14 +126,14 @@ All child components
 
 | Component | Injects | Vuetify Components | Key Behavior |
 |-----------|---------|-------------------|--------------|
-| NativeChatWidget | CONFIG_KEY | VThemeProvider | Registers `nativeChat` theme, creates `useChat`, provides state |
-| ChatPanel | CONFIG_KEY, CHAT_STATE_KEY | VNavigationDrawer, VProgressCircular | Responsive width (400px / 100% mobile), Escape key close, scrim disabled |
-| ChatHeader | CHAT_STATE_KEY | VIcon, VBtn | Close button calls `chatState.close()` |
-| ChatInput | CHAT_STATE_KEY | VTextarea, VBtn | Enter sends, Shift+Enter newline, focus management, failed text pre-fill |
-| MessageList | CHAT_STATE_KEY | VInfiniteScroll, VProgressCircular | Auto-scroll when near bottom, scroll position preservation on prepend |
-| MessageBubble | — (props only) | — | Markdown rendering (marked + DOMPurify), copy-to-clipboard, error styling |
-| FloatingButton | CONFIG_KEY, CHAT_STATE_KEY | VBtn, VIcon | Position config (bottom-left/right), focus return on close |
-| WelcomeState | — (props only) | — | Default or custom welcome message |
+| NativeChatWidget | CONFIG_KEY | VThemeProvider | Registers `nativeChat` theme, creates `useChat`, provides state, focus management (return to FAB on close) |
+| ChatPanel | CONFIG_KEY, CHAT_STATE_KEY | VThemeProvider, VProgressCircular | Teleport to body, responsive breakpoint (768px), Escape key close (global keydown listener), panel transitions |
+| ChatHeader | CHAT_STATE_KEY | VIcon, VBtn | Star icon + "AI Assistant" title, close button (`variant="plain"`), bottom divider |
+| ChatInput | CHAT_STATE_KEY | VTextarea, VBtn, VProgressCircular, VIcon | Enter sends/Shift+Enter newline, inline send button (append-inner slot), loading spinner during send, focus on open/after send, failed text pre-fill |
+| MessageList | CHAT_STATE_KEY | VInfiniteScroll, VProgressCircular | Auto-scroll when near bottom (50px threshold), scroll position preservation on prepend, entrance animation tracking (knownIds + animatingIds) |
+| MessageBubble | — (props only) | VBtn, VIcon | Markdown rendering (marked + DOMPurify), copy-to-clipboard, error styling (warning icon + red tint), entrance slide animations |
+| FloatingButton | CONFIG_KEY, CHAT_STATE_KEY | VBtn, VIcon | Position config (bottom-left/right), hideToggleWhenOpen option, icon rotate transition (star ↔ close), focus/expose for return focus |
+| WelcomeState | — (props only) | — | Default or custom welcome message, centered layout |
 
 ## Theming
 
@@ -129,25 +141,35 @@ The library registers a custom Vuetify theme named `nativeChat`:
 
 | Color Token | Value | Usage |
 |-------------|-------|-------|
-| primary | `#002B38` | User message bubbles |
-| secondary | `#C4105B` | Send button, star icon, links |
-| background | `#F8F8F8` | Panel background |
+| primary | `#002B38` | User message bubbles, input text |
+| secondary | `#C4105B` | FAB, star icon, links, send button active |
+| background | `#F8F8F8` | Overall background |
 | surface | `#FFFFFF` | Assistant message bubbles |
-| error | `#DE3232` | Error states |
-| success | `#41A58D` | Success states |
-| on-primary | `#FDFDFD` | Text on primary |
-| on-surface | `#002B38` | Text on surface |
-| welcome-text | `#B0BCC0` | Welcome state text |
+| error | `#DE3232` | Error message tint, warning icon |
+| success | `#41A58D` | Copy confirmation icon |
+| info | `#002B38` | Information states |
+| on-primary | `#FDFDFD` | Text on primary (user messages) |
+| on-secondary | `#FFFFFF` | Text on secondary (FAB icon) |
+| on-surface | `#002B38` | Text on surface (assistant messages, labels) |
+| welcome-text | `#B0BCC0` | Welcome state placeholder text |
+| chat-background | `#EBEBED` | Chat panel body background |
+| title | `#9E9E9E` | Muted UI elements (copy icon default) |
 
-Theme merges with the host app's `light` theme (additive, non-destructive). Registration is idempotent.
+Theme merges with the host app's `light` theme (additive, non-destructive). Registration is idempotent — only created once per app.
 
 ## CSS Architecture
 
-- All component styles use `<style scoped>` with `@layer native-chat { ... }`
-- CSS layer prevents style leakage into or from the host application
-- BEM-like naming: `nc-{component}__{element}--{modifier}`
-- Vuetify deep selectors (`:deep()`) used for internal Vuetify component styling (e.g., textarea border-radius)
-- Responsive breakpoint: 768px (mobile vs desktop)
+- All component styles use `<style scoped>` within `@layer native-chat { ... }`
+- CSS layer ensures low specificity — host apps can override without `!important`
+- BEM-like naming convention: `nc-{component}__{element}--{modifier}`
+- Vuetify theme variables accessed via `rgb(var(--v-theme-{color}))` pattern
+- Deep selectors (`:deep()`) used for Vuetify internal styling (textarea, infinite-scroll)
+- Responsive breakpoint: 768px (via Vuetify's `useDisplay()`)
+- Animations:
+  - **Panel**: `nc-panel-enter/leave` (scale + translate, 280ms/200ms cubic-bezier)
+  - **Message bubbles**: `nc-bubble-slide-left/right` (250ms cubic-bezier) for entrance
+  - **FAB icon**: `nc-fab-icon` rotate transition (120ms) between star/close
+  - All animations respect `prefers-reduced-motion: reduce` (set to 0ms/none)
 
 ## Public API Surface
 
@@ -181,25 +203,37 @@ export type {
 | welcomeMessage | string | No | 'Hello! How can I help you?' | Empty state message |
 | batchSize | number | No | 20 | Messages per page |
 | conversationId | string | No | — | Pre-set conversation (skips lookup) |
-| onError | (error: ChatError) => void | No | — | Error callback |
+| hideToggleWhenOpen | boolean | No | false | Hide FAB when chat panel is open |
+| onError | (error: ChatError) => void | No | — | Error callback (sync/async failures caught) |
+
+## Accessibility
+
+- **ARIA roles**: `role="complementary"` on chat panel, `role="list"` + `role="listitem"` on messages, `aria-live="polite"` on message list
+- **ARIA labels**: Descriptive labels on all interactive elements (buttons, inputs, message bubbles)
+- **ARIA expanded**: FloatingButton tracks `aria-expanded` based on open state
+- **Keyboard navigation**: Escape closes panel, Enter sends, Shift+Enter for newline
+- **Focus management**: Auto-focus textarea on open, return focus to FAB on close, refocus after send
+- **Reduced motion**: All animations/transitions disabled via `@media (prefers-reduced-motion: reduce)`
 
 ## Testing Strategy
 
 | Layer | Tool | Count | Pattern |
 |-------|------|-------|---------|
-| Unit (components) | Vitest + Vue Test Utils | 127 | Mock provide/inject state |
-| Unit (composable) | Vitest | 75+ | Real composable + mock API client |
-| Unit (helpers) | Vitest | 13 | Mock fetch |
-| Unit (types) | Vitest | 11 | Shape verification |
-| Integration | Vitest + Vue Test Utils | 24 | Full widget with real composable |
+| Unit (components) | Vitest + Vue Test Utils | ~105 | Mock provide/inject state |
+| Unit (composable) | Vitest | ~70 | Real composable + mock API client |
+| Unit (helpers) | Vitest | ~12 | Mock fetch |
+| Unit (types) | Vitest | ~10 | Shape verification |
+| Integration | Vitest + Vue Test Utils | ~18 | Full widget with real composable |
 | Performance | Playwright | 2 | 1000-message FPS benchmark |
 
-**Total: 210+ test cases**
+**Total: 175+ test cases**
 
 ## Security Considerations
 
 - **XSS Protection**: All assistant markdown is rendered via `marked.parse()` then sanitized with `DOMPurify.sanitize()` before `v-html` injection
 - **User messages**: Rendered as plain text (no `v-html`), no sanitization needed
+- **Error messages**: Rendered as plain text (no markdown, no `v-html`)
 - **API auth**: Bearer token via `getAccessToken()` callback (supports async token refresh)
 - **URL encoding**: `encodeURIComponent()` used for path parameters in API client
-- **Error isolation**: `onError` callback failures (sync throws + async rejections) are caught and silenced
+- **Error isolation**: `onError` callback failures (sync throws + async rejections) are caught and silenced — callback bugs never break the chat
+- **CSS isolation**: `@layer native-chat` prevents style conflicts with host application
