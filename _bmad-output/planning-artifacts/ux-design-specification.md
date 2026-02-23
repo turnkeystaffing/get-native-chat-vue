@@ -691,7 +691,7 @@ All six custom components plus Vuetify integration constitute the MVP. No phasin
 **Error Feedback:**
 - All errors render as inline chat messages, left-aligned, assistant style
 - Error message text is calm and informational: "Something went wrong. You can try sending your message again."
-- No red backgrounds, no alert icons, no exclamation marks — error messages use the same visual container as assistant messages with neutral text
+- Error messages use a subtle visual distinction from assistant messages: a nearly invisible red-tinted background (`rgba(error, 0.06)`) and border (`rgba(error, 0.2)`) via theme tokens, plus a small muted warning icon with "Error" label at reduced opacity (`0.6`). The distinction is calm and not alarming — no solid red backgrounds or large alert icons. Error text content remains calm and informational
 - On message send failure: the optimistic user message is removed from the list, the error message appears inline, and the input is re-populated with the failed message text
 - Failed messages are ephemeral local state — they are never persisted to the server and naturally disappear on next session
 - Input re-enables immediately after error display, pre-filled with the failed text for easy retry

@@ -50,6 +50,15 @@ describe('MessageBubble', () => {
     expect(wrapper.classes()).toContain('nc-message-bubble--assistant')
   })
 
+  it('assistant message shows star icon and "AI Assistant" label in header', () => {
+    const wrapper = mountBubble(createMessage({ role: 'assistant', content: 'Hello' }))
+
+    expect(wrapper.find('.nc-message-bubble__header').exists()).toBe(true)
+    expect(wrapper.find('.nc-message-bubble__star').exists()).toBe(true)
+    expect(wrapper.find('.nc-message-bubble__label').text()).toBe('AI Assistant')
+    expect(wrapper.find('.nc-message-bubble__warning-icon').exists()).toBe(false)
+  })
+
   it('assistant message content is rendered through marked + DOMPurify', async () => {
     const { marked } = await import('marked')
     const DOMPurify = (await import('dompurify')).default
@@ -77,7 +86,7 @@ describe('MessageBubble', () => {
     expect(mockParse).not.toHaveBeenCalled()
   })
 
-  it('error message renders with assistant styling (no special error visual treatment)', () => {
+  it('error message renders with error class (not assistant class)', () => {
     const wrapper = mountBubble(
       createMessage({
         id: 'error-123',
@@ -226,14 +235,26 @@ describe('MessageBubble', () => {
       expect(wrapper.classes()).toContain('nc-message-bubble--error')
     })
 
-    it('does not show assistant label/icon for error messages', () => {
+    it('shows error header via status failed path (not just error- id prefix)', () => {
+      const wrapper = mountBubble(
+        createMessage({ id: 'msg-99', role: 'assistant', content: 'Failed', status: 'failed' }),
+      )
+
+      expect(wrapper.find('.nc-message-bubble__header').exists()).toBe(true)
+      expect(wrapper.find('.nc-message-bubble__warning-icon').exists()).toBe(true)
+      expect(wrapper.find('.nc-message-bubble__label').text()).toBe('Error')
+      expect(wrapper.find('.nc-message-bubble__star').exists()).toBe(false)
+    })
+
+    it('shows error header with warning icon and "Error" label (not assistant header)', () => {
       const wrapper = mountBubble(
         createMessage({ id: 'error-1', role: 'assistant', content: 'Something went wrong.' }),
       )
 
-      expect(wrapper.find('.nc-message-bubble__header').exists()).toBe(false)
+      expect(wrapper.find('.nc-message-bubble__header').exists()).toBe(true)
+      expect(wrapper.find('.nc-message-bubble__warning-icon').exists()).toBe(true)
+      expect(wrapper.find('.nc-message-bubble__label').text()).toBe('Error')
       expect(wrapper.find('.nc-message-bubble__star').exists()).toBe(false)
-      expect(wrapper.find('.nc-message-bubble__label').exists()).toBe(false)
     })
 
     it('renders as li with role="listitem"', () => {

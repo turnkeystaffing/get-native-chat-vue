@@ -455,10 +455,11 @@ describe('Error Display Flow Integration (Story 4.1)', () => {
     // Verify: error message renders in MessageList
     expect(wrapper.findComponent(MessageList).exists()).toBe(true)
 
-    // Verify: error bubble has correct class and no header
+    // Verify: error bubble has correct class and error header
     const errorBubble = wrapper.find('.nc-message-bubble--error')
     expect(errorBubble.exists()).toBe(true)
-    expect(errorBubble.find('.nc-message-bubble__header').exists()).toBe(false)
+    expect(errorBubble.find('.nc-message-bubble__header').exists()).toBe(true)
+    expect(errorBubble.find('.nc-message-bubble__label').text()).toBe('Error')
     expect(errorBubble.attributes('aria-label')).toBe('Error message')
     expect(errorBubble.find('.nc-message-bubble__content').text()).toBe(
       'The service is temporarily unavailable. Please try again in a moment.',

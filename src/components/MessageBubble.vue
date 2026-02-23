@@ -4,6 +4,7 @@ import { marked } from 'marked'
 import DOMPurify from 'dompurify'
 import type { ChatMessage } from '@/types/chat'
 import IconStar from '@/icons/IconStar.vue'
+import IconWarning from '@/icons/IconWarning.vue'
 import IconCopy from '@/icons/IconCopy.vue'
 import IconCheck from '@/icons/IconCheck.vue'
 
@@ -69,9 +70,13 @@ onBeforeUnmount(() => {
       'nc-message-bubble--animate-in': props.animate,
     }"
   >
-    <div v-if="!isError" class="nc-message-bubble__header">
+    <div class="nc-message-bubble__header">
       <template v-if="isUser">
         <span class="nc-message-bubble__label">You</span>
+      </template>
+      <template v-else-if="isError">
+        <IconWarning class="nc-message-bubble__warning-icon" />
+        <span class="nc-message-bubble__label">Error</span>
       </template>
       <template v-else>
         <IconStar class="nc-message-bubble__star" />
@@ -144,11 +149,21 @@ onBeforeUnmount(() => {
     color: rgb(var(--v-theme-on-primary));
   }
 
-  .nc-message-bubble--assistant .nc-message-bubble__bubble,
-  .nc-message-bubble--error .nc-message-bubble__bubble {
+  .nc-message-bubble--assistant .nc-message-bubble__bubble {
     background: rgb(var(--v-theme-surface));
     border: 1px solid rgba(var(--v-theme-on-surface), 0.12);
     color: rgb(var(--v-theme-on-surface));
+  }
+
+  .nc-message-bubble--error .nc-message-bubble__bubble {
+    background: rgba(var(--v-theme-error), 0.06);
+    border: 1px solid rgba(var(--v-theme-error), 0.2);
+    color: rgb(var(--v-theme-on-surface));
+  }
+
+  .nc-message-bubble__warning-icon {
+    font-size: 14px;
+    color: rgba(var(--v-theme-error), 0.6);
   }
 
   .nc-message-bubble--sending .nc-message-bubble__bubble {
