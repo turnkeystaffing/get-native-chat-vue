@@ -74,9 +74,10 @@ watch(
       :max-rows="10"
       no-resize
       hide-details
-      variant="outlined"
+      variant="solo"
       density="compact"
-      rounded="xl"
+      flat
+      rounded="lg"
       placeholder="How can I help you? Ask me anything..."
       aria-label="Type a message"
       :disabled="chatState.isSending.value"
@@ -91,7 +92,6 @@ watch(
           :color="canSend || chatState.isSending.value ? 'primary' : undefined"
           :disabled="!canSend"
           aria-label="Send message"
-          class="nc-chat-input__send-btn"
           @click="handleSend"
         >
           <v-progress-circular

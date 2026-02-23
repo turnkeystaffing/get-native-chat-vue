@@ -47,7 +47,7 @@ onUnmounted(() => {
         v-if="chatState.isOpen.value"
         theme="nativeChat"
         with-background
-        class="nc-chat-panel"
+        class="nc-chat-panel border-md"
         :class="{ 'nc-chat-panel--mobile': isMobile }"
         role="complementary"
         aria-label="Chat with AI Assistant"
@@ -76,9 +76,9 @@ onUnmounted(() => {
 @layer native-chat {
   .nc-chat-panel {
     position: fixed;
-    right: 24px;
-    bottom: 24px;
-    top: 24px;
+    right: 25px;
+    bottom: 20px;
+    top: 20px;
     width: 420px;
     border-radius: 20px;
     box-shadow: 0 8px 40px rgba(0, 0, 0, 0.12);
@@ -86,7 +86,7 @@ onUnmounted(() => {
     flex-direction: column;
     overflow: hidden;
     z-index: 10000;
-    background: rgb(var(--v-theme-surface));
+    background: rgb(var(--v-theme-chat-background));
   }
 
   .nc-chat-panel--mobile {

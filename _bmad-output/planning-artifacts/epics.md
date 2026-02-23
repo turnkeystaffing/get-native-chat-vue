@@ -193,12 +193,12 @@ Developer finds comprehensive documentation with live interactive demos, enablin
 **Implementation notes:** DemoBlock.vue for source+preview, mock API client for demos, guide pages, component demo pages, VitePress sidebar navigation, landing page.
 
 ### Epic 6: Figma Design Alignment
-The chat widget's layout, visual styling, and motion design match the approved Figma design — floating panel with edge gaps, pinned input, polished message spacing, smooth transitions, modern input area, correct theming, and error distinction.
+The chat widget's layout, visual styling, and motion design match the approved Figma design — floating panel with edge gaps, pinned input, polished message spacing, smooth transitions, modern input area, correct theming, error distinction, refined panel/input styling, and enriched demo experience.
 **FRs reinforced:** FR7 (overlay/panel position), FR8 (responsive viewports), FR12 (scroll position), FR18 (disable during pending — loading spinner), FR24 (error display — visual distinction)
 **User outcome:** The widget looks and behaves exactly as designed in Figma. Input is always accessible, panel feels like a lightweight floating assistant rather than a rigid sidebar. Errors are visually recognizable. Demo site displays correctly.
-**Implementation notes:** Replaces v-navigation-drawer with Teleport + positioned div for floating panel. Fixes scroll containment so only MessageList scrolls. CSS polish for bubble padding, message spacing, welcome state positioning. Stories 6.6-6.9 add input redesign (action bar pattern), VitePress theme/CSS fixes, error message distinction, and header/panel polish.
+**Implementation notes:** Replaces v-navigation-drawer with Teleport + positioned div for floating panel. Fixes scroll containment so only MessageList scrolls. CSS polish for bubble padding, message spacing, welcome state positioning. Stories 6.6-6.9 add input redesign (action bar pattern), VitePress theme/CSS fixes, error message distinction, and header/panel polish. Stories 6.10-6.11 add final UI refinements (solo input, panel background, copy button Vuetify refactor, new theme tokens) and demo experience improvements (richer mock data, simulated latency, smaller batch size).
 
-*Added via Correct Course workflow (2026-02-22) to align visual implementation with the approved Figma design. Extended via Correct Course workflow (2026-02-22c) with stories 6.6-6.9 for input redesign, VitePress fixes, error distinction, and UI polish.*
+*Added via Correct Course workflow (2026-02-22) to align visual implementation with the approved Figma design. Extended via Correct Course workflow (2026-02-22c) with stories 6.6-6.9 for input redesign, VitePress fixes, error distinction, and UI polish. Extended via Correct Course workflow (2026-02-23) with stories 6.10-6.11 for UI refinements and demo experience enhancement.*
 
 ## Epic 1: Plugin Foundation & Chat Shell
 
@@ -1071,3 +1071,82 @@ So that the widget feels refined and professional.
 *Modifies: `FloatingButton.vue` (dynamic elevation), `ChatHeader.vue` (border-bottom, close button size and variant).*
 
 *Added via Correct Course workflow (2026-02-22c) for UI polish items identified during design review.*
+
+### Story 6.10: UI Polish & Theme Refinements
+
+As a user,
+I want the chat panel, input field, and copy button to have refined visual styling,
+So that the widget feels more polished and visually cohesive.
+
+**Acceptance Criteria:**
+
+**Given** the chat panel is open on desktop (>=768px)
+**When** inspecting the panel
+**Then** it has a visible border (`border-md` class)
+**And** edge gaps are 25px right, 20px top and bottom
+**And** the background uses the `chat-background` theme token (`#EBEBED`) instead of surface white
+
+**Given** the chat input field
+**When** rendered
+**Then** it uses `variant="solo"` with `flat` (no outline border, clean inset look)
+**And** rounding is `lg` (not `xl`)
+**And** placeholder text remains "How can I help you? Ask me anything..."
+
+**Given** an assistant message with a copy button
+**When** inspecting the copy action
+**Then** it uses a Vuetify `<v-btn icon variant="text" size="small">` instead of a custom HTML button
+**And** the icon uses `color="title"` (`#9E9E9E`) by default, `color="success"` after copy
+**And** custom `.nc-message-bubble__copy` CSS is removed (Vuetify handles styling)
+
+**Given** the nativeChatTheme definition
+**When** inspecting theme colors
+**Then** `chat-background: #EBEBED` is defined for panel background
+**And** `title: #9E9E9E` is defined for muted icon colors
+**And** `theme-overlay-multiplier: 1` is set in variables
+
+**Given** the existing test suite
+**When** running `yarn test`
+**Then** all MessageBubble copy button tests pass with updated selectors
+**And** all other tests pass
+
+*Modifies: `ChatInput.vue` (variant, flat, rounded), `ChatPanel.vue` (border, gaps, background), `MessageBubble.vue` (copy button refactor + CSS removal), `nativeChatTheme.ts` (new colors + variable), `MessageBubble.test.ts` (selector updates for 5 tests).*
+
+*Added via Correct Course workflow (2026-02-23) to document UI polish changes made outside BMAD workflow.*
+
+### Story 6.11: Demo Experience Enhancement
+
+As a developer browsing the docs site,
+I want the demo to have a rich conversation history with realistic loading behavior,
+So that I can experience infinite scroll and evaluate the plugin's performance with realistic data.
+
+**Acceptance Criteria:**
+
+**Given** the VitePress docs site is running (`yarn docs:dev`)
+**When** the chat widget opens and the user scrolls up
+**Then** 40+ older messages are available via infinite scroll (20 user/assistant pairs)
+**And** message content covers realistic Vue development topics (refs, routing, composables, testing, etc.)
+**And** each pair has timestamps spaced 1 minute apart, counting backwards
+
+**Given** the mock API client's getMessages method
+**When** called during infinite scroll
+**Then** it simulates 300ms–1s network latency before returning results
+**And** the loading indicator is visible during the delay, providing realistic UX feedback
+
+**Given** the VitePress plugin configuration
+**When** the docs site loads
+**Then** `batchSize` is set to `5` (not the default 20)
+**And** infinite scroll triggers frequently, making it easy to test pagination behavior
+
+**Given** the existing hand-written mock messages (10 messages)
+**When** combined with the generated older messages
+**Then** older generated messages appear first (earliest timestamps)
+**And** the 10 hand-written messages appear last (most recent)
+**And** message ordering is correct throughout
+
+**Given** the existing test suite
+**When** running `yarn test`
+**Then** all tests pass (mock changes are docs-only, no impact on source tests)
+
+*Modifies: `docs/.vitepress/mock/mockApiClient.ts` (older message generation + latency simulation), `docs/.vitepress/theme/index.ts` (batchSize config).*
+
+*Added via Correct Course workflow (2026-02-23) to document demo improvements made outside BMAD workflow.*

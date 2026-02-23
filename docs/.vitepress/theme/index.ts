@@ -26,7 +26,7 @@ export default {
   enhanceApp({ app }) {
     app.use(vuetify)
     if (typeof window !== 'undefined') {
-      app.use(NativeChatPlugin, { apiClient: mockApiClient })
+      app.use(NativeChatPlugin, { apiClient: mockApiClient, batchSize: 5 })
     }
   },
 } satisfies Theme

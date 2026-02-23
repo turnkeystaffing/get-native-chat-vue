@@ -90,15 +90,18 @@ onBeforeUnmount(() => {
       <div v-else class="nc-message-bubble__content" v-html="renderedContent"></div>
     </div>
 
-    <button
+    <v-btn
       v-if="isAssistant"
-      class="nc-message-bubble__copy"
+      icon
+      variant="text"
+      density="comfortable"
+      size="small"
+      class="mt-1"
       :aria-label="copied ? 'Message copied' : 'Copy message'"
       @click="handleCopy"
     >
-      <IconCheck v-if="copied" />
-      <IconCopy v-else />
-    </button>
+      <v-icon :icon="copied ? IconCheck : IconCopy" size="small" :color="copied ? 'success' : 'title'"></v-icon>
+    </v-btn>
   </li>
 </template>
 
@@ -168,26 +171,6 @@ onBeforeUnmount(() => {
 
   .nc-message-bubble--sending .nc-message-bubble__bubble {
     opacity: 0.7;
-  }
-
-  .nc-message-bubble__copy {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 24px;
-    height: 24px;
-    margin-top: 4px;
-    padding: 0;
-    border: none;
-    background: none;
-    color: rgb(var(--v-theme-on-surface) / 0.4);
-    cursor: pointer;
-    font-size: 16px;
-    border-radius: 4px;
-  }
-
-  .nc-message-bubble__copy:hover {
-    color: rgb(var(--v-theme-on-surface));
   }
 
   /* Markdown content styling via :deep() for v-html */

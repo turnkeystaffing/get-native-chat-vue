@@ -19,6 +19,10 @@ export const nativeChatTheme: StrictThemeDefinition = {
     'on-secondary': '#FFFFFF',
     'on-surface': '#002B38',
     'welcome-text': '#B0BCC0',
+    'chat-background': '#EBEBED',
+    'title': '#9E9E9E'
   },
-  variables: {},
+  variables: {
+    'theme-overlay-multiplier': 1,
+  },
 }

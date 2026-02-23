@@ -101,13 +101,13 @@ describe('MessageBubble', () => {
 
   it('copy button appears only on assistant messages (not on user or error messages)', () => {
     const userWrapper = mountBubble(createMessage({ role: 'user' }))
-    expect(userWrapper.find('.nc-message-bubble__copy').exists()).toBe(false)
+    expect(userWrapper.find('[aria-label="Copy message"]').exists()).toBe(false)
 
     const assistantWrapper = mountBubble(createMessage({ role: 'assistant' }))
-    expect(assistantWrapper.find('.nc-message-bubble__copy').exists()).toBe(true)
+    expect(assistantWrapper.find('[aria-label="Copy message"]').exists()).toBe(true)
 
     const errorWrapper = mountBubble(createMessage({ id: 'error-1', role: 'assistant' }))
-    expect(errorWrapper.find('.nc-message-bubble__copy').exists()).toBe(false)
+    expect(errorWrapper.find('[aria-label="Copy message"]').exists()).toBe(false)
   })
 
   it('clicking copy button calls navigator.clipboard.writeText() with raw message content', async () => {
@@ -118,7 +118,7 @@ describe('MessageBubble', () => {
 
     const wrapper = mountBubble(createMessage({ role: 'assistant', content: '**raw markdown**' }))
 
-    await wrapper.find('.nc-message-bubble__copy').trigger('click')
+    await wrapper.find('[aria-label="Copy message"]').trigger('click')
     await nextTick()
 
     expect(writeTextMock).toHaveBeenCalledWith('**raw markdown**')
@@ -133,18 +133,18 @@ describe('MessageBubble', () => {
 
     const wrapper = mountBubble(createMessage({ role: 'assistant', content: 'test' }))
 
-    await wrapper.find('.nc-message-bubble__copy').trigger('click')
+    await wrapper.find('[aria-label="Copy message"]').trigger('click')
     await nextTick()
     // Allow the async handleCopy to resolve
     await Promise.resolve()
     await nextTick()
 
-    expect(wrapper.find('.nc-message-bubble__copy').attributes('aria-label')).toBe('Message copied')
+    expect(wrapper.find('[aria-label="Message copied"]').exists()).toBe(true)
 
     vi.advanceTimersByTime(1500)
     await nextTick()
 
-    expect(wrapper.find('.nc-message-bubble__copy').attributes('aria-label')).toBe('Copy message')
+    expect(wrapper.find('[aria-label="Copy message"]').exists()).toBe(true)
 
     vi.useRealTimers()
   })
@@ -158,12 +158,12 @@ describe('MessageBubble', () => {
     const wrapper = mountBubble(createMessage({ role: 'assistant', content: 'test' }))
 
     // Should not throw
-    await wrapper.find('.nc-message-bubble__copy').trigger('click')
+    await wrapper.find('[aria-label="Copy message"]').trigger('click')
     await nextTick()
     await Promise.resolve()
     await nextTick()
 
-    expect(wrapper.find('.nc-message-bubble__copy').attributes('aria-label')).toBe('Copy message')
+    expect(wrapper.find('[aria-label="Copy message"]').exists()).toBe(true)
   })
 
   it('role="listitem" present on root element', () => {
@@ -276,7 +276,7 @@ describe('MessageBubble', () => {
 
     const wrapper = mountBubble(createMessage({ role: 'assistant', content: 'test' }))
 
-    await wrapper.find('.nc-message-bubble__copy').trigger('click')
+    await wrapper.find('[aria-label="Copy message"]').trigger('click')
     await nextTick()
     await Promise.resolve()
     await nextTick()

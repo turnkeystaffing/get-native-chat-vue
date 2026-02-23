@@ -299,7 +299,7 @@ The plugin uses the host application's existing color palette to feel native:
 
 **Background & Surface:**
 - Page Background: `#F8F8F8` — host app background
-- Chat Panel: `#FFFFFF` — chat panel background
+- Chat Panel: `#EBEBED` — chat panel background (via `chat-background` theme token)
 - User Bubble: `#002B38` — dark teal (primary)
 - Assistant Bubble: `#FFFFFF` with `#EBEBED` border — white with subtle border
 - Input Field: `#FFFFFF` with `#CCCCD1` border
@@ -314,6 +314,7 @@ The plugin uses the host application's existing color palette to feel native:
 - Success: `#41A58D` (green)
 - Error: `#DE3232` (red)
 - Disabled: `#B0BCC0` (gray)
+- Muted icons: `#9E9E9E` (via `title` theme token) — copy button, secondary icons
 - Dividers: `#EBEBED`
 - Borders: `#CCCCD1`
 
@@ -348,9 +349,10 @@ The plugin uses the host application's existing color palette to feel native:
 
 **Input Area:**
 - Bottom-pinned, full width of chat panel
-- Rounded input field (~50px border-radius pill shape)
+- Rounded input field (solo variant, flat, lg border-radius)
 - Send button icon (right, magenta)
 - Padding: 16px from panel edges
+- Edge gaps: 25px right, 20px top and bottom
 
 **Floating Agent Button:**
 - Circular, magenta (`#C4105B`) background
