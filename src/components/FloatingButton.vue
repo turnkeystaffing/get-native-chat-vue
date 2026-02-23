@@ -9,6 +9,7 @@ const config = inject(CONFIG_KEY)
 const chatState = inject(CHAT_STATE_KEY)!
 
 const isOpen = computed(() => chatState.isOpen.value)
+const isHidden = computed(() => isOpen.value && (config?.hideToggleWhenOpen ?? false))
 const position = computed(() => config?.position ?? 'bottom-right')
 const positionClass = computed(
   () => `nc-floating-button-wrapper--${position.value === 'bottom-left' ? 'left' : 'right'}`,
@@ -32,7 +33,7 @@ defineExpose({ focus })
 </script>
 
 <template>
-  <div class="nc-floating-button-wrapper" :class="positionClass">
+  <div v-show="!isHidden" class="nc-floating-button-wrapper" :class="positionClass">
     <v-btn
       ref="triggerBtn"
       icon

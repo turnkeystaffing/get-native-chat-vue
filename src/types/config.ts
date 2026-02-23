@@ -7,5 +7,6 @@ export interface NativeChatPluginOptions {
   welcomeMessage?: string
   batchSize?: number
   conversationId?: string
+  hideToggleWhenOpen?: boolean
   onError?: (error: ChatError) => void
 }

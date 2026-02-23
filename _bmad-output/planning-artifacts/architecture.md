@@ -264,6 +264,7 @@ export interface NativeChatPluginOptions {
   welcomeMessage?: string                           // Default: 'Hello! How can I help you?'
   batchSize?: number                                // Default: 20
   conversationId?: string                           // Resume specific conversation
+  hideToggleWhenOpen?: boolean                       // Default: false — hide FAB when panel open
   onError?: (error: ChatError) => void              // Error notification hook
 }
 ```

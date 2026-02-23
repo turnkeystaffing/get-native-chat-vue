@@ -47,11 +47,13 @@ function createState(isOpenValue = false) {
 function mountFloatingButton(options?: {
   isOpen?: boolean
   position?: 'bottom-left' | 'bottom-right'
+  hideToggleWhenOpen?: boolean
 }) {
   const state = createState(options?.isOpen ?? false)
   const config = {
     apiClient: createMockApiClient(),
     position: options?.position,
+    hideToggleWhenOpen: options?.hideToggleWhenOpen,
   }
 
   const wrapper = mount(FloatingButton, {
@@ -144,6 +146,34 @@ describe('FloatingButton', () => {
     const wrapperDiv = wrapper.find('.nc-floating-button-wrapper')
 
     expect(wrapperDiv.classes()).toContain('nc-floating-button-wrapper--left')
+  })
+
+  it('is visible when open and hideToggleWhenOpen is false (default)', () => {
+    const { wrapper } = mountFloatingButton({ isOpen: true })
+    const wrapperDiv = wrapper.find('.nc-floating-button-wrapper')
+
+    expect(wrapperDiv.element.style.display).not.toBe('none')
+  })
+
+  it('is hidden when open and hideToggleWhenOpen is true', () => {
+    const { wrapper } = mountFloatingButton({ isOpen: true, hideToggleWhenOpen: true })
+    const wrapperDiv = wrapper.find('.nc-floating-button-wrapper')
+
+    expect(wrapperDiv.element.style.display).toBe('none')
+  })
+
+  it('is visible when closed and hideToggleWhenOpen is true', () => {
+    const { wrapper } = mountFloatingButton({ isOpen: false, hideToggleWhenOpen: true })
+    const wrapperDiv = wrapper.find('.nc-floating-button-wrapper')
+
+    expect(wrapperDiv.element.style.display).not.toBe('none')
+  })
+
+  it('button has elevation 4', () => {
+    const { wrapper } = mountFloatingButton()
+    const btn = wrapper.findComponent({ name: 'VBtn' })
+
+    expect(String(btn.props('elevation'))).toBe('4')
   })
 
   it('renders wrapper div with fixed-positioning class', () => {

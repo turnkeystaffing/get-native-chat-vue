@@ -68,6 +68,28 @@ describe('ChatHeader', () => {
     expect(closeFn).toHaveBeenCalledOnce()
   })
 
+  it('close button uses variant="plain" (opacity-only hover)', () => {
+    const { wrapper } = mountChatHeader()
+    const closeBtn = wrapper.findComponent({ name: 'VBtn' })
+
+    expect(closeBtn.props('variant')).toBe('plain')
+  })
+
+  it('close button uses size="default" (meets 44px tap target)', () => {
+    const { wrapper } = mountChatHeader()
+    const closeBtn = wrapper.findComponent({ name: 'VBtn' })
+
+    expect(closeBtn.props('size')).toBe('default')
+  })
+
+  it('close icon uses size="22"', () => {
+    const { wrapper } = mountChatHeader()
+    const closeBtn = wrapper.findComponent({ name: 'VBtn' })
+    const closeIcon = closeBtn.findComponent({ name: 'VIcon' })
+
+    expect(String(closeIcon.props('size'))).toBe('22')
+  })
+
   it('close button is keyboard accessible via v-btn', () => {
     const { wrapper } = mountChatHeader()
     const closeBtn = wrapper.findComponent({ name: 'VBtn' })

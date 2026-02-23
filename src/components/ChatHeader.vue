@@ -13,8 +13,8 @@ const chatState = inject(CHAT_STATE_KEY)!
       <v-icon :icon="IconStar" color="secondary" size="20" />
       <span class="nc-chat-header__title">AI Assistant</span>
     </div>
-    <v-btn icon variant="text" size="small" aria-label="Close chat" @click="chatState.close()">
-      <v-icon :icon="IconClose" size="18" />
+    <v-btn icon variant="plain" size="default" aria-label="Close chat" @click="chatState.close()">
+      <v-icon :icon="IconClose" size="22" />
     </v-btn>
   </div>
 </template>
@@ -26,6 +26,7 @@ const chatState = inject(CHAT_STATE_KEY)!
     align-items: center;
     justify-content: space-between;
     padding: 12px 16px;
+    border-bottom: 1px solid rgba(var(--v-theme-on-surface), 0.12);
   }
 
   .nc-chat-header__left {
