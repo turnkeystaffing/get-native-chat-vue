@@ -265,6 +265,11 @@ native-chat-vue is a Vue plugin (SPA component) embedded in a host single-page a
 - FR26: User can retry sending a failed message (re-send the same content) or compose a new message after a failure
 - FR27: System can recover from errors (API failures, network timeouts) without page reload — input controls re-enable after error display, user can compose new messages and scroll history during error state
 
+### Scroll Behavior
+
+- FR28: System can scroll to the most recent message when the user sends a message or receives an assistant response, regardless of current scroll position
+- FR29: System can display a scroll-to-bottom control when the user has scrolled away from the most recent messages, allowing one-click return to the live conversation edge
+
 ## Non-Functional Requirements
 
 ### Performance

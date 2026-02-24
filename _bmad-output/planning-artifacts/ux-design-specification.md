@@ -620,10 +620,11 @@ app.use(NativeChatPlugin, {
 **Purpose:** Scrollable container for all messages with infinite scroll.
 **Vuetify component:** Uses `v-infinite-scroll` with `side="start"` for upward history loading — handles scroll threshold detection, debounce, and duplicate request prevention.
 **Behavior:**
-- Auto-scrolls to bottom on new message (if user is at bottom)
-- Preserves scroll position when older messages prepend (custom `scrollTop` adjustment after prepend)
+- Force-scrolls to bottom on user send and assistant response (regardless of current position)
+- Preserves scroll position when older messages prepend via anchor-based restoration (capture first visible message element position, restore after render)
 - History fetch triggered automatically by `v-infinite-scroll` when scrolling near the top
 - Shows subtle loading indicator at top during fetch
+- Scroll-to-bottom FAB: a small circular down-arrow button appears overlaid on the bottom-right of the message list when the user has scrolled up past ~50px from bottom. Clicking scrolls to the most recent message. Uses `v-btn` icon variant, `color="secondary"` (magenta), `size="small"`, `variant="elevated"`. Positioned absolutely within the message list container. Transitions in/out with opacity fade.
 
 **Animation tracking:** Maintains `knownIds` and `animatingIds` sets. Entrance animations play only for newly appended messages (send/receive). Suppressed on initial load and history prepend (loadMore) to prevent visual noise.
 **States:** Loading (fetching history), loaded, empty (welcome state), error
@@ -755,9 +756,11 @@ All six custom components plus Vuetify integration constitute the MVP. No phasin
 ### Scroll Behavior Patterns
 
 **Auto-Scroll Rules:**
-- If user is at or near the bottom of the message list → auto-scroll to bottom when new message appears (both user's own message and assistant response)
-- If user has scrolled up (reading history) → do NOT auto-scroll — respect their position
-- "Near bottom" threshold: within ~50px of the bottom edge
+- **On user send:** Always scroll to bottom, regardless of current scroll position. Sending a message is an explicit intent to continue at the live conversation edge.
+- **On assistant response (MVP — complete messages):** Always scroll to bottom. The user is waiting for this response. (Phase 2 streaming: switch to "only if pinned to bottom" — stop following if user scrolls up during generation.)
+- **On history prepend (infinite scroll):** Never scroll to bottom. Preserve the user's current reading position using anchor-based restoration.
+- **"Near bottom" threshold:** ~50px — used for scroll-to-bottom FAB visibility and Phase 2 streaming pin logic.
+- **Scroll-to-bottom affordance:** A floating down-arrow button appears when the user has scrolled up past the near-bottom threshold. Clicking it scrolls to the most recent message. Standard in ChatGPT, Claude, Gemini, and Copilot.
 
 **Infinite Scroll Rules:**
 - Implemented via Vuetify's `v-infinite-scroll` with `side="start"` — handles scroll threshold detection, debounce, and duplicate request prevention automatically
@@ -767,7 +770,12 @@ All six custom components plus Vuetify integration constitute the MVP. No phasin
 - End of history: no more fetches triggered, no "you've reached the beginning" indicator needed
 
 **Scroll Position Preservation:**
-- When older messages prepend, calculate height difference and adjust `scrollTop` so the user's current view doesn't shift
+- When older messages prepend, use anchor-based restoration:
+  1. Before prepend: capture the first visible message element and its viewport position (`getBoundingClientRect().top`)
+  2. After prepend + DOM render: measure the same anchor element's new position
+  3. Adjust `scrollTop` by the delta (`newTop - oldTop`)
+- CSS `overflow-anchor: auto` applied to the scroll container as a baseline browser-native anchoring layer
+- This approach is robust against Vuetify spinner DOM insertion/removal, markdown reflow, and variable-height content
 - This is the single most critical scroll behavior to get right — any jump breaks user trust
 
 ## Responsive Design & Accessibility

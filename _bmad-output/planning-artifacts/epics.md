@@ -14,7 +14,7 @@ inputDocuments:
 
 ## Overview
 
-This document provides the complete epic and story breakdown for native-chat-vue, decomposing the requirements from the PRD, UX Design if it exists, and Architecture requirements into implementable stories. Includes Epic 5 added via Correct Course workflow (2026-02-21) to address missing documentation planning. Includes Epic 6 added via Correct Course workflow (2026-02-22) to align visual implementation with the approved Figma design. Stories 6.4-6.5 added via Correct Course workflow (2026-02-22b) to document animation changes made outside BMAD workflow. Stories 6.6-6.9 added via Correct Course workflow (2026-02-22c) for input redesign, VitePress environment fixes, error message distinction, and panel/header UI polish.
+This document provides the complete epic and story breakdown for native-chat-vue, decomposing the requirements from the PRD, UX Design if it exists, and Architecture requirements into implementable stories. Includes Epic 5 added via Correct Course workflow (2026-02-21) to address missing documentation planning. Includes Epic 6 added via Correct Course workflow (2026-02-22) to align visual implementation with the approved Figma design. Stories 6.4-6.5 added via Correct Course workflow (2026-02-22b) to document animation changes made outside BMAD workflow. Stories 6.6-6.9 added via Correct Course workflow (2026-02-22c) for input redesign, VitePress environment fixes, error message distinction, and panel/header UI polish. Epic 7 added via Correct Course workflow (2026-02-23) to rework scroll behavior to match industry-standard AI chat patterns (force-scroll on send/response, anchor-based history preservation, scroll-to-bottom FAB).
 
 ## Requirements Inventory
 
@@ -159,6 +159,8 @@ NFR17: Plugin must operate within a host Vue SPA without state collisions or glo
 | FR25 | Epic 4 | Network failure resilience |
 | FR26 | Epic 4 | Retry failed message |
 | FR27 | Epic 4 | No-reload recovery |
+| FR28 | Epic 7 | Scroll to bottom on send/response |
+| FR29 | Epic 7 | Scroll-to-bottom control |
 
 ## Epic List
 
@@ -199,6 +201,14 @@ The chat widget's layout, visual styling, and motion design match the approved F
 **Implementation notes:** Replaces v-navigation-drawer with Teleport + positioned div for floating panel. Fixes scroll containment so only MessageList scrolls. CSS polish for bubble padding, message spacing, welcome state positioning. Stories 6.6-6.9 add input redesign (action bar pattern), VitePress theme/CSS fixes, error message distinction, and header/panel polish. Stories 6.10-6.11 add final UI refinements (solo input, panel background, copy button Vuetify refactor, new theme tokens) and demo experience improvements (richer mock data, simulated latency, smaller batch size).
 
 *Added via Correct Course workflow (2026-02-22) to align visual implementation with the approved Figma design. Extended via Correct Course workflow (2026-02-22c) with stories 6.6-6.9 for input redesign, VitePress fixes, error distinction, and UI polish. Extended via Correct Course workflow (2026-02-23) with stories 6.10-6.11 for UI refinements and demo experience enhancement.*
+
+### Epic 7: Scroll Behavior Rework
+The chat widget's scroll behavior matches industry-standard AI chat patterns — force-scroll on send/response, anchor-based history preservation, and a scroll-to-bottom affordance for manual navigation.
+**FRs covered:** FR12 (rework), FR28, FR29
+**User outcome:** Sending a message always takes the user to the live conversation edge. Loading older history never causes position jumps. A down-arrow button provides a one-click return from history browsing.
+**Implementation notes:** All changes isolated to MessageList.vue. No composable or API changes. CSS overflow-anchor + JS anchor-element restoration.
+
+*Added via Correct Course workflow (2026-02-23) to fix scroll behavior deviating from industry-standard AI chat patterns. Validated by multi-model consensus (Gemini 3 Pro, GPT-5.2) against ChatGPT, Claude, Gemini, and Copilot.*
 
 ## Epic 1: Plugin Foundation & Chat Shell
 
@@ -1150,3 +1160,115 @@ So that I can experience infinite scroll and evaluate the plugin's performance w
 *Modifies: `docs/.vitepress/mock/mockApiClient.ts` (older message generation + latency simulation), `docs/.vitepress/theme/index.ts` (batchSize config).*
 
 *Added via Correct Course workflow (2026-02-23) to document demo improvements made outside BMAD workflow.*
+
+## Epic 7: Scroll Behavior Rework
+
+The chat widget's scroll behavior matches industry-standard AI chat patterns — force-scroll on send/response, anchor-based history preservation, and a scroll-to-bottom affordance for manual navigation.
+
+*Added via Correct Course workflow (2026-02-23) to fix scroll behavior deviating from industry-standard AI chat patterns. Validated by multi-model consensus (Gemini 3 Pro, GPT-5.2) against ChatGPT, Claude, Gemini, and Copilot.*
+
+### Story 7.1: Event-Driven Scroll Policy
+
+As a user,
+I want the chat to scroll to my newest message when I send one and to the assistant's response when it arrives,
+So that I always see the active conversation without manually scrolling down.
+
+**Acceptance Criteria:**
+
+**Given** the user is scrolled to the middle of chat history
+**When** they send a message
+**Then** the message list scrolls to the bottom showing the new message
+**And** this happens regardless of how far up the user had scrolled
+
+**Given** the user sent a message and is waiting for a response
+**When** the assistant response arrives (complete message, MVP)
+**Then** the message list scrolls to the bottom showing the response
+**And** this happens regardless of current scroll position
+
+**Given** older messages are being loaded via infinite scroll
+**When** the messages prepend to the list
+**Then** the scroll position is preserved — no scroll to bottom occurs
+**And** the user continues viewing the same messages they were reading
+
+**Given** the existing auto-scroll watcher in MessageList.vue
+**When** refactored
+**Then** scroll policy is event-driven: separate handling for user-send, assistant-response, and history-prepend
+**And** the single isNearBottom gate is no longer the sole scroll controller
+
+**Given** the existing test suite
+**When** running `yarn test`
+**Then** all tests pass (scroll behavior tests updated for new policy)
+
+*Covers: FR28 (scroll on send/response). Modifies: `MessageList.vue` (scroll watcher refactor).*
+
+### Story 7.2: Anchor-Based Scroll Preservation
+
+As a user,
+I want loading older messages to never jump my scroll position,
+So that I can browse history smoothly without losing my place.
+
+**Acceptance Criteria:**
+
+**Given** the user is reading messages in the middle of the list
+**When** infinite scroll triggers and older messages load
+**Then** the message the user was reading stays in exactly the same viewport position
+**And** no visible jump occurs — the content above expands upward only
+
+**Given** the scroll container
+**When** inspecting CSS
+**Then** `overflow-anchor: auto` is applied as a baseline browser-native anchor
+
+**Given** the handleLoadMore function
+**When** older messages prepend
+**Then** anchor-based restoration is used:
+  1. Before prepend: capture the first visible message element and its `getBoundingClientRect().top`
+  2. After prepend + render: measure the same element's new `.top`
+  3. Adjust `scrollTop` by the delta
+**And** this technique is robust against Vuetify spinner insertion/removal
+
+**Given** the v-infinite-scroll loading spinner
+**When** it appears and disappears during a load cycle
+**Then** no scroll position shift occurs from spinner DOM changes
+
+**Given** the existing test suite
+**When** running `yarn test`
+**Then** all tests pass
+
+*Covers: FR12 (scroll position preservation — rework). Modifies: `MessageList.vue` (handleLoadMore refactor, CSS addition).*
+
+### Story 7.3: Scroll-to-Bottom FAB Button
+
+As a user,
+I want a down-arrow button to appear when I've scrolled up in the chat,
+So that I can quickly return to the most recent messages with one click.
+
+**Acceptance Criteria:**
+
+**Given** the user has scrolled up past the ~50px near-bottom threshold
+**When** the message list renders
+**Then** a small circular down-arrow button appears overlaid on the bottom-right of the message list area
+**And** the button uses `v-btn` with `icon`, `variant="elevated"`, `color="secondary"`, `size="small"`
+**And** the button transitions in with an opacity fade
+
+**Given** the scroll-to-bottom button is visible
+**When** the user clicks it
+**Then** the message list scrolls to the most recent message
+**And** the button disappears (user is now at bottom)
+
+**Given** the user is at or near the bottom of the message list
+**When** the message list renders
+**Then** no scroll-to-bottom button is visible
+
+**Given** the scroll-to-bottom button
+**When** inspecting accessibility
+**Then** the button has `aria-label="Scroll to latest messages"`
+
+**Given** the user has `prefers-reduced-motion: reduce` enabled
+**When** the button appears or disappears
+**Then** the transition is instant (no fade animation)
+
+**Given** the existing test suite
+**When** running `yarn test`
+**Then** all tests pass with new tests for the FAB button
+
+*Covers: FR29 (scroll-to-bottom control). Modifies: `MessageList.vue` (add FAB element + visibility logic).*
