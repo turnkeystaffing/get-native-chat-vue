@@ -104,9 +104,9 @@ onBeforeUnmount(() => {
 async function handleLoadMore({ done }: { done: (status: InfiniteScrollStatus) => void }) {
   suppressAnimation = true
   isLoadingMore = true
-  const el = getScrollElement()
-  const prevScrollHeight = el?.scrollHeight ?? 0
 
+  // Scroll preservation is handled natively by VInfiniteScroll for side="start".
+  // It captures scrollHeight before load and adjusts scrollTop after done() via nextTick.
   try {
     await chatState.loadMore()
     done(!chatState.hasMore.value ? 'empty' : 'ok')
@@ -116,12 +116,6 @@ async function handleLoadMore({ done }: { done: (status: InfiniteScrollStatus) =
 
   await nextTick()
   suppressAnimation = false
-
-  if (el) {
-    const newScrollHeight = el.scrollHeight
-    el.scrollTop = el.scrollTop + (newScrollHeight - prevScrollHeight)
-  }
-
   isLoadingMore = false
 
   if (pendingScrollToBottom) {
@@ -165,7 +159,6 @@ async function handleLoadMore({ done }: { done: (status: InfiniteScrollStatus) =
   .nc-message-list-scroll {
     flex: 1;
     overflow-y: auto;
-    overflow-anchor: auto;
   }
 
   .nc-message-list {

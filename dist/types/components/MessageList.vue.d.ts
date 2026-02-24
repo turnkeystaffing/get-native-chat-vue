@@ -31,8 +31,7 @@ declare const _default: import('vue').DefineComponent<{}, {}, {}, {}, {}, import
             loading?: false | ((arg: import('vuetify/lib/components/VInfiniteScroll/VInfiniteScroll.js').InfiniteScrollSlot) => import('vue').VNodeChild) | undefined;
             error?: false | ((arg: import('vuetify/lib/components/VInfiniteScroll/VInfiniteScroll.js').InfiniteScrollSlot) => import('vue').VNodeChild) | undefined;
             empty?: false | ((arg: import('vuetify/lib/components/VInfiniteScroll/VInfiniteScroll.js').InfiniteScrollSlot) => import('vue').VNodeChild) | undefined;
-            "load-more"
-            /** @type { typeof __VLS_ctx.scrollContainer } */ ? /** @type { typeof __VLS_ctx.scrollContainer } */: false | ((arg: import('vuetify/lib/components/VInfiniteScroll/VInfiniteScroll.js').InfiniteScrollSlot) => import('vue').VNodeChild) | undefined;
+            "load-more"?: false | ((arg: import('vuetify/lib/components/VInfiniteScroll/VInfiniteScroll.js').InfiniteScrollSlot) => import('vue').VNodeChild) | undefined;
         } | undefined;
     } & {
         "v-slot:default"?: false | (() => import('vue').VNodeChild) | undefined;
