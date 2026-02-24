@@ -4,6 +4,7 @@ import type { ComponentPublicInstance } from 'vue'
 import type { InfiniteScrollStatus } from 'vuetify/lib/components/VInfiniteScroll/VInfiniteScroll.js'
 import { CHAT_STATE_KEY } from '@/keys'
 import MessageBubble from '@/components/MessageBubble.vue'
+import IconArrowDown from '@/icons/IconArrowDown.vue'
 
 const chatState = inject(CHAT_STATE_KEY)!
 
@@ -126,36 +127,61 @@ async function handleLoadMore({ done }: { done: (status: InfiniteScrollStatus) =
 </script>
 
 <template>
-  <v-infinite-scroll
-    ref="scrollContainer"
-    side="start"
-    :disabled="!chatState.hasMore.value"
-    class="nc-message-list-scroll"
-    @load="handleLoadMore"
-  >
-    <ul role="list" aria-live="polite" class="nc-message-list">
-      <MessageBubble
-        v-for="msg in chatState.messages.value"
-        :key="msg.id"
-        :message="msg"
-        :animate="animatingIds.has(msg.id)"
-      />
-    </ul>
+  <div class="nc-message-list-wrapper">
+    <v-infinite-scroll
+      ref="scrollContainer"
+      side="start"
+      :disabled="!chatState.hasMore.value"
+      class="nc-message-list-scroll"
+      @load="handleLoadMore"
+    >
+      <ul role="list" aria-live="polite" class="nc-message-list">
+        <MessageBubble
+          v-for="msg in chatState.messages.value"
+          :key="msg.id"
+          :message="msg"
+          :animate="animatingIds.has(msg.id)"
+        />
+      </ul>
 
-    <template #loading>
-      <div class="nc-message-list__loader">
-        <v-progress-circular indeterminate size="24" width="2" />
+      <template #loading>
+        <div class="nc-message-list__loader">
+          <v-progress-circular indeterminate size="24" width="2" />
+        </div>
+      </template>
+
+      <template #empty>
+        <!-- No end-of-history indicator per spec -->
+      </template>
+    </v-infinite-scroll>
+
+    <Transition name="nc-scroll-fab">
+      <div v-show="!isNearBottom" class="nc-scroll-fab">
+        <v-btn
+          icon
+          variant="elevated"
+          color="surface"
+          size="small"
+          aria-label="Scroll to latest messages"
+          @click="scrollToBottom"
+        >
+          <v-icon :icon="IconArrowDown"></v-icon>
+        </v-btn>
       </div>
-    </template>
-
-    <template #empty>
-      <!-- No end-of-history indicator per spec -->
-    </template>
-  </v-infinite-scroll>
+    </Transition>
+  </div>
 </template>
 
 <style scoped>
 @layer native-chat {
+  .nc-message-list-wrapper {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    overflow: hidden;
+  }
+
   .nc-message-list-scroll {
     flex: 1;
     overflow-y: auto;
@@ -174,6 +200,34 @@ async function handleLoadMore({ done }: { done: (status: InfiniteScrollStatus) =
     display: flex;
     justify-content: center;
     padding: 8px 0;
+  }
+
+  .nc-scroll-fab {
+    position: absolute;
+    bottom: 5px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 1;
+  }
+
+  .nc-scroll-fab-enter-active,
+  .nc-scroll-fab-leave-active {
+    transition:
+      opacity 200ms ease,
+      transform 200ms ease;
+  }
+
+  .nc-scroll-fab-enter-from,
+  .nc-scroll-fab-leave-to {
+    opacity: 0;
+    transform: translateX(-50%) translateY(8px) scale(0.9);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .nc-scroll-fab-enter-active,
+    .nc-scroll-fab-leave-active {
+      transition-duration: 0ms;
+    }
   }
 }
 </style>

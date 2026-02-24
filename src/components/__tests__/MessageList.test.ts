@@ -472,6 +472,138 @@ describe('MessageList', () => {
     })
   })
 
+  describe('scroll-to-bottom FAB button', () => {
+    it('FAB is NOT visible when isNearBottom is true (initial state)', () => {
+      const msgs = [createMessage('1', 'user')]
+      const { wrapper } = mountMessageList({ messages: msgs })
+
+      const fabWrapper = wrapper.find('.nc-scroll-fab')
+      expect(fabWrapper.exists()).toBe(true)
+      // isNearBottom starts as true → v-show hides the wrapper div
+      expect(fabWrapper.element.style.display).toBe('none')
+    })
+
+    it('FAB becomes visible when user scrolls up past threshold', async () => {
+      const msgs = [createMessage('1', 'user')]
+      const { wrapper } = mountMessageList({ messages: msgs })
+
+      const scrollContainer = wrapper.find('.v-infinite-scroll').element as HTMLElement
+
+      Object.defineProperty(scrollContainer, 'scrollHeight', {
+        value: 1000,
+        writable: true,
+        configurable: true,
+      })
+      Object.defineProperty(scrollContainer, 'scrollTop', {
+        value: 100,
+        writable: true,
+        configurable: true,
+      })
+      Object.defineProperty(scrollContainer, 'clientHeight', {
+        value: 100,
+        writable: true,
+        configurable: true,
+      })
+
+      // Trigger scroll → isNearBottom becomes false (distance = 800 > 50)
+      scrollContainer.dispatchEvent(new Event('scroll'))
+      await nextTick()
+
+      const fabWrapper = wrapper.find('.nc-scroll-fab')
+      expect(fabWrapper.element.style.display).not.toBe('none')
+    })
+
+    it('clicking FAB calls scrollToBottom', async () => {
+      const msgs = [createMessage('1', 'user')]
+      const { wrapper } = mountMessageList({ messages: msgs })
+
+      const scrollContainer = wrapper.find('.v-infinite-scroll').element as HTMLElement
+
+      Object.defineProperty(scrollContainer, 'scrollHeight', {
+        value: 1000,
+        writable: true,
+        configurable: true,
+      })
+      Object.defineProperty(scrollContainer, 'scrollTop', {
+        value: 100,
+        writable: true,
+        configurable: true,
+      })
+      Object.defineProperty(scrollContainer, 'clientHeight', {
+        value: 100,
+        writable: true,
+        configurable: true,
+      })
+
+      // Scroll up to make FAB visible
+      scrollContainer.dispatchEvent(new Event('scroll'))
+      await nextTick()
+
+      const fab = wrapper.find('[aria-label="Scroll to latest messages"]')
+      await fab.trigger('click')
+      await nextTick()
+
+      // scrollToBottom sets scrollTop = scrollHeight
+      expect(scrollContainer.scrollTop).toBe(scrollContainer.scrollHeight)
+    })
+
+    it('FAB has correct aria-label', () => {
+      const msgs = [createMessage('1', 'user')]
+      const { wrapper } = mountMessageList({ messages: msgs })
+
+      const fab = wrapper.find('[aria-label="Scroll to latest messages"]')
+      expect(fab.exists()).toBe(true)
+      expect(fab.attributes('aria-label')).toBe('Scroll to latest messages')
+    })
+
+    it('FAB disappears after scrollToBottom completes', async () => {
+      const msgs = [createMessage('1', 'user')]
+      const { wrapper } = mountMessageList({ messages: msgs })
+
+      const scrollContainer = wrapper.find('.v-infinite-scroll').element as HTMLElement
+
+      Object.defineProperty(scrollContainer, 'scrollHeight', {
+        value: 1000,
+        writable: true,
+        configurable: true,
+      })
+      Object.defineProperty(scrollContainer, 'scrollTop', {
+        value: 100,
+        writable: true,
+        configurable: true,
+      })
+      Object.defineProperty(scrollContainer, 'clientHeight', {
+        value: 100,
+        writable: true,
+        configurable: true,
+      })
+
+      // Scroll up to make FAB visible
+      scrollContainer.dispatchEvent(new Event('scroll'))
+      await nextTick()
+
+      const fabWrapper = wrapper.find('.nc-scroll-fab')
+      expect(fabWrapper.element.style.display).not.toBe('none')
+
+      // Click FAB → scrollToBottom
+      const fab = wrapper.find('[aria-label="Scroll to latest messages"]')
+      await fab.trigger('click')
+      await nextTick()
+
+      // After scrollToBottom, simulate the scroll event that fires when scrollTop changes
+      // Now at bottom: scrollHeight - scrollTop - clientHeight = 1000 - 1000 - 100 ≤ 50
+      Object.defineProperty(scrollContainer, 'scrollTop', {
+        value: 1000,
+        writable: true,
+        configurable: true,
+      })
+      scrollContainer.dispatchEvent(new Event('scroll'))
+      await nextTick()
+
+      expect(fabWrapper.element.style.display).toBe('none')
+    })
+  })
+
   describe('message entrance animation', () => {
     it('does not pass animate=true for messages present on initial mount', async () => {
       const msgs = [createMessage('1', 'user'), createMessage('2', 'assistant')]

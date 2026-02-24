@@ -135,6 +135,6 @@ declare const _default: import('vue').DefineComponent<{}, {}, {}, {}, {}, import
         loadMoreText: string;
         emptyText: string;
     }> | null;
-}, any>;
+}, HTMLDivElement>;
 export default _default;
 //# sourceMappingURL=MessageList.vue.d.ts.map

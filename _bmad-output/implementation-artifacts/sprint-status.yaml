@@ -84,8 +84,8 @@ development_status:
   6-11-demo-experience-enhancement: done
   epic-6-retrospective: optional
 
-  epic-7: in-progress
+  epic-7: done
   7-1-event-driven-scroll-policy: done
   7-2-anchor-based-scroll-preservation: done
-  7-3-scroll-to-bottom-fab-button: backlog
+  7-3-scroll-to-bottom-fab-button: done
   epic-7-retrospective: optional
