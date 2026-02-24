@@ -14,7 +14,7 @@ inputDocuments:
 
 ## Overview
 
-This document provides the complete epic and story breakdown for native-chat-vue, decomposing the requirements from the PRD, UX Design if it exists, and Architecture requirements into implementable stories. Includes Epic 5 added via Correct Course workflow (2026-02-21) to address missing documentation planning. Includes Epic 6 added via Correct Course workflow (2026-02-22) to align visual implementation with the approved Figma design. Stories 6.4-6.5 added via Correct Course workflow (2026-02-22b) to document animation changes made outside BMAD workflow. Stories 6.6-6.9 added via Correct Course workflow (2026-02-22c) for input redesign, VitePress environment fixes, error message distinction, and panel/header UI polish. Epic 7 added via Correct Course workflow (2026-02-23) to rework scroll behavior to match industry-standard AI chat patterns (force-scroll on send/response, anchor-based history preservation, scroll-to-bottom FAB). Stories 6.12-6.14 added via Correct Course workflow (2026-02-24) for typography enforcement, input/header refinements, and CSS import relocation. Stories 6.15-6.16 added via Correct Course workflow (2026-02-24) for widget configuration options (bubble headers toggle, full-width assistant mode), CSS specificity fix, scrollbar polish, and test alignment.
+This document provides the complete epic and story breakdown for native-chat-vue, decomposing the requirements from the PRD, UX Design if it exists, and Architecture requirements into implementable stories. Includes Epic 5 added via Correct Course workflow (2026-02-21) to address missing documentation planning. Includes Epic 6 added via Correct Course workflow (2026-02-22) to align visual implementation with the approved Figma design. Stories 6.4-6.5 added via Correct Course workflow (2026-02-22b) to document animation changes made outside BMAD workflow. Stories 6.6-6.9 added via Correct Course workflow (2026-02-22c) for input redesign, VitePress environment fixes, error message distinction, and panel/header UI polish. Epic 7 added via Correct Course workflow (2026-02-23) to rework scroll behavior to match industry-standard AI chat patterns (force-scroll on send/response, anchor-based history preservation, scroll-to-bottom FAB). Stories 6.12-6.14 added via Correct Course workflow (2026-02-24) for typography enforcement, input/header refinements, and CSS import relocation. Stories 6.15-6.16 added via Correct Course workflow (2026-02-24) for widget configuration options (bubble headers toggle, full-width assistant mode), CSS specificity fix, scrollbar polish, and test alignment. Story 1.5 added via Correct Course workflow (2026-02-24b) to migrate createNativeChatApiClient helper from fetch-based implementation to Axios instance delegation, aligning with the host application's interceptor-based auth lifecycle.
 
 ## Requirements Inventory
 
@@ -79,7 +79,7 @@ NFR17: Plugin must operate within a host Vue SPA without state collisions or glo
 - Vuetify 3.x as deliberate peer dependency — all target host apps already use Vuetify
 - `marked` (~11.8KB gzip) + `dompurify` (~6-7KB gzip) as the only runtime dependencies beyond peer deps
 - API client interface defined: `NativeChatApiClient` with `createConversation()`, `getConversations()`, `getMessages()`, `sendMessage()`
-- Convenience helper: `createNativeChatApiClient({ baseUrl, getAccessToken })` exported from package
+- Convenience helper: `createNativeChatApiClient({ axiosInstance })` exported from package — wraps consumer's Axios instance (with interceptors for auth, refresh, retry)
 - Plugin configuration API: `NativeChatPluginOptions` with required `apiClient` and optional `position`, `welcomeMessage`, `batchSize`, `conversationId`, `onError`
 - Config validation during `app.use()` — missing `apiClient` logs console warning, skips registration
 - Conversation management: single active conversation, `getConversations(0,1)` → use latest; if none → `createConversation()`; server is source of truth, no localStorage
@@ -168,7 +168,7 @@ NFR17: Plugin must operate within a host Vue SPA without state collisions or glo
 Developer integrates the plugin into a Vue app; users see a floating button and can open/close a responsive chat panel.
 **FRs covered:** FR1, FR2, FR3, FR4, FR5, FR6, FR7, FR8
 **User outcome:** Developer completes integration (Journey 3). Users see the entry point and can open/close the panel. The plugin renders without breaking the host app.
-**Implementation notes:** Includes project scaffold (VitePress + Vite library mode per Architecture). Establishes types, plugin install, config validation, theme, CSS isolation, FloatingButton, ChatPanel, ChatHeader, WelcomeState.
+**Implementation notes:** Includes project scaffold (VitePress + Vite library mode per Architecture). Establishes types, plugin install, config validation, theme, CSS isolation, FloatingButton, ChatPanel, ChatHeader, WelcomeState. Story 1.5 added via Correct Course workflow (2026-02-24b) to migrate `createNativeChatApiClient` from fetch+getAccessToken to Axios instance delegation.
 
 ### Epic 2: Core Messaging Experience
 User sends a message, sees it appear instantly, and receives an assistant response — the complete ask-and-answer loop with conversation history.
@@ -267,15 +267,15 @@ So that the plugin is configured and ready to render in my application.
 **And** the plugin skips registration (no component registered)
 
 **Given** the `createNativeChatApiClient` helper is imported
-**When** I call `createNativeChatApiClient({ baseUrl, getAccessToken })`
+**When** I call `createNativeChatApiClient({ axiosInstance })` with a pre-configured Axios instance
 **Then** it returns an object conforming to the `NativeChatApiClient` interface
-**And** each method attaches the `Authorization: Bearer <token>` header using the `getAccessToken` callback
+**And** each method delegates HTTP requests to the provided Axios instance using relative paths (`/conversations`, `/conversations/:id/messages`)
 
 **Given** the package entry point `src/index.ts`
 **When** a consumer imports from the package
 **Then** `NativeChatPlugin`, `NativeChatWidget`, `createNativeChatApiClient`, and all public TypeScript interfaces are available
 
-*Covers: FR2 (plugin registration), FR3 (auth token), FR4 (API client injection). Creates: `types/api.ts`, `types/chat.ts`, `types/config.ts`, `types/index.ts`, `helpers/createApiClient.ts`, `plugin.ts`, `keys.ts`, `index.ts`.*
+*Covers: FR2 (plugin registration), FR3 (authenticated HTTP client), FR4 (API client injection). Creates: `types/api.ts`, `types/chat.ts`, `types/config.ts`, `types/index.ts`, `helpers/createApiClient.ts`, `plugin.ts`, `keys.ts`, `index.ts`.*
 
 ### Story 1.3: Floating Agent Button
 
@@ -352,6 +352,46 @@ So that I have a clear, familiar interface ready for conversation.
 **And** the close button has `aria-label="Close chat"` and is keyboard accessible
 
 *Covers: FR6 (close via control), FR7 (overlay/panel position), FR8 (responsive viewports). Creates: `ChatPanel.vue`, `ChatHeader.vue`, `WelcomeState.vue`.*
+
+### Story 1.5: API Client Helper — Axios Instance Migration
+
+As a developer integrating the plugin into a host app with Axios interceptors,
+I want `createNativeChatApiClient` to accept my pre-configured Axios instance,
+So that the plugin participates in my app's auth lifecycle (token refresh, error handling, retry logic) automatically.
+
+**Acceptance Criteria:**
+
+**Given** I have an Axios instance with auth interceptors attached
+**When** I call `createNativeChatApiClient({ axiosInstance })`
+**Then** all 4 API methods delegate HTTP requests through my Axios instance
+**And** auth tokens are injected by the Axios interceptor (not by the helper)
+**And** the helper uses relative paths (`/conversations`, `/conversations/:id/messages`)
+
+**Given** the Axios instance has a `baseURL` configured
+**When** any API method is called
+**Then** the request URL is resolved relative to the Axios instance's `baseURL`
+
+**Given** an Axios request fails with an error containing `error.response.status`
+**When** `useChat` processes the error
+**Then** the status code is extracted correctly for error message mapping (429, 503, 504)
+**And** the `onError` callback receives the status code in `ChatError.statusCode`
+
+**Given** a custom `NativeChatApiClient` implementation throws errors with `error.statusCode`
+**When** `useChat` processes the error
+**Then** backward compatibility is maintained — `error.statusCode` is still recognized
+
+**Given** the plugin's `package.json`
+**When** a consumer installs the package
+**Then** `axios` is listed as an optional peer dependency
+**And** consumers who implement `NativeChatApiClient` directly do not need axios installed
+
+**Given** the library is built with `yarn build`
+**When** the output bundle is inspected
+**Then** `axios` is externalized (not bundled), same as `vue` and `vuetify`
+
+*Covers: FR3 (authenticated HTTP client — rework), FR4 (API client injection — reinforced). Modifies: `helpers/createApiClient.ts`, `composables/useChat.ts` (error extraction), `package.json`, `vite.config.ts`. Updates: `docs/guide/api-client.md`, `docs/guide/getting-started.md`, `docs/guide/configuration.md`.*
+
+*Added via Correct Course workflow (2026-02-24b) to align the API client helper with the host application's Axios interceptor-based auth lifecycle.*
 
 ## Epic 2: Core Messaging Experience
 

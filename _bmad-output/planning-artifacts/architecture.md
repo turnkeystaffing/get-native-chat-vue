@@ -204,7 +204,7 @@ Components in `src/components/`, composables in `src/composables/`, types in `sr
 | Decision | Choice | Rationale |
 |---|---|---|
 | API client interface | Mirrors OpenAPI spec; `apiClient` injected, plugin never handles auth | PRD FR4, security — plugin doesn't touch tokens |
-| API client helper | Export `createNativeChatApiClient({ baseUrl, getAccessToken })` utility | DX convenience without violating auth boundary |
+| API client helper | Export `createNativeChatApiClient({ axiosInstance })` utility — wraps consumer's Axios instance | DX convenience; auth handled by Axios interceptors |
 | Error contract | Client throws on HTTP errors; plugin catches + maps status codes | Standard JS pattern, HTTP status codes already defined by backend |
 | Pagination | Offset-based (`offset` + `limit` + `has_more`) | Matches backend API contract |
 | Message ordering | API returns newest-first; plugin reverses for display | Backend spec confirmed |
@@ -244,12 +244,11 @@ export interface NativeChatApiClient {
 
 // Convenience helper — exported from package
 export function createNativeChatApiClient(config: {
-  baseUrl: string
-  getAccessToken: () => string | Promise<string>
+  axiosInstance: AxiosInstance
 }): NativeChatApiClient
 ```
 
-- Auth handled entirely by the host app's client or via `getAccessToken` callback in the helper
+- Auth handled entirely by the host app's Axios instance interceptors (token injection, refresh, error handling)
 - Plugin never stores, manages, or refreshes tokens
 - Error contract: client throws on HTTP errors; plugin maps status codes (429 → rate limit, 503/504 → service unavailable, others → generic error)
 - Pagination: offset-based per backend API
@@ -294,7 +293,7 @@ export interface NativeChatPluginOptions {
 ### Build & Distribution
 
 - **Output format:** ESM-only (no CJS)
-- **Externals:** `vue`, `vuetify` externalized in rollupOptions
+- **Externals:** `vue`, `vuetify`, `axios` externalized in rollupOptions
 - **CSS:** Vuetify theme handles component styles; plugin CSS bundled via `@layer native-chat`, emitted as separate `.css` file
 - **Type declarations:** `vite-plugin-dts` generates `.d.ts` files
 - **Entry point:** Single `src/index.ts` exporting `NativeChatPlugin`, `NativeChatWidget`, `createNativeChatApiClient`, and TypeScript interfaces
@@ -309,7 +308,7 @@ export interface NativeChatPluginOptions {
 ### Decision Impact Analysis
 
 **Implementation Sequence:**
-1. API client interface + `createNativeChatApiClient` helper (gating — all components depend on this)
+1. API client interface + `createNativeChatApiClient` helper wrapping AxiosInstance (gating — all components depend on this)
 2. Plugin install function + config validation + `provide/inject` setup
 3. `useChat()` composable (state management, conversation lifecycle, message operations)
 4. NativeChatWidget (root wrapper — creates useChat, provides state)

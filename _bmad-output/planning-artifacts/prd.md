@@ -224,7 +224,7 @@ native-chat-vue is a Vue plugin (SPA component) embedded in a host single-page a
 
 - FR1: Developer can install the plugin as an npm package
 - FR2: Developer can register the plugin with a Vue application via `app.use()` with a configuration object
-- FR3: Developer can provide an auth token through plugin configuration
+- FR3: Developer can provide an authenticated HTTP client (Axios instance with interceptors) through plugin configuration, delegating token management to the host application
 - FR4: Developer can provide a pre-configured API client through plugin configuration (for session management, token refresh, retry logic)
 
 ### Chat Window Management
