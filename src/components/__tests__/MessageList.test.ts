@@ -101,43 +101,33 @@ describe('MessageList', () => {
     expect(bubbles[2].props('message').content).toBe('Third')
   })
 
-  it('auto-scrolls to bottom when new message added and user is near bottom', async () => {
+  it('scrolls to bottom when new message appended (send/response)', async () => {
     const msgs = [createMessage('1', 'user')]
     const { wrapper, messages } = mountMessageList({ messages: msgs })
 
     const scrollContainer = wrapper.find('.v-infinite-scroll').element as HTMLElement
 
-    // Mock scroll properties: user is near bottom
     Object.defineProperty(scrollContainer, 'scrollHeight', {
       value: 500,
       writable: true,
       configurable: true,
     })
     Object.defineProperty(scrollContainer, 'scrollTop', {
-      value: 450,
-      writable: true,
-      configurable: true,
-    })
-    Object.defineProperty(scrollContainer, 'clientHeight', {
-      value: 100,
+      value: 0,
       writable: true,
       configurable: true,
     })
 
-    // Trigger scroll to update isNearBottom
-    scrollContainer.dispatchEvent(new Event('scroll'))
-    await nextTick()
-
-    // Add a new message
+    // Add a new message (simulates send/response)
     messages.value = [...messages.value, createMessage('2', 'assistant')]
     await nextTick()
     await nextTick()
 
-    // scrollTop should have been set to scrollHeight
+    // scrollTop should have been set to scrollHeight — event-driven, no position gate
     expect(scrollContainer.scrollTop).toBe(scrollContainer.scrollHeight)
   })
 
-  it('does NOT auto-scroll when user has scrolled up (not near bottom)', async () => {
+  it('scrolls to bottom on send/response even when user has scrolled up', async () => {
     const msgs = [createMessage('1', 'user')]
     const { wrapper, messages } = mountMessageList({ messages: msgs })
 
@@ -160,19 +150,17 @@ describe('MessageList', () => {
       configurable: true,
     })
 
-    // Trigger scroll to update isNearBottom
+    // Trigger scroll to update isNearBottom (far from bottom)
     scrollContainer.dispatchEvent(new Event('scroll'))
     await nextTick()
 
-    const scrollTopBefore = scrollContainer.scrollTop
-
-    // Add a new message
+    // Add a new message (simulates send/response — NOT loadMore)
     messages.value = [...messages.value, createMessage('2', 'assistant')]
     await nextTick()
     await nextTick()
 
-    // scrollTop should NOT have changed
-    expect(scrollContainer.scrollTop).toBe(scrollTopBefore)
+    // Event-driven policy: scrollTop SHOULD be set to scrollHeight regardless of position
+    expect(scrollContainer.scrollTop).toBe(scrollContainer.scrollHeight)
   })
 
   it('scrolls to bottom on initial render with messages', async () => {
@@ -200,6 +188,166 @@ describe('MessageList', () => {
     const ul = wrapper.find('ul')
     expect(ul.exists()).toBe(true)
     expect(wrapper.findAllComponents(MessageBubble)).toHaveLength(0)
+  })
+
+  it('does NOT scroll to bottom when messages are prepended via loadMore', async () => {
+    const msgs = [createMessage('3', 'user'), createMessage('4', 'assistant')]
+    const { wrapper, messages, chatState } = mountMessageList({
+      messages: msgs,
+      hasMore: true,
+    })
+
+    const scrollContainer = wrapper.find('.v-infinite-scroll').element as HTMLElement
+
+    // Flush onMounted's deferred scrollToBottom
+    await nextTick()
+    await nextTick()
+
+    let mockScrollHeight = 400
+
+    Object.defineProperty(scrollContainer, 'scrollHeight', {
+      get: () => mockScrollHeight,
+      configurable: true,
+    })
+    Object.defineProperty(scrollContainer, 'scrollTop', {
+      value: 50,
+      writable: true,
+      configurable: true,
+    })
+    Object.defineProperty(scrollContainer, 'clientHeight', {
+      value: 100,
+      writable: true,
+      configurable: true,
+    })
+
+    // Configure loadMore to prepend older messages
+    const loadMoreFn = chatState.loadMore as ReturnType<typeof vi.fn>
+    loadMoreFn.mockImplementation(async () => {
+      const olderMessages = [createMessage('1', 'user'), createMessage('2', 'assistant')]
+      messages.value = [...olderMessages, ...messages.value]
+      mockScrollHeight = 600
+    })
+
+    const infiniteScroll = wrapper.findComponent({ name: 'VInfiniteScroll' })
+    const doneFn = vi.fn()
+
+    await infiniteScroll.vm.$emit('load', { side: 'start', done: doneFn })
+    await nextTick()
+    await nextTick()
+    await nextTick()
+
+    // scrollTop should be adjusted by delta (600 - 400 = 200), not set to scrollHeight
+    // Initial scrollTop 50 + delta 200 = 250
+    expect(scrollContainer.scrollTop).toBe(250)
+    // Should NOT have been set to scrollHeight (600)
+    expect(scrollContainer.scrollTop).not.toBe(mockScrollHeight)
+  })
+
+  it('scrolls to bottom on assistant response arrival even when scrolled to middle', async () => {
+    const msgs = [createMessage('1', 'user'), createMessage('2', 'assistant')]
+    const { wrapper, messages } = mountMessageList({ messages: msgs })
+
+    const scrollContainer = wrapper.find('.v-infinite-scroll').element as HTMLElement
+
+    // Flush onMounted's deferred scrollToBottom
+    await nextTick()
+    await nextTick()
+
+    // Mock: user is in the middle of history
+    Object.defineProperty(scrollContainer, 'scrollHeight', {
+      value: 2000,
+      writable: true,
+      configurable: true,
+    })
+    Object.defineProperty(scrollContainer, 'scrollTop', {
+      value: 500,
+      writable: true,
+      configurable: true,
+    })
+    Object.defineProperty(scrollContainer, 'clientHeight', {
+      value: 100,
+      writable: true,
+      configurable: true,
+    })
+
+    // Trigger scroll to mark user as NOT near bottom
+    scrollContainer.dispatchEvent(new Event('scroll'))
+    await nextTick()
+
+    // Simulate user sends a message (append)
+    messages.value = [...messages.value, createMessage('3', 'user', 'New question')]
+    await nextTick()
+    await nextTick()
+
+    // Should scroll to bottom despite being in middle
+    expect(scrollContainer.scrollTop).toBe(scrollContainer.scrollHeight)
+
+    // Simulate assistant response arrives (another append)
+    messages.value = [...messages.value, createMessage('4', 'assistant', 'Response')]
+    await nextTick()
+    await nextTick()
+
+    // Should scroll to bottom again
+    expect(scrollContainer.scrollTop).toBe(scrollContainer.scrollHeight)
+  })
+
+  it('scrolls to bottom when response arrives during active loadMore (race condition)', async () => {
+    const msgs = [createMessage('3', 'user'), createMessage('4', 'assistant')]
+    const { wrapper, messages, chatState } = mountMessageList({
+      messages: msgs,
+      hasMore: true,
+    })
+
+    const scrollContainer = wrapper.find('.v-infinite-scroll').element as HTMLElement
+
+    // Flush onMounted's deferred scrollToBottom
+    await nextTick()
+    await nextTick()
+
+    let mockScrollHeight = 400
+
+    Object.defineProperty(scrollContainer, 'scrollHeight', {
+      get: () => mockScrollHeight,
+      configurable: true,
+    })
+    Object.defineProperty(scrollContainer, 'scrollTop', {
+      value: 50,
+      writable: true,
+      configurable: true,
+    })
+    Object.defineProperty(scrollContainer, 'clientHeight', {
+      value: 100,
+      writable: true,
+      configurable: true,
+    })
+
+    // Configure loadMore to prepend older messages AND simulate a response arriving mid-load
+    const loadMoreFn = chatState.loadMore as ReturnType<typeof vi.fn>
+    loadMoreFn.mockImplementation(async () => {
+      const olderMessages = [createMessage('1', 'user'), createMessage('2', 'assistant')]
+      messages.value = [...olderMessages, ...messages.value]
+      mockScrollHeight = 600
+
+      // Simulate assistant response arriving during the loadMore await
+      messages.value = [
+        ...messages.value,
+        createMessage('5', 'assistant', 'Late response'),
+      ]
+      mockScrollHeight = 800
+    })
+
+    const infiniteScroll = wrapper.findComponent({ name: 'VInfiniteScroll' })
+    const doneFn = vi.fn()
+
+    await infiniteScroll.vm.$emit('load', { side: 'start', done: doneFn })
+    await nextTick()
+    await nextTick()
+    await nextTick()
+    await nextTick()
+
+    // The deferred scroll should fire after handleLoadMore completes position adjustment
+    // Final scrollTop should be scrollHeight — the response was not silently suppressed
+    expect(scrollContainer.scrollTop).toBe(mockScrollHeight)
   })
 
   // Task 4: Infinite scroll trigger tests
@@ -426,7 +574,11 @@ describe('MessageList', () => {
       // Configure loadMore to prepend older messages
       const loadMoreFn = chatState.loadMore as ReturnType<typeof vi.fn>
       loadMoreFn.mockImplementation(async () => {
-        messages.value = [createMessage('1', 'user'), createMessage('2', 'assistant'), ...messages.value]
+        messages.value = [
+          createMessage('1', 'user'),
+          createMessage('2', 'assistant'),
+          ...messages.value,
+        ]
       })
 
       const infiniteScroll = wrapper.findComponent({ name: 'VInfiniteScroll' })

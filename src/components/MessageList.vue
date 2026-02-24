@@ -54,11 +54,30 @@ function scrollToBottom() {
   el.scrollTop = el.scrollHeight
 }
 
+// Event-driven scroll policy: detect appends vs prepends via tail-ID tracking.
+// If the last message ID changes → append (user-send or assistant-response) → scroll to bottom.
+// If unchanged → prepend (loadMore) → no scroll (handleLoadMore manages position).
+let lastTailId: string | null =
+  chatState.messages.value.length > 0
+    ? chatState.messages.value[chatState.messages.value.length - 1].id
+    : null
+let isLoadingMore = false
+let pendingScrollToBottom = false
+
 watch(
   () => chatState.messages.value,
-  () => {
-    if (isNearBottom.value) {
-      nextTick(scrollToBottom)
+  (messages) => {
+    const currentTailId = messages.length > 0 ? messages[messages.length - 1].id : null
+    const wasAppended = currentTailId !== null && currentTailId !== lastTailId
+    lastTailId = currentTailId
+
+    if (wasAppended) {
+      if (isLoadingMore) {
+        // Response arrived during active loadMore — defer scroll until position adjustment completes
+        pendingScrollToBottom = true
+      } else {
+        nextTick(scrollToBottom)
+      }
     }
   },
 )
@@ -84,6 +103,7 @@ onBeforeUnmount(() => {
 
 async function handleLoadMore({ done }: { done: (status: InfiniteScrollStatus) => void }) {
   suppressAnimation = true
+  isLoadingMore = true
   const el = getScrollElement()
   const prevScrollHeight = el?.scrollHeight ?? 0
 
@@ -100,6 +120,13 @@ async function handleLoadMore({ done }: { done: (status: InfiniteScrollStatus) =
   if (el) {
     const newScrollHeight = el.scrollHeight
     el.scrollTop = el.scrollTop + (newScrollHeight - prevScrollHeight)
+  }
+
+  isLoadingMore = false
+
+  if (pendingScrollToBottom) {
+    pendingScrollToBottom = false
+    nextTick(scrollToBottom)
   }
 }
 </script>
@@ -138,6 +165,7 @@ async function handleLoadMore({ done }: { done: (status: InfiniteScrollStatus) =
   .nc-message-list-scroll {
     flex: 1;
     overflow-y: auto;
+    overflow-anchor: auto;
   }
 
   .nc-message-list {

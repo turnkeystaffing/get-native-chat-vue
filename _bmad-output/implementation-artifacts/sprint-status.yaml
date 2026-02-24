@@ -70,7 +70,7 @@ development_status:
   5-3-component-demo-pages-landing-page: done
   epic-5-retrospective: optional
 
-  epic-6: in-progress
+  epic-6: done
   6-1-floating-panel-layout-scroll-containment: done
   6-2-visual-polish-figma-spacing: done
   6-3-update-planning-artifacts: done
@@ -83,3 +83,9 @@ development_status:
   6-10-ui-polish-theme-refinements: done
   6-11-demo-experience-enhancement: done
   epic-6-retrospective: optional
+
+  epic-7: in-progress
+  7-1-event-driven-scroll-policy: done
+  7-2-anchor-based-scroll-preservation: backlog
+  7-3-scroll-to-bottom-fab-button: backlog
+  epic-7-retrospective: optional
