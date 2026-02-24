@@ -70,14 +70,13 @@ watch(
       ref="textareaRef"
       v-model="inputText"
       auto-grow
-      :rows="1"
+      :rows="2"
       :max-rows="10"
       no-resize
       hide-details
       variant="solo"
       density="compact"
       flat
-      rounded="lg"
       placeholder="How can I help you? Ask me anything..."
       aria-label="Type a message"
       :disabled="chatState.isSending.value"
@@ -115,8 +114,14 @@ watch(
     flex-shrink: 0;
   }
 
+  .nc-chat-input__textarea :deep(.v-field) {
+    border-radius: 15px !important;
+    overflow: hidden;
+  }
+
   .nc-chat-input__textarea :deep(textarea) {
-    max-height: 120px;
+    color: rgb(var(--v-theme-input-text));
+    font-family: inherit;
   }
 
   .nc-chat-input__textarea :deep(.v-field__append-inner) {

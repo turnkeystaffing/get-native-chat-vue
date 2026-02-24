@@ -14,7 +14,7 @@ inputDocuments:
 
 ## Overview
 
-This document provides the complete epic and story breakdown for native-chat-vue, decomposing the requirements from the PRD, UX Design if it exists, and Architecture requirements into implementable stories. Includes Epic 5 added via Correct Course workflow (2026-02-21) to address missing documentation planning. Includes Epic 6 added via Correct Course workflow (2026-02-22) to align visual implementation with the approved Figma design. Stories 6.4-6.5 added via Correct Course workflow (2026-02-22b) to document animation changes made outside BMAD workflow. Stories 6.6-6.9 added via Correct Course workflow (2026-02-22c) for input redesign, VitePress environment fixes, error message distinction, and panel/header UI polish. Epic 7 added via Correct Course workflow (2026-02-23) to rework scroll behavior to match industry-standard AI chat patterns (force-scroll on send/response, anchor-based history preservation, scroll-to-bottom FAB).
+This document provides the complete epic and story breakdown for native-chat-vue, decomposing the requirements from the PRD, UX Design if it exists, and Architecture requirements into implementable stories. Includes Epic 5 added via Correct Course workflow (2026-02-21) to address missing documentation planning. Includes Epic 6 added via Correct Course workflow (2026-02-22) to align visual implementation with the approved Figma design. Stories 6.4-6.5 added via Correct Course workflow (2026-02-22b) to document animation changes made outside BMAD workflow. Stories 6.6-6.9 added via Correct Course workflow (2026-02-22c) for input redesign, VitePress environment fixes, error message distinction, and panel/header UI polish. Epic 7 added via Correct Course workflow (2026-02-23) to rework scroll behavior to match industry-standard AI chat patterns (force-scroll on send/response, anchor-based history preservation, scroll-to-bottom FAB). Stories 6.12-6.14 added via Correct Course workflow (2026-02-24) for typography enforcement, input/header refinements, and CSS import relocation.
 
 ## Requirements Inventory
 
@@ -198,9 +198,9 @@ Developer finds comprehensive documentation with live interactive demos, enablin
 The chat widget's layout, visual styling, and motion design match the approved Figma design — floating panel with edge gaps, pinned input, polished message spacing, smooth transitions, modern input area, correct theming, error distinction, refined panel/input styling, and enriched demo experience.
 **FRs reinforced:** FR7 (overlay/panel position), FR8 (responsive viewports), FR12 (scroll position), FR18 (disable during pending — loading spinner), FR24 (error display — visual distinction)
 **User outcome:** The widget looks and behaves exactly as designed in Figma. Input is always accessible, panel feels like a lightweight floating assistant rather than a rigid sidebar. Errors are visually recognizable. Demo site displays correctly.
-**Implementation notes:** Replaces v-navigation-drawer with Teleport + positioned div for floating panel. Fixes scroll containment so only MessageList scrolls. CSS polish for bubble padding, message spacing, welcome state positioning. Stories 6.6-6.9 add input redesign (action bar pattern), VitePress theme/CSS fixes, error message distinction, and header/panel polish. Stories 6.10-6.11 add final UI refinements (solo input, panel background, copy button Vuetify refactor, new theme tokens) and demo experience improvements (richer mock data, simulated latency, smaller batch size).
+**Implementation notes:** Replaces v-navigation-drawer with Teleport + positioned div for floating panel. Fixes scroll containment so only MessageList scrolls. CSS polish for bubble padding, message spacing, welcome state positioning. Stories 6.6-6.9 add input redesign (action bar pattern), VitePress theme/CSS fixes, error message distinction, and header/panel polish. Stories 6.10-6.11 add final UI refinements (solo input, panel background, copy button Vuetify refactor, new theme tokens) and demo experience improvements (richer mock data, simulated latency, smaller batch size). Stories 6.12-6.14 add typography enforcement (Open Sans font-family, explicit font-size, input-text theme token), input/header refinements (2-row default, 15px border-radius, text variant close button), and CSS import relocation to plugin install.
 
-*Added via Correct Course workflow (2026-02-22) to align visual implementation with the approved Figma design. Extended via Correct Course workflow (2026-02-22c) with stories 6.6-6.9 for input redesign, VitePress fixes, error distinction, and UI polish. Extended via Correct Course workflow (2026-02-23) with stories 6.10-6.11 for UI refinements and demo experience enhancement.*
+*Added via Correct Course workflow (2026-02-22) to align visual implementation with the approved Figma design. Extended via Correct Course workflow (2026-02-22c) with stories 6.6-6.9 for input redesign, VitePress fixes, error distinction, and UI polish. Extended via Correct Course workflow (2026-02-23) with stories 6.10-6.11 for UI refinements and demo experience enhancement. Extended via Correct Course workflow (2026-02-24) with stories 6.12-6.14 for typography enforcement, input/header refinements, and CSS import relocation.*
 
 ### Epic 7: Scroll Behavior Rework
 The chat widget's scroll behavior matches industry-standard AI chat patterns — force-scroll on send/response, anchor-based history preservation, and a scroll-to-bottom affordance for manual navigation.
@@ -1160,6 +1160,104 @@ So that I can experience infinite scroll and evaluate the plugin's performance w
 *Modifies: `docs/.vitepress/mock/mockApiClient.ts` (older message generation + latency simulation), `docs/.vitepress/theme/index.ts` (batchSize config).*
 
 *Added via Correct Course workflow (2026-02-23) to document demo improvements made outside BMAD workflow.*
+
+### Story 6.12: Typography & Font Enforcement
+
+As a user,
+I want the chat widget to render all text in Open Sans consistently,
+So that the widget matches the approved Figma design typography across all host apps.
+
+**Acceptance Criteria:**
+
+**Given** the chat panel is open
+**When** inspecting any text element
+**Then** the font-family is `'Open Sans', sans-serif` applied via `@layer native-chat` base styles
+**And** `.nc-chat-panel` and `.nc-floating-button-wrapper` both inherit the font
+
+**Given** the VitePress docs site is running
+**When** the chat widget renders
+**Then** Open Sans is loaded via Google Fonts import (weights 300-700)
+**And** all widget text renders in Open Sans, not the VitePress default font
+
+**Given** a message bubble (user or assistant)
+**When** rendered
+**Then** the font-size is explicitly `14px` (matching the UX spec type scale)
+
+**Given** the chat input textarea
+**When** the user types
+**Then** the text renders in the inherited Open Sans font-family
+**And** text color uses the `input-text` theme token (`#727272`)
+
+**Given** the nativeChatTheme definition
+**When** inspecting theme colors
+**Then** `input-text: '#727272'` is defined for textarea text color
+
+*Modifies: `styles.css` (font-family rule), `docs/.vitepress/theme/overrides.css` (Google Fonts import), `MessageBubble.vue` (font-size), `ChatInput.vue` (font-family inherit, color token), `nativeChatTheme.ts` (input-text token).*
+
+*Added via Correct Course workflow (2026-02-24) to document typography changes made outside BMAD workflow.*
+
+### Story 6.13: Input Field & Header Refinements
+
+As a user,
+I want the chat input to have a taller default size and refined border radius, and the header close button to have consistent hover behavior,
+So that the input area feels more inviting and the header controls behave uniformly.
+
+**Acceptance Criteria:**
+
+**Given** the chat input field
+**When** rendered with no text
+**Then** the textarea displays 2 visible rows by default (increased from 1)
+**And** the border-radius is 15px (custom, replacing Vuetify `rounded="lg"`)
+
+**Given** the chat input textarea
+**When** the user types long content
+**Then** the textarea auto-grows up to 10 rows with no max-height CSS constraint
+
+**Given** the close (X) button in the header
+**When** inspecting its variant
+**Then** the button uses `variant="text"` (changed from `variant="plain"`)
+**And** hover produces a subtle background highlight instead of opacity-only change
+
+**Given** the existing test suite
+**When** running `yarn test`
+**Then** all tests pass
+
+*Modifies: `ChatInput.vue` (rows, border-radius, removed max-height), `ChatHeader.vue` (close button variant).*
+
+*Added via Correct Course workflow (2026-02-24) to document input and header refinements made outside BMAD workflow.*
+
+### Story 6.14: CSS Import Relocation to Plugin Install
+
+As a developer,
+I want the plugin's base CSS to load during plugin installation rather than on bare import,
+So that consumers who import individual exports (types, helpers) don't trigger unwanted CSS side effects.
+
+**Acceptance Criteria:**
+
+**Given** a consumer imports only types or helpers from the package
+**When** the import resolves
+**Then** no CSS side effects are triggered (no `styles.css` loaded)
+
+**Given** a consumer calls `app.use(NativeChatPlugin, options)`
+**When** the plugin installs
+**Then** `styles.css` is loaded as a side effect of `plugin.ts`
+**And** the `@layer native-chat` base styles (including font-family) are applied
+
+**Given** the package entry point `src/index.ts`
+**When** inspecting its imports
+**Then** it no longer contains `import './styles.css'`
+
+**Given** `src/plugin.ts`
+**When** inspecting its imports
+**Then** it contains `import './styles.css'` as the first line
+
+**Given** the existing test suite and build
+**When** running `yarn test && yarn build`
+**Then** all tests pass and the CSS is still included in the production bundle
+
+*Modifies: `src/index.ts` (remove CSS import), `src/plugin.ts` (add CSS import).*
+
+*Added via Correct Course workflow (2026-02-24) to document build hygiene change made outside BMAD workflow.*
 
 ## Epic 7: Scroll Behavior Rework
 

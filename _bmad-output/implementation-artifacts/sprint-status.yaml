@@ -82,6 +82,9 @@ development_status:
   6-9-panel-header-ui-polish: done
   6-10-ui-polish-theme-refinements: done
   6-11-demo-experience-enhancement: done
+  6-12-typography-font-enforcement: done
+  6-13-input-field-header-refinements: done
+  6-14-css-import-relocation: done
   epic-6-retrospective: optional
 
   epic-7: done

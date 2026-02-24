@@ -1,3 +1,4 @@
+import './styles.css'
 import type { App, Plugin } from 'vue'
 import type { NativeChatPluginOptions } from '@/types/config'
 import { CONFIG_KEY } from '@/keys'

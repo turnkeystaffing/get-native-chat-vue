@@ -142,6 +142,7 @@ onBeforeUnmount(() => {
     padding: 12px 16px;
     border-radius: 12px;
     word-break: break-word;
+    font-size: 14px;
   }
 
   .nc-message-bubble--user .nc-message-bubble__bubble {

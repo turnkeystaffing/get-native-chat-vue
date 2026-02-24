@@ -1,5 +1,3 @@
-import './styles.css'
-
 export { NativeChatPlugin } from '@/plugin'
 export { NativeChatPlugin as default } from '@/plugin'
 export { default as NativeChatWidget } from '@/components/NativeChatWidget.vue'

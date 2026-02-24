@@ -20,7 +20,8 @@ export const nativeChatTheme: StrictThemeDefinition = {
     'on-surface': '#002B38',
     'welcome-text': '#B0BCC0',
     'chat-background': '#EBEBED',
-    'title': '#9E9E9E'
+    'title': '#9E9E9E',
+    'input-text': '#727272'
   },
   variables: {
     'theme-overlay-multiplier': 1,
