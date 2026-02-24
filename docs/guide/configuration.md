@@ -11,6 +11,7 @@ The plugin accepts a `NativeChatPluginOptions` object when registered with `app.
 | `welcomeMessage` | `string`                          | No       | `'Hello! How can I help you?'` | Text shown in the empty chat state               |
 | `batchSize`      | `number`                          | No       | `20`                           | Number of messages loaded per pagination request |
 | `conversationId` | `string`                          | No       | —                              | Resume a specific conversation on load           |
+| `assistantBubbleFullWidth` | `boolean`                | No       | `false`                        | Remove bubble chrome on assistant messages for full-width content |
 | `onError`        | `(error: ChatError) => void`      | No       | —                              | Callback invoked when a chat error occurs        |
 
 ## `ChatError` Type
@@ -70,6 +71,17 @@ app.use(NativeChatPlugin, {
 })
 ```
 
+### Full-Width Assistant Bubbles
+
+Strip bubble chrome (background, border, padding, border-radius) from assistant messages so content like tables and code blocks can use the full available width:
+
+```ts
+app.use(NativeChatPlugin, {
+  apiClient,
+  assistantBubbleFullWidth: true,
+})
+```
+
 ### Resuming a Conversation
 
 Pass a `conversationId` to open a specific conversation when the widget loads:
@@ -108,6 +120,7 @@ app.use(NativeChatPlugin, {
   welcomeMessage: 'Hi there! How can I help?',
   batchSize: 50,
   conversationId: savedConversationId,
+  assistantBubbleFullWidth: false,
   onError: (error: ChatError) => {
     errorReporter.captureError(error)
   },

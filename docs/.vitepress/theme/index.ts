@@ -6,7 +6,7 @@ import * as directives from 'vuetify/directives'
 import '@mdi/font/css/materialdesignicons.css'
 import { nativeChatTheme } from '../../../src/theme/nativeChatTheme'
 import { NativeChatPlugin } from '@/plugin'
-import { mockApiClient } from '../mock/mockApiClient'
+import { demoConfig } from '../mock/demoConfig'
 import Layout from './Layout.vue'
 import './overrides.css'
 
@@ -26,7 +26,7 @@ export default {
   enhanceApp({ app }) {
     app.use(vuetify)
     if (typeof window !== 'undefined') {
-      app.use(NativeChatPlugin, { apiClient: mockApiClient, batchSize: 5 })
+      app.use(NativeChatPlugin, demoConfig)
     }
   },
 } satisfies Theme

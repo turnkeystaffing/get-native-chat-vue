@@ -1,8 +1,9 @@
 <script setup lang="ts">
-import { ref, computed, onBeforeUnmount } from 'vue'
+import { ref, computed, inject, onBeforeUnmount } from 'vue'
 import { marked } from 'marked'
 import DOMPurify from 'dompurify'
 import type { ChatMessage } from '@/types/chat'
+import { CONFIG_KEY } from '@/keys'
 import IconStar from '@/icons/IconStar.vue'
 import IconWarning from '@/icons/IconWarning.vue'
 import IconCopy from '@/icons/IconCopy.vue'
@@ -16,6 +17,10 @@ interface MessageBubbleProps {
 const props = withDefaults(defineProps<MessageBubbleProps>(), {
   animate: false,
 })
+
+const config = inject(CONFIG_KEY, undefined)
+const showHeader = computed(() => config?.showBubbleHeaders ?? true)
+const assistantFullWidth = computed(() => config?.assistantBubbleFullWidth ?? false)
 
 const isUser = computed(() => props.message.role === 'user')
 const isError = computed(
@@ -67,10 +72,11 @@ onBeforeUnmount(() => {
       'nc-message-bubble--assistant': isAssistant,
       'nc-message-bubble--error': isError,
       'nc-message-bubble--sending': isSending,
+      'nc-message-bubble--flat': isAssistant && assistantFullWidth,
       'nc-message-bubble--animate-in': props.animate,
     }"
   >
-    <div class="nc-message-bubble__header">
+    <div v-if="showHeader" class="nc-message-bubble__header">
       <template v-if="isUser">
         <span class="nc-message-bubble__label">You</span>
       </template>
@@ -171,6 +177,17 @@ onBeforeUnmount(() => {
     opacity: 0.7;
   }
 
+  .nc-message-bubble--flat .nc-message-bubble__bubble {
+    max-width: 100%;
+    background: transparent;
+    border: none;
+    border-radius: 0;
+  }
+
+  .nc-message-bubble--flat > .v-btn {
+    margin-left: 10px;
+  }
+
   /* Markdown content styling via :deep() for v-html */
   .nc-message-bubble__content :deep(h1),
   .nc-message-bubble__content :deep(h2),
@@ -217,6 +234,20 @@ onBeforeUnmount(() => {
     padding: 8px;
     border-radius: 4px;
     overflow-x: auto;
+  }
+
+  .nc-message-bubble__content :deep(pre code) {
+    background: transparent;
+    padding: 0;
+    border-radius: 0;
+  }
+
+  .nc-message-bubble--flat :deep(code) {
+    background: rgba(var(--v-theme-on-surface), 0.1);
+  }
+
+  .nc-message-bubble--flat :deep(pre) {
+    background: rgba(var(--v-theme-on-surface), 0.1);
   }
 
   .nc-message-bubble__content :deep(a) {

@@ -265,6 +265,8 @@ export interface NativeChatPluginOptions {
   batchSize?: number                                // Default: 20
   conversationId?: string                           // Resume specific conversation
   hideToggleWhenOpen?: boolean                       // Default: false — hide FAB when panel open
+  showBubbleHeaders?: boolean                        // Default: true — show role labels on message bubbles
+  assistantBubbleFullWidth?: boolean                  // Default: false — strip bubble chrome for full-width assistant content
   onError?: (error: ChatError) => void              // Error notification hook
 }
 ```
@@ -606,7 +608,7 @@ native-chat-vue/
 - **FloatingButton** reads `isOpen` from injected state; calls `open()` / `close()` actions; swaps icon (star ↔ close) with rotate+scale transition
 - **ChatPanel** renders the chat drawer — reads `isOpen` from injected state, contains ChatHeader, MessageList, ChatInput, WelcomeState
 - **MessageList** reads `messages`, `isLoading`, `isSending`, `hasMore` from injected state; emits `@load-more`; tracks animation state via `knownIds`/`animatingIds` sets — suppresses animation on initial load and history prepend, enables it only for newly appended messages. Implements event-driven scroll policy: force-scroll to bottom on user send and assistant response; scroll position preservation on history prepend delegated to VInfiniteScroll's native `side="start"` scroll management (captures `previousScrollSize` before load, adjusts `scrollTop` after `done()`). Includes a scroll-to-bottom FAB (`v-btn` icon, down-arrow) that appears when user has scrolled up past ~50px threshold.
-- **MessageBubble** is a pure display component — receives a single message and optional `animate` flag via props, no state access; entrance animation slides from left (assistant/error) or right (user) when `animate` is true
+- **MessageBubble** is a display component — receives a single message and optional `animate` flag via props; injects `CONFIG_KEY` to read `showBubbleHeaders` (toggles header visibility) and `assistantBubbleFullWidth` (applies `--flat` class stripping bubble chrome for full-width content); entrance animation slides from left (assistant/error) or right (user) when `animate` is true
 - **ChatInput** reads `isSending`, `failedMessageText` from state; calls `sendMessage()` / `retry()` actions
 - **ChatHeader** calls `close()` action
 - **WelcomeState** is a pure display component — no state, no props beyond `welcomeMessage`

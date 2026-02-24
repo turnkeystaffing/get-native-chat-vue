@@ -1,6 +1,9 @@
 import { mount } from '@vue/test-utils'
 import { nextTick } from 'vue'
 import MessageBubble from '@/components/MessageBubble.vue'
+import { CONFIG_KEY } from '@/keys'
+import type { NativeChatPluginOptions } from '@/types/config'
+import type { NativeChatApiClient } from '@/types/api'
 import type { ChatMessage } from '@/types/chat'
 
 vi.mock('marked', () => ({
@@ -26,9 +29,36 @@ function createMessage(overrides: Partial<ChatMessage> = {}): ChatMessage {
   }
 }
 
+function createMockApiClient(): NativeChatApiClient {
+  return {
+    createConversation: vi.fn(),
+    getConversations: vi.fn(),
+    getMessages: vi.fn(),
+    sendMessage: vi.fn(),
+  }
+}
+
 function mountBubble(message: ChatMessage, animate = false) {
   return mount(MessageBubble, {
     props: { message, animate },
+  })
+}
+
+function mountBubbleWithConfig(
+  message: ChatMessage,
+  configOverrides: Partial<NativeChatPluginOptions> = {},
+) {
+  const config: NativeChatPluginOptions = {
+    apiClient: createMockApiClient(),
+    ...configOverrides,
+  }
+  return mount(MessageBubble, {
+    props: { message },
+    global: {
+      provide: {
+        [CONFIG_KEY as symbol]: config,
+      },
+    },
   })
 }
 
@@ -54,7 +84,7 @@ describe('MessageBubble', () => {
     const wrapper = mountBubble(createMessage({ role: 'assistant', content: 'Hello' }))
 
     expect(wrapper.find('.nc-message-bubble__header').exists()).toBe(true)
-    expect(wrapper.find('.nc-message-bubble__star').exists()).toBe(true)
+    expect(wrapper.find('.v-avatar').exists()).toBe(true)
     expect(wrapper.find('.nc-message-bubble__label').text()).toBe('AI Assistant')
     expect(wrapper.find('.nc-message-bubble__warning-icon').exists()).toBe(false)
   })
@@ -243,7 +273,7 @@ describe('MessageBubble', () => {
       expect(wrapper.find('.nc-message-bubble__header').exists()).toBe(true)
       expect(wrapper.find('.nc-message-bubble__warning-icon').exists()).toBe(true)
       expect(wrapper.find('.nc-message-bubble__label').text()).toBe('Error')
-      expect(wrapper.find('.nc-message-bubble__star').exists()).toBe(false)
+      expect(wrapper.find('.v-avatar').exists()).toBe(false)
     })
 
     it('shows error header with warning icon and "Error" label (not assistant header)', () => {
@@ -254,7 +284,7 @@ describe('MessageBubble', () => {
       expect(wrapper.find('.nc-message-bubble__header').exists()).toBe(true)
       expect(wrapper.find('.nc-message-bubble__warning-icon').exists()).toBe(true)
       expect(wrapper.find('.nc-message-bubble__label').text()).toBe('Error')
-      expect(wrapper.find('.nc-message-bubble__star').exists()).toBe(false)
+      expect(wrapper.find('.v-avatar').exists()).toBe(false)
     })
 
     it('renders as li with role="listitem"', () => {
@@ -308,6 +338,89 @@ describe('MessageBubble', () => {
 
       expect(wrapper.classes()).toContain('nc-message-bubble--animate-in')
       expect(wrapper.classes()).toContain('nc-message-bubble--assistant')
+    })
+  })
+
+  describe('showBubbleHeaders config', () => {
+    it('header is rendered by default when no config is provided', () => {
+      const wrapper = mountBubble(createMessage({ role: 'assistant' }))
+
+      expect(wrapper.find('.nc-message-bubble__header').exists()).toBe(true)
+    })
+
+    it('header is hidden when showBubbleHeaders is false', () => {
+      const wrapper = mountBubbleWithConfig(createMessage({ role: 'assistant' }), {
+        showBubbleHeaders: false,
+      })
+
+      expect(wrapper.find('.nc-message-bubble__header').exists()).toBe(false)
+      expect(wrapper.find('.nc-message-bubble__content').exists()).toBe(true)
+    })
+
+    it('header is visible when showBubbleHeaders is true', () => {
+      const wrapper = mountBubbleWithConfig(createMessage({ role: 'assistant' }), {
+        showBubbleHeaders: true,
+      })
+
+      expect(wrapper.find('.nc-message-bubble__header').exists()).toBe(true)
+    })
+
+    it('header is hidden for user messages when showBubbleHeaders is false', () => {
+      const wrapper = mountBubbleWithConfig(createMessage({ role: 'user', content: 'Hi' }), {
+        showBubbleHeaders: false,
+      })
+
+      expect(wrapper.find('.nc-message-bubble__header').exists()).toBe(false)
+      expect(wrapper.find('.nc-message-bubble__content').text()).toBe('Hi')
+    })
+  })
+
+  describe('assistantBubbleFullWidth config', () => {
+    it('does not apply --flat class by default (no config)', () => {
+      const wrapper = mountBubble(createMessage({ role: 'assistant', content: 'Hello' }))
+
+      expect(wrapper.classes()).not.toContain('nc-message-bubble--flat')
+    })
+
+    it('does not apply --flat class when assistantBubbleFullWidth is false', () => {
+      const wrapper = mountBubbleWithConfig(createMessage({ role: 'assistant', content: 'Hello' }), {
+        assistantBubbleFullWidth: false,
+      })
+
+      expect(wrapper.classes()).not.toContain('nc-message-bubble--flat')
+    })
+
+    it('applies --flat class to assistant message when assistantBubbleFullWidth is true', () => {
+      const wrapper = mountBubbleWithConfig(createMessage({ role: 'assistant', content: 'Hello' }), {
+        assistantBubbleFullWidth: true,
+      })
+
+      expect(wrapper.classes()).toContain('nc-message-bubble--flat')
+    })
+
+    it('does not apply --flat class to user message when assistantBubbleFullWidth is true', () => {
+      const wrapper = mountBubbleWithConfig(createMessage({ role: 'user', content: 'Hi' }), {
+        assistantBubbleFullWidth: true,
+      })
+
+      expect(wrapper.classes()).not.toContain('nc-message-bubble--flat')
+    })
+
+    it('does not apply --flat class to error message when assistantBubbleFullWidth is true', () => {
+      const wrapper = mountBubbleWithConfig(
+        createMessage({ id: 'error-1', role: 'assistant', content: 'Error' }),
+        { assistantBubbleFullWidth: true },
+      )
+
+      expect(wrapper.classes()).not.toContain('nc-message-bubble--flat')
+    })
+
+    it('copy button is still present when assistantBubbleFullWidth is true', () => {
+      const wrapper = mountBubbleWithConfig(createMessage({ role: 'assistant', content: 'Hello' }), {
+        assistantBubbleFullWidth: true,
+      })
+
+      expect(wrapper.find('[aria-label="Copy message"]').exists()).toBe(true)
     })
   })
 })

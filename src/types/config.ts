@@ -8,5 +8,7 @@ export interface NativeChatPluginOptions {
   batchSize?: number
   conversationId?: string
   hideToggleWhenOpen?: boolean
+  showBubbleHeaders?: boolean
+  assistantBubbleFullWidth?: boolean
   onError?: (error: ChatError) => void
 }

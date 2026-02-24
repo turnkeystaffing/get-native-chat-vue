@@ -18,11 +18,23 @@ import WidgetDemoSource from './demos/WidgetDemo.vue?raw'
 import WidgetDemo from './demos/WidgetDemo.vue'
 import WidgetErrorDemoSource from './demos/WidgetErrorDemo.vue?raw'
 import WidgetErrorDemo from './demos/WidgetErrorDemo.vue'
+import WidgetConfigDemoSource from './demos/WidgetConfigDemo.vue?raw'
+import WidgetConfigDemo from './demos/WidgetConfigDemo.vue'
 </script>
 
 <ClientOnly>
   <DemoBlock :source="WidgetDemoSource">
     <WidgetDemo />
+  </DemoBlock>
+</ClientOnly>
+
+## Widget Configuration
+
+Use the controls below to toggle widget config options at runtime. Changes apply immediately to the live widget above.
+
+<ClientOnly>
+  <DemoBlock :source="WidgetConfigDemoSource">
+    <WidgetConfigDemo />
   </DemoBlock>
 </ClientOnly>
 

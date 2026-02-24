@@ -14,7 +14,7 @@ inputDocuments:
 
 ## Overview
 
-This document provides the complete epic and story breakdown for native-chat-vue, decomposing the requirements from the PRD, UX Design if it exists, and Architecture requirements into implementable stories. Includes Epic 5 added via Correct Course workflow (2026-02-21) to address missing documentation planning. Includes Epic 6 added via Correct Course workflow (2026-02-22) to align visual implementation with the approved Figma design. Stories 6.4-6.5 added via Correct Course workflow (2026-02-22b) to document animation changes made outside BMAD workflow. Stories 6.6-6.9 added via Correct Course workflow (2026-02-22c) for input redesign, VitePress environment fixes, error message distinction, and panel/header UI polish. Epic 7 added via Correct Course workflow (2026-02-23) to rework scroll behavior to match industry-standard AI chat patterns (force-scroll on send/response, anchor-based history preservation, scroll-to-bottom FAB). Stories 6.12-6.14 added via Correct Course workflow (2026-02-24) for typography enforcement, input/header refinements, and CSS import relocation.
+This document provides the complete epic and story breakdown for native-chat-vue, decomposing the requirements from the PRD, UX Design if it exists, and Architecture requirements into implementable stories. Includes Epic 5 added via Correct Course workflow (2026-02-21) to address missing documentation planning. Includes Epic 6 added via Correct Course workflow (2026-02-22) to align visual implementation with the approved Figma design. Stories 6.4-6.5 added via Correct Course workflow (2026-02-22b) to document animation changes made outside BMAD workflow. Stories 6.6-6.9 added via Correct Course workflow (2026-02-22c) for input redesign, VitePress environment fixes, error message distinction, and panel/header UI polish. Epic 7 added via Correct Course workflow (2026-02-23) to rework scroll behavior to match industry-standard AI chat patterns (force-scroll on send/response, anchor-based history preservation, scroll-to-bottom FAB). Stories 6.12-6.14 added via Correct Course workflow (2026-02-24) for typography enforcement, input/header refinements, and CSS import relocation. Stories 6.15-6.16 added via Correct Course workflow (2026-02-24) for widget configuration options (bubble headers toggle, full-width assistant mode), CSS specificity fix, scrollbar polish, and test alignment.
 
 ## Requirements Inventory
 
@@ -1258,6 +1258,95 @@ So that consumers who import individual exports (types, helpers) don't trigger u
 *Modifies: `src/index.ts` (remove CSS import), `src/plugin.ts` (add CSS import).*
 
 *Added via Correct Course workflow (2026-02-24) to document build hygiene change made outside BMAD workflow.*
+
+### Story 6.15: Widget Configuration Options — Bubble Headers & Full-Width Mode
+
+As a developer,
+I want to toggle bubble header labels and strip assistant bubble chrome via plugin config,
+So that I can adapt the chat appearance to different use cases (e.g., content-heavy responses that need full width).
+
+**Acceptance Criteria:**
+
+**Given** the `NativeChatPluginOptions` interface
+**When** inspecting available options
+**Then** `showBubbleHeaders?: boolean` (default `true`) controls visibility of role labels ("You", "AI Assistant", "Error")
+**And** `assistantBubbleFullWidth?: boolean` (default `false`) strips bubble chrome from assistant messages
+
+**Given** `showBubbleHeaders` is set to `false`
+**When** any message renders (user, assistant, or error)
+**Then** the `.nc-message-bubble__header` div is not present in the DOM (`v-if`)
+**And** message content still renders normally
+
+**Given** `assistantBubbleFullWidth` is set to `true`
+**When** an assistant message renders
+**Then** the bubble has class `nc-message-bubble--flat`
+**And** the bubble background is transparent, border is removed, border-radius is 0, and max-width is 100%
+**And** code blocks (`code`, `pre`) inside flat bubbles use `rgba(var(--v-theme-on-surface), 0.1)` background
+
+**Given** `assistantBubbleFullWidth` is set to `true`
+**When** a user message or error message renders
+**Then** the `--flat` class is NOT applied (only affects assistant role)
+
+**Given** the MessageBubble component
+**When** inspecting its setup
+**Then** it injects `CONFIG_KEY` to read plugin options
+**And** `showHeader` and `assistantFullWidth` are computed from config with safe defaults
+
+**Given** the VitePress docs site
+**When** the widget.md page renders
+**Then** a "Widget Configuration" demo section shows two `v-switch` toggles
+**And** toggling them updates the live widget immediately via a reactive `demoConfig` object
+
+**Given** `docs/.vitepress/theme/index.ts`
+**When** the plugin is registered
+**Then** it uses the shared reactive `demoConfig` (from `docs/.vitepress/mock/demoConfig.ts`) instead of an inline config object
+
+**Given** `docs/guide/configuration.md`
+**When** reading the options table
+**Then** `assistantBubbleFullWidth` is documented with type, default, and description
+**And** a usage example section "Full-Width Assistant Bubbles" is included
+
+**Given** the test suite
+**When** running `yarn test`
+**Then** 4 tests cover `showBubbleHeaders` (default visible, hidden when false, visible when true, hidden for user messages)
+**And** 6 tests cover `assistantBubbleFullWidth` (no flat by default, not applied when false, applied for assistant, not for user, not for error, copy button still present)
+**And** all existing tests pass
+
+*Modifies: `src/types/config.ts`, `src/components/MessageBubble.vue`, `src/components/__tests__/MessageBubble.test.ts`, `docs/.vitepress/theme/index.ts`, `docs/components/widget.md`, `docs/guide/configuration.md`. New files: `docs/.vitepress/mock/demoConfig.ts`, `docs/components/demos/WidgetConfigDemo.vue`.*
+
+*Added via Correct Course workflow (2026-02-24) to document configuration options implemented outside BMAD workflow.*
+
+### Story 6.16: CSS Specificity Fix, Scrollbar Polish & Test Alignment
+
+As a user,
+I want the chat panel background to render correctly regardless of Vuetify's specificity, and the scrollbar to have subtle styling,
+So that the panel appearance is reliable across host apps and the scroll area feels polished.
+
+**Acceptance Criteria:**
+
+**Given** the ChatPanel is rendered inside a `v-theme-provider`
+**When** Vuetify applies its unlayered `.v-theme-provider` background styles
+**Then** the `nc-chat-panel` background rule is placed OUTSIDE `@layer native-chat` (unlayered)
+**And** it uses `background: rgb(var(--v-theme-chat-background))` to beat Vuetify's specificity
+**And** the layered `@layer native-chat` block no longer contains the background property
+
+**Given** the message list scroll area
+**When** the user scrolls through messages
+**Then** the scrollbar uses `scrollbar-color: rgba(0, 0, 0, 0.2) transparent`
+**And** the scrollbar blends subtly with the panel background
+
+**Given** the ChatHeader close button
+**When** running the test suite
+**Then** the test expects `variant="text"` (aligned with Story 6.13's implementation change from `variant="plain"`)
+**And** the test description reads `'close button uses variant="text"'`
+
+**Given** the existing test suite
+**When** running `yarn test`
+**Then** all tests pass
+
+*Modifies: `src/components/ChatPanel.vue` (CSS specificity fix), `src/components/MessageList.vue` (scrollbar-color), `src/components/__tests__/ChatHeader.test.ts` (variant assertion alignment).*
+
+*Added via Correct Course workflow (2026-02-24) to document CSS and test fixes made outside BMAD workflow.*
 
 ## Epic 7: Scroll Behavior Rework
 

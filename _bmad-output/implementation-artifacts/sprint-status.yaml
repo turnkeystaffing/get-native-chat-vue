@@ -85,6 +85,8 @@ development_status:
   6-12-typography-font-enforcement: done
   6-13-input-field-header-refinements: done
   6-14-css-import-relocation: done
+  6-15-widget-config-options-bubble-headers-fullwidth: done
+  6-16-css-specificity-fix-scrollbar-test-alignment: done
   epic-6-retrospective: optional
 
   epic-7: done

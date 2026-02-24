@@ -68,11 +68,11 @@ describe('ChatHeader', () => {
     expect(closeFn).toHaveBeenCalledOnce()
   })
 
-  it('close button uses variant="plain" (opacity-only hover)', () => {
+  it('close button uses variant="text" (opacity-only hover)', () => {
     const { wrapper } = mountChatHeader()
     const closeBtn = wrapper.findComponent({ name: 'VBtn' })
 
-    expect(closeBtn.props('variant')).toBe('plain')
+    expect(closeBtn.props('variant')).toBe('text')
   })
 
   it('close button uses size="default" (meets 44px tap target)', () => {

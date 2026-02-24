@@ -73,6 +73,11 @@ onUnmounted(() => {
 </template>
 
 <style scoped>
+/* Unlayered — must beat Vuetify's unlayered .v-theme-provider background */
+.nc-chat-panel {
+  background: rgb(var(--v-theme-chat-background));
+}
+
 @layer native-chat {
   .nc-chat-panel {
     position: fixed;
@@ -86,7 +91,6 @@ onUnmounted(() => {
     flex-direction: column;
     overflow: hidden;
     z-index: 10000;
-    background: rgb(var(--v-theme-chat-background));
   }
 
   .nc-chat-panel--mobile {

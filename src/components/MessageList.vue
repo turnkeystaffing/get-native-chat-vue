@@ -185,6 +185,7 @@ async function handleLoadMore({ done }: { done: (status: InfiniteScrollStatus) =
   .nc-message-list-scroll {
     flex: 1;
     overflow-y: auto;
+    scrollbar-color: rgba(0, 0, 0, 0.2) transparent;
   }
 
   .nc-message-list {
