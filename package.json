@@ -1,23 +1,23 @@
 {
-  "name": "@turnkeystaffing/native-chat-vue",
-  "version": "1.0.0",
+  "name": "@turnkeystaffing/get-native-chat-vue",
+  "version": "1.0.1",
   "repository": {
     "type": "git",
-    "url": "https://github.com/turnkeystaffing/native-chat-vue.git"
+    "url": "https://github.com/turnkeystaffing/get-native-chat-vue.git"
   },
   "publishConfig": {
     "registry": "https://npm.pkg.github.com"
   },
   "type": "module",
-  "main": "./dist/native-chat-vue.es.js",
-  "module": "./dist/native-chat-vue.es.js",
+  "main": "./dist/get-native-chat-vue.es.js",
+  "module": "./dist/get-native-chat-vue.es.js",
   "types": "./dist/types/index.d.ts",
   "exports": {
     ".": {
-      "import": "./dist/native-chat-vue.es.js",
+      "import": "./dist/get-native-chat-vue.es.js",
       "types": "./dist/types/index.d.ts"
     },
-    "./style.css": "./dist/native-chat-vue.css"
+    "./style.css": "./dist/get-native-chat-vue.css"
   },
   "files": [
     "dist"

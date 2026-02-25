@@ -2448,7 +2448,7 @@ const Da = /* @__PURE__ */ V(La, [["render", Ma]]), Oa = { class: "nc-chat-input
 };
 function qa(s) {
   if (!s?.axiosInstance)
-    throw new Error("[native-chat-vue] createNativeChatApiClient requires an axiosInstance");
+    throw new Error("[get-native-chat-vue] createNativeChatApiClient requires an axiosInstance");
   const { axiosInstance: e } = s;
   return {
     async createConversation() {

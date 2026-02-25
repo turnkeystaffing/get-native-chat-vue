@@ -1531,6 +1531,45 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@turnkeystaffing/get-native-chat-vue@workspace:.":
+  version: 0.0.0-use.local
+  resolution: "@turnkeystaffing/get-native-chat-vue@workspace:."
+  dependencies:
+    "@mdi/font": "npm:^7.4.0"
+    "@playwright/test": "npm:^1.58.2"
+    "@vitejs/plugin-vue": "npm:^5.2.0"
+    "@vue/eslint-config-typescript": "npm:^14.0.0"
+    "@vue/test-utils": "npm:^2.4.6"
+    axios: "npm:^1.9.0"
+    dompurify: "npm:^3.3.0"
+    eslint: "npm:^10.0.0"
+    eslint-config-prettier: "npm:^10.1.8"
+    eslint-plugin-vue: "npm:^10.8.0"
+    jiti: "npm:^2.6.1"
+    jsdom: "npm:^28.1.0"
+    marked: "npm:^17.0.0"
+    prettier: "npm:^3.8.0"
+    sass-embedded: "npm:^1.97.3"
+    typescript: "npm:^5.9.0"
+    typescript-eslint: "npm:^8.56.0"
+    vite: "npm:^7.3.0"
+    vite-plugin-dts: "npm:^4.5.0"
+    vite-plugin-vuetify: "npm:^2.1.3"
+    vitepress: "npm:^1.6.4"
+    vitest: "npm:^4.0.0"
+    vue: "npm:^3.5.28"
+    vue-tsc: "npm:^2.2.0"
+    vuetify: "npm:^3.11.8"
+  peerDependencies:
+    axios: ^1.0.0
+    vue: ^3.5.0
+    vuetify: ^3.11.0
+  peerDependenciesMeta:
+    axios:
+      optional: true
+  languageName: unknown
+  linkType: soft
+
 "@types/argparse@npm:1.0.38":
   version: 1.0.38
   resolution: "@types/argparse@npm:1.0.38"
@@ -4382,45 +4421,6 @@ __metadata:
   checksum: 10c0/40e7f70b3d15f725ca072dfc4f74e81fcf1fbb02e491cf58ac0c79093adc9b0a73b152bcde57df4b79cd097e13023d7504acb38404a4da7bc1cd8e887b82fe0b
   languageName: node
   linkType: hard
-
-"native-chat-vue@workspace:.":
-  version: 0.0.0-use.local
-  resolution: "native-chat-vue@workspace:."
-  dependencies:
-    "@mdi/font": "npm:^7.4.0"
-    "@playwright/test": "npm:^1.58.2"
-    "@vitejs/plugin-vue": "npm:^5.2.0"
-    "@vue/eslint-config-typescript": "npm:^14.0.0"
-    "@vue/test-utils": "npm:^2.4.6"
-    axios: "npm:^1.9.0"
-    dompurify: "npm:^3.3.0"
-    eslint: "npm:^10.0.0"
-    eslint-config-prettier: "npm:^10.1.8"
-    eslint-plugin-vue: "npm:^10.8.0"
-    jiti: "npm:^2.6.1"
-    jsdom: "npm:^28.1.0"
-    marked: "npm:^17.0.0"
-    prettier: "npm:^3.8.0"
-    sass-embedded: "npm:^1.97.3"
-    typescript: "npm:^5.9.0"
-    typescript-eslint: "npm:^8.56.0"
-    vite: "npm:^7.3.0"
-    vite-plugin-dts: "npm:^4.5.0"
-    vite-plugin-vuetify: "npm:^2.1.3"
-    vitepress: "npm:^1.6.4"
-    vitest: "npm:^4.0.0"
-    vue: "npm:^3.5.28"
-    vue-tsc: "npm:^2.2.0"
-    vuetify: "npm:^3.11.8"
-  peerDependencies:
-    axios: ^1.0.0
-    vue: ^3.5.0
-    vuetify: ^3.11.0
-  peerDependenciesMeta:
-    axios:
-      optional: true
-  languageName: unknown
-  linkType: soft
 
 "natural-compare@npm:^1.4.0":
   version: 1.4.0

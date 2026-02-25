@@ -20,7 +20,7 @@ export default defineConfig({
     lib: {
       entry: resolve(__dirname, 'src/index.ts'),
       name: 'NativeChatVue',
-      fileName: () => 'native-chat-vue.es.js',
+      fileName: () => 'get-native-chat-vue.es.js',
       formats: ['es'],
     },
     rollupOptions: {

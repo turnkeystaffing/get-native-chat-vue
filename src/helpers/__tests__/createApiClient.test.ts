@@ -27,13 +27,13 @@ describe('createNativeChatApiClient', () => {
   it('throws a descriptive error when axiosInstance is undefined', () => {
     expect(() =>
       createNativeChatApiClient({ axiosInstance: undefined as unknown as AxiosInstance }),
-    ).toThrow('[native-chat-vue] createNativeChatApiClient requires an axiosInstance')
+    ).toThrow('[get-native-chat-vue] createNativeChatApiClient requires an axiosInstance')
   })
 
   it('throws a descriptive error when config is null', () => {
     expect(() =>
       createNativeChatApiClient(null as unknown as { axiosInstance: AxiosInstance }),
-    ).toThrow('[native-chat-vue] createNativeChatApiClient requires an axiosInstance')
+    ).toThrow('[get-native-chat-vue] createNativeChatApiClient requires an axiosInstance')
   })
 
   describe('createConversation', () => {

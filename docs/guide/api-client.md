@@ -7,7 +7,7 @@ The plugin communicates with your backend through a `NativeChatApiClient` interf
 The interface defines four methods:
 
 ```ts
-import type { NativeChatApiClient } from 'native-chat-vue'
+import type { NativeChatApiClient } from '@turnkeystaffing/get-native-chat-vue'
 
 interface NativeChatApiClient {
   createConversation(): Promise<ConversationResponse>
@@ -32,7 +32,7 @@ import type {
   MessageResponse,
   MessageHistoryResponse,
   SendMessageResponse,
-} from 'native-chat-vue'
+} from '@turnkeystaffing/get-native-chat-vue'
 ```
 
 ### `ConversationResponse`
@@ -110,7 +110,7 @@ The package provides a convenience helper that delegates all HTTP calls through 
 
 ```ts
 import axios from 'axios'
-import { createNativeChatApiClient } from 'native-chat-vue'
+import { createNativeChatApiClient } from '@turnkeystaffing/get-native-chat-vue'
 
 const axiosInstance = axios.create({ baseURL: 'https://api.example.com' })
 // Add interceptors for auth, retry, error handling, etc.
@@ -144,7 +144,7 @@ The helper passes relative paths to the Axios instance. The final URL is resolve
 If you prefer not to use Axios, implement the `NativeChatApiClient` interface directly with `fetch` or any other HTTP library:
 
 ```ts
-import type { NativeChatApiClient } from 'native-chat-vue'
+import type { NativeChatApiClient } from '@turnkeystaffing/get-native-chat-vue'
 
 const customApiClient: NativeChatApiClient = {
   async createConversation() {

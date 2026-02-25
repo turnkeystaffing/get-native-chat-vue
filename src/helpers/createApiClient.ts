@@ -11,7 +11,7 @@ export function createNativeChatApiClient(config: {
   axiosInstance: AxiosInstance
 }): NativeChatApiClient {
   if (!config?.axiosInstance) {
-    throw new Error('[native-chat-vue] createNativeChatApiClient requires an axiosInstance')
+    throw new Error('[get-native-chat-vue] createNativeChatApiClient requires an axiosInstance')
   }
 
   const { axiosInstance } = config

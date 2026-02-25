@@ -14,15 +14,15 @@ The host application must already have Vuetify set up (theme, icons, etc.) befor
 ::: code-group
 
 ```sh [yarn]
-yarn add native-chat-vue
+yarn add @turnkeystaffing/get-native-chat-vue
 ```
 
 ```sh [npm]
-npm install native-chat-vue
+npm install @turnkeystaffing/get-native-chat-vue
 ```
 
 ```sh [pnpm]
-pnpm add native-chat-vue
+pnpm add @turnkeystaffing/get-native-chat-vue
 ```
 
 :::
@@ -38,9 +38,9 @@ Register the plugin in your application entry point:
 import { createApp } from 'vue'
 import { createVuetify } from 'vuetify'
 import axios from 'axios'
-import { NativeChatPlugin, createNativeChatApiClient } from 'native-chat-vue'
+import { NativeChatPlugin, createNativeChatApiClient } from '@turnkeystaffing/get-native-chat-vue'
 import 'vuetify/styles'
-import 'native-chat-vue/style.css'
+import '@turnkeystaffing/get-native-chat-vue/style.css'
 import App from './App.vue'
 
 const vuetify = createVuetify()
@@ -62,7 +62,7 @@ If `apiClient` is missing from the options, the plugin logs a `console.warn` and
 `NativeChatPlugin` is also available as the default export:
 
 ```ts
-import NativeChatPlugin from 'native-chat-vue'
+import NativeChatPlugin from '@turnkeystaffing/get-native-chat-vue'
 ```
 
 ## Template Placement
@@ -91,9 +91,9 @@ Here is a minimal working integration:
 import { createApp } from 'vue'
 import { createVuetify } from 'vuetify'
 import axios from 'axios'
-import { NativeChatPlugin, createNativeChatApiClient } from 'native-chat-vue'
+import { NativeChatPlugin, createNativeChatApiClient } from '@turnkeystaffing/get-native-chat-vue'
 import 'vuetify/styles'
-import 'native-chat-vue/style.css'
+import '@turnkeystaffing/get-native-chat-vue/style.css'
 import App from './App.vue'
 
 const vuetify = createVuetify()

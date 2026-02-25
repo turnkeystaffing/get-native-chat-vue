@@ -21,7 +21,7 @@ The plugin accepts a `NativeChatPluginOptions` object when registered with `app.
 The `onError` callback receives a `ChatError` object:
 
 ```ts
-import type { ChatError } from 'native-chat-vue'
+import type { ChatError } from '@turnkeystaffing/get-native-chat-vue'
 
 interface ChatError {
   message: string
@@ -109,8 +109,8 @@ No component is registered and no error is thrown. The host application continue
 
 ```ts
 import axios from 'axios'
-import { NativeChatPlugin, createNativeChatApiClient } from 'native-chat-vue'
-import type { ChatError } from 'native-chat-vue'
+import { NativeChatPlugin, createNativeChatApiClient } from '@turnkeystaffing/get-native-chat-vue'
+import type { ChatError } from '@turnkeystaffing/get-native-chat-vue'
 
 const axiosInstance = axios.create({ baseURL: 'https://api.example.com' })
 // axiosInstance.interceptors.request.use(...) — add auth, retry, etc.
