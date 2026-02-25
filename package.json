@@ -1,6 +1,13 @@
 {
-  "name": "native-chat-vue",
-  "version": "0.1.0",
+  "name": "@turnkeystaffing/native-chat-vue",
+  "version": "1.0.0",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/turnkeystaffing/native-chat-vue.git"
+  },
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com"
+  },
   "type": "module",
   "main": "./dist/native-chat-vue.es.js",
   "module": "./dist/native-chat-vue.es.js",
