@@ -37,6 +37,7 @@ Register the plugin in your application entry point:
 // main.ts
 import { createApp } from 'vue'
 import { createVuetify } from 'vuetify'
+import axios from 'axios'
 import { NativeChatPlugin, createNativeChatApiClient } from 'native-chat-vue'
 import 'vuetify/styles'
 import 'native-chat-vue/style.css'
@@ -44,10 +45,11 @@ import App from './App.vue'
 
 const vuetify = createVuetify()
 
-const apiClient = createNativeChatApiClient({
-  baseUrl: 'https://api.example.com',
-  getAccessToken: () => authStore.token,
-})
+// Create an Axios instance with your base URL and interceptors
+const axiosInstance = axios.create({ baseURL: 'https://api.example.com' })
+// axiosInstance.interceptors.request.use(...) — add auth, retry, etc.
+
+const apiClient = createNativeChatApiClient({ axiosInstance })
 
 const app = createApp(App)
 app.use(vuetify)
@@ -88,6 +90,7 @@ Here is a minimal working integration:
 ```ts [main.ts]
 import { createApp } from 'vue'
 import { createVuetify } from 'vuetify'
+import axios from 'axios'
 import { NativeChatPlugin, createNativeChatApiClient } from 'native-chat-vue'
 import 'vuetify/styles'
 import 'native-chat-vue/style.css'
@@ -95,10 +98,10 @@ import App from './App.vue'
 
 const vuetify = createVuetify()
 
-const apiClient = createNativeChatApiClient({
-  baseUrl: 'https://api.example.com',
-  getAccessToken: () => localStorage.getItem('auth_token') ?? '',
-})
+// Create an Axios instance — add interceptors for auth, retry, etc.
+const axiosInstance = axios.create({ baseURL: 'https://api.example.com' })
+
+const apiClient = createNativeChatApiClient({ axiosInstance })
 
 const app = createApp(App)
 app.use(vuetify)

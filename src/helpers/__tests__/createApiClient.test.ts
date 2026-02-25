@@ -1,25 +1,22 @@
+import type { AxiosInstance } from 'axios'
 import { createNativeChatApiClient } from '@/helpers/createApiClient'
-import type { NativeChatApiClient } from '@/types/api'
 
-const BASE_URL = 'https://api.example.com'
-const TOKEN = 'test-token-123'
-
-function createClient(overrides?: {
-  getAccessToken?: () => string | Promise<string>
-}): NativeChatApiClient {
-  return createNativeChatApiClient({
-    baseUrl: BASE_URL,
-    getAccessToken: overrides?.getAccessToken ?? (() => TOKEN),
-  })
+function createMockAxiosInstance() {
+  return {
+    get: vi.fn(),
+    post: vi.fn(),
+  } as unknown as AxiosInstance
 }
 
 describe('createNativeChatApiClient', () => {
+  let mockAxios: AxiosInstance
+
   beforeEach(() => {
-    vi.restoreAllMocks()
+    mockAxios = createMockAxiosInstance()
   })
 
   it('returns an object with all 4 NativeChatApiClient methods', () => {
-    const client = createClient()
+    const client = createNativeChatApiClient({ axiosInstance: mockAxios })
 
     expect(typeof client.createConversation).toBe('function')
     expect(typeof client.getConversations).toBe('function')
@@ -27,84 +24,75 @@ describe('createNativeChatApiClient', () => {
     expect(typeof client.sendMessage).toBe('function')
   })
 
-  describe('createConversation', () => {
-    it('calls POST /conversations with auth header', async () => {
-      const mockResponse = { id: 'conv-1', createdAt: '2026-01-01T00:00:00Z' }
-      const fetchSpy = vi
-        .spyOn(globalThis, 'fetch')
-        .mockResolvedValue(new Response(JSON.stringify(mockResponse), { status: 200 }))
+  it('throws a descriptive error when axiosInstance is undefined', () => {
+    expect(() =>
+      createNativeChatApiClient({ axiosInstance: undefined as unknown as AxiosInstance }),
+    ).toThrow('[native-chat-vue] createNativeChatApiClient requires an axiosInstance')
+  })
 
-      const client = createClient()
+  it('throws a descriptive error when config is null', () => {
+    expect(() =>
+      createNativeChatApiClient(null as unknown as { axiosInstance: AxiosInstance }),
+    ).toThrow('[native-chat-vue] createNativeChatApiClient requires an axiosInstance')
+  })
+
+  describe('createConversation', () => {
+    it('calls axiosInstance.post with /conversations and empty body, returns response.data', async () => {
+      const mockResponse = { id: 'conv-1', createdAt: '2026-01-01T00:00:00Z' }
+      ;(mockAxios.post as ReturnType<typeof vi.fn>).mockResolvedValue({ data: mockResponse })
+
+      const client = createNativeChatApiClient({ axiosInstance: mockAxios })
       const result = await client.createConversation()
 
-      expect(fetchSpy).toHaveBeenCalledWith(`${BASE_URL}/conversations`, {
-        method: 'POST',
-        headers: {
-          Authorization: `Bearer ${TOKEN}`,
-        },
-      })
+      expect(mockAxios.post).toHaveBeenCalledWith('/conversations', {})
       expect(result).toEqual(mockResponse)
     })
   })
 
   describe('getConversations', () => {
-    it('calls GET /conversations with offset and limit query params', async () => {
+    it('calls axiosInstance.get with /conversations and params, returns response.data', async () => {
       const mockResponse = { conversations: [], has_more: false }
-      const fetchSpy = vi
-        .spyOn(globalThis, 'fetch')
-        .mockResolvedValue(new Response(JSON.stringify(mockResponse), { status: 200 }))
+      ;(mockAxios.get as ReturnType<typeof vi.fn>).mockResolvedValue({ data: mockResponse })
 
-      const client = createClient()
+      const client = createNativeChatApiClient({ axiosInstance: mockAxios })
       const result = await client.getConversations(10, 20)
 
-      expect(fetchSpy).toHaveBeenCalledWith(`${BASE_URL}/conversations?offset=10&limit=20`, {
-        headers: {
-          Authorization: `Bearer ${TOKEN}`,
-        },
+      expect(mockAxios.get).toHaveBeenCalledWith('/conversations', {
+        params: { offset: 10, limit: 20 },
       })
       expect(result).toEqual(mockResponse)
     })
   })
 
   describe('getMessages', () => {
-    it('calls GET /conversations/:id/messages with offset and limit', async () => {
+    it('calls axiosInstance.get with encoded conversationId path and params, returns response.data', async () => {
       const mockResponse = { messages: [], has_more: false }
-      const fetchSpy = vi
-        .spyOn(globalThis, 'fetch')
-        .mockResolvedValue(new Response(JSON.stringify(mockResponse), { status: 200 }))
+      ;(mockAxios.get as ReturnType<typeof vi.fn>).mockResolvedValue({ data: mockResponse })
 
-      const client = createClient()
+      const client = createNativeChatApiClient({ axiosInstance: mockAxios })
       const result = await client.getMessages('conv-42', 0, 20)
 
-      expect(fetchSpy).toHaveBeenCalledWith(
-        `${BASE_URL}/conversations/conv-42/messages?offset=0&limit=20`,
-        {
-          headers: {
-            Authorization: `Bearer ${TOKEN}`,
-          },
-        },
-      )
+      expect(mockAxios.get).toHaveBeenCalledWith('/conversations/conv-42/messages', {
+        params: { offset: 0, limit: 20 },
+      })
       expect(result).toEqual(mockResponse)
     })
 
-    it('encodes conversationId in URL path', async () => {
+    it('encodes special characters in conversationId', async () => {
       const mockResponse = { messages: [], has_more: false }
-      vi.spyOn(globalThis, 'fetch').mockResolvedValue(
-        new Response(JSON.stringify(mockResponse), { status: 200 }),
-      )
+      ;(mockAxios.get as ReturnType<typeof vi.fn>).mockResolvedValue({ data: mockResponse })
 
-      const client = createClient()
-      await client.getMessages('id/with/slashes', 0, 10)
+      const client = createNativeChatApiClient({ axiosInstance: mockAxios })
+      await client.getMessages('abc/def 123', 0, 10)
 
-      expect(globalThis.fetch).toHaveBeenCalledWith(
-        `${BASE_URL}/conversations/id%2Fwith%2Fslashes/messages?offset=0&limit=10`,
-        expect.any(Object),
-      )
+      expect(mockAxios.get).toHaveBeenCalledWith('/conversations/abc%2Fdef%20123/messages', {
+        params: { offset: 0, limit: 10 },
+      })
     })
   })
 
   describe('sendMessage', () => {
-    it('calls POST /conversations/:id/messages with message body and Content-Type', async () => {
+    it('calls axiosInstance.post with encoded conversationId path and message body, returns response.data', async () => {
       const mockResponse = {
         userMessage: {
           id: 'msg-1',
@@ -121,80 +109,64 @@ describe('createNativeChatApiClient', () => {
           createdAt: '',
         },
       }
-      const fetchSpy = vi
-        .spyOn(globalThis, 'fetch')
-        .mockResolvedValue(new Response(JSON.stringify(mockResponse), { status: 200 }))
+      ;(mockAxios.post as ReturnType<typeof vi.fn>).mockResolvedValue({ data: mockResponse })
 
-      const client = createClient()
+      const client = createNativeChatApiClient({ axiosInstance: mockAxios })
       const result = await client.sendMessage('conv-1', 'hello')
 
-      expect(fetchSpy).toHaveBeenCalledWith(`${BASE_URL}/conversations/conv-1/messages`, {
-        method: 'POST',
-        headers: {
-          Authorization: `Bearer ${TOKEN}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ message: 'hello' }),
+      expect(mockAxios.post).toHaveBeenCalledWith('/conversations/conv-1/messages', {
+        message: 'hello',
       })
       expect(result).toEqual(mockResponse)
     })
-  })
 
-  describe('async getAccessToken support', () => {
-    it('supports async getAccessToken callback', async () => {
-      const asyncToken = 'async-token-456'
-      vi.spyOn(globalThis, 'fetch').mockResolvedValue(
-        new Response(JSON.stringify({ id: 'conv-1', createdAt: '' }), { status: 200 }),
-      )
-
-      const client = createClient({
-        getAccessToken: async () => asyncToken,
-      })
-      await client.createConversation()
-
-      expect(globalThis.fetch).toHaveBeenCalledWith(
-        expect.any(String),
-        expect.objectContaining({
-          headers: expect.objectContaining({
-            Authorization: `Bearer ${asyncToken}`,
-          }),
-        }),
-      )
-    })
-  })
-
-  describe('error handling', () => {
-    it('throws on non-ok HTTP responses', async () => {
-      vi.spyOn(globalThis, 'fetch').mockResolvedValue(
-        new Response('Not Found', { status: 404, statusText: 'Not Found' }),
-      )
-
-      const client = createClient()
-
-      await expect(client.getConversations(0, 20)).rejects.toThrow('HTTP 404: Not Found')
-    })
-
-    it('includes statusCode on thrown error', async () => {
-      vi.spyOn(globalThis, 'fetch').mockResolvedValue(
-        new Response('Server Error', { status: 500, statusText: 'Internal Server Error' }),
-      )
-
-      const client = createClient()
-
-      try {
-        await client.createConversation()
-        expect.fail('Should have thrown')
-      } catch (error) {
-        expect((error as Error & { statusCode: number }).statusCode).toBe(500)
+    it('encodes special characters in conversationId', async () => {
+      const mockResponse = {
+        userMessage: {
+          id: 'msg-1',
+          conversationId: 'abc/def 123',
+          role: 'user',
+          content: 'test',
+          createdAt: '',
+        },
+        assistantMessage: {
+          id: 'msg-2',
+          conversationId: 'abc/def 123',
+          role: 'assistant',
+          content: 'reply',
+          createdAt: '',
+        },
       }
+      ;(mockAxios.post as ReturnType<typeof vi.fn>).mockResolvedValue({ data: mockResponse })
+
+      const client = createNativeChatApiClient({ axiosInstance: mockAxios })
+      await client.sendMessage('abc/def 123', 'test')
+
+      expect(mockAxios.post).toHaveBeenCalledWith('/conversations/abc%2Fdef%20123/messages', {
+        message: 'test',
+      })
+    })
+  })
+
+  describe('error propagation', () => {
+    it('propagates Axios errors without modification', async () => {
+      const axiosError = Object.assign(new Error('Request failed'), {
+        response: { status: 429, data: {} },
+      })
+      ;(mockAxios.post as ReturnType<typeof vi.fn>).mockRejectedValue(axiosError)
+
+      const client = createNativeChatApiClient({ axiosInstance: mockAxios })
+
+      await expect(client.createConversation()).rejects.toBe(axiosError)
     })
 
-    it('propagates network-level fetch errors', async () => {
-      vi.spyOn(globalThis, 'fetch').mockRejectedValue(new TypeError('Failed to fetch'))
+    it('propagates network errors without modification', async () => {
+      const networkError = new TypeError('Network Error')
+      ;(mockAxios.get as ReturnType<typeof vi.fn>).mockRejectedValue(networkError)
 
-      const client = createClient()
+      const client = createNativeChatApiClient({ axiosInstance: mockAxios })
 
-      await expect(client.getConversations(0, 20)).rejects.toThrow('Failed to fetch')
+      await expect(client.getConversations(0, 20)).rejects.toBe(networkError)
     })
   })
 })

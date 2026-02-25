@@ -1,50 +1,49 @@
-import type { NativeChatApiClient } from '@/types/api'
+import type { AxiosInstance } from 'axios'
+import type {
+  NativeChatApiClient,
+  ConversationResponse,
+  ConversationListResponse,
+  MessageHistoryResponse,
+  SendMessageResponse,
+} from '@/types/api'
 
 export function createNativeChatApiClient(config: {
-  baseUrl: string
-  getAccessToken: () => string | Promise<string>
+  axiosInstance: AxiosInstance
 }): NativeChatApiClient {
-  const { baseUrl, getAccessToken } = config
-
-  async function request<T>(url: string, options: RequestInit = {}): Promise<T> {
-    const token = await getAccessToken()
-    const headers: Record<string, string> = {
-      Authorization: `Bearer ${token}`,
-    }
-    if (options.body) {
-      headers['Content-Type'] = 'application/json'
-    }
-    const response = await fetch(url, { ...options, headers })
-
-    if (!response.ok) {
-      const error = new Error(`HTTP ${response.status}: ${response.statusText}`)
-      ;(error as Error & { statusCode: number }).statusCode = response.status
-      throw error
-    }
-
-    return response.json() as Promise<T>
+  if (!config?.axiosInstance) {
+    throw new Error('[native-chat-vue] createNativeChatApiClient requires an axiosInstance')
   }
 
+  const { axiosInstance } = config
+
   return {
-    createConversation() {
-      return request(`${baseUrl}/conversations`, { method: 'POST' })
+    async createConversation() {
+      // Empty body {} ensures Axios sends Content-Type: application/json
+      const response = await axiosInstance.post<ConversationResponse>('/conversations', {})
+      return response.data
     },
 
-    getConversations(offset: number, limit: number) {
-      return request(`${baseUrl}/conversations?offset=${offset}&limit=${limit}`)
-    },
-
-    getMessages(conversationId: string, offset: number, limit: number) {
-      return request(
-        `${baseUrl}/conversations/${encodeURIComponent(conversationId)}/messages?offset=${offset}&limit=${limit}`,
-      )
-    },
-
-    sendMessage(conversationId: string, message: string) {
-      return request(`${baseUrl}/conversations/${encodeURIComponent(conversationId)}/messages`, {
-        method: 'POST',
-        body: JSON.stringify({ message }),
+    async getConversations(offset: number, limit: number) {
+      const response = await axiosInstance.get<ConversationListResponse>('/conversations', {
+        params: { offset, limit },
       })
+      return response.data
+    },
+
+    async getMessages(conversationId: string, offset: number, limit: number) {
+      const response = await axiosInstance.get<MessageHistoryResponse>(
+        `/conversations/${encodeURIComponent(conversationId)}/messages`,
+        { params: { offset, limit } },
+      )
+      return response.data
+    },
+
+    async sendMessage(conversationId: string, message: string) {
+      const response = await axiosInstance.post<SendMessageResponse>(
+        `/conversations/${encodeURIComponent(conversationId)}/messages`,
+        { message },
+      )
+      return response.data
     },
   }
 }

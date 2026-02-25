@@ -106,104 +106,97 @@ type MessageStatus = 'sending' | 'sent' | 'failed'
 
 ## Built-in Helper: `createNativeChatApiClient`
 
-The package provides a `fetch`-based client out of the box:
+The package provides a convenience helper that delegates all HTTP calls through a pre-configured Axios instance:
 
 ```ts
+import axios from 'axios'
 import { createNativeChatApiClient } from 'native-chat-vue'
 
-const apiClient = createNativeChatApiClient({
-  baseUrl: 'https://api.example.com',
-  getAccessToken: () => authStore.token,
-})
+const axiosInstance = axios.create({ baseURL: 'https://api.example.com' })
+// Add interceptors for auth, retry, error handling, etc.
+// axiosInstance.interceptors.request.use(...)
+
+const apiClient = createNativeChatApiClient({ axiosInstance })
 ```
 
 ### How It Works
 
-- Calls `getAccessToken()` before every request (supports both sync and async return values)
-- Adds an `Authorization: Bearer <token>` header to all requests
-- Sets `Content-Type: application/json` for requests with a body
-- Throws an `Error` with a `.statusCode` property on non-ok HTTP responses
+- Delegates all HTTP requests through the provided Axios instance
+- Uses `axiosInstance.get()` and `axiosInstance.post()` — auth, headers, and retry logic are handled by your Axios interceptors
+- Passes only relative paths (`/conversations`, `/conversations/:id/messages`) — URL resolution to `baseURL` is Axios's responsibility
+- Uses Axios `params` option for query parameters
+- Returns `response.data` directly (Axios auto-parses JSON)
+- Lets Axios errors propagate naturally — no wrapping or `.statusCode` attachment
 
 ### URL Patterns
 
-The helper constructs the following endpoints from the `baseUrl`:
+The helper passes relative paths to the Axios instance. The final URL is resolved by Axios against the instance's `baseURL`:
 
-| Method                            | HTTP Verb | Endpoint                                                 |
-| --------------------------------- | --------- | -------------------------------------------------------- |
-| `createConversation()`            | POST      | `{baseUrl}/conversations`                                |
-| `getConversations(offset, limit)` | GET       | `{baseUrl}/conversations?offset=…&limit=…`               |
-| `getMessages(id, offset, limit)`  | GET       | `{baseUrl}/conversations/{id}/messages?offset=…&limit=…` |
-| `sendMessage(id, message)`        | POST      | `{baseUrl}/conversations/{id}/messages`                  |
+| Method                            | HTTP Verb | Path                                                   |
+| --------------------------------- | --------- | ------------------------------------------------------ |
+| `createConversation()`            | POST      | `/conversations`                                       |
+| `getConversations(offset, limit)` | GET       | `/conversations` (params: offset, limit)               |
+| `getMessages(id, offset, limit)`  | GET       | `/conversations/{id}/messages` (params: offset, limit) |
+| `sendMessage(id, message)`        | POST      | `/conversations/{id}/messages`                         |
 
 ## Custom Implementation
 
-If you need features like retry logic, custom headers, or a different HTTP library, implement the `NativeChatApiClient` interface directly:
+If you prefer not to use Axios, implement the `NativeChatApiClient` interface directly with `fetch` or any other HTTP library:
 
 ```ts
 import type { NativeChatApiClient } from 'native-chat-vue'
-import axios from 'axios'
-
-function rethrowWithStatusCode(err: unknown): never {
-  if (axios.isAxiosError(err) && err.response) {
-    const error = new Error(err.message)
-    ;(error as Error & { statusCode: number }).statusCode = err.response.status
-    throw error
-  }
-  throw err
-}
 
 const customApiClient: NativeChatApiClient = {
   async createConversation() {
-    try {
-      const res = await axios.post('/api/conversations')
-      return res.data
-    } catch (err) {
-      rethrowWithStatusCode(err)
-    }
+    const res = await fetch('/api/conversations', { method: 'POST' })
+    if (!res.ok) throw Object.assign(new Error(res.statusText), { statusCode: res.status })
+    return res.json()
   },
 
   async getConversations(offset, limit) {
-    try {
-      const res = await axios.get('/api/conversations', {
-        params: { offset, limit },
-      })
-      return res.data
-    } catch (err) {
-      rethrowWithStatusCode(err)
-    }
+    const res = await fetch(`/api/conversations?offset=${offset}&limit=${limit}`)
+    if (!res.ok) throw Object.assign(new Error(res.statusText), { statusCode: res.status })
+    return res.json()
   },
 
   async getMessages(conversationId, offset, limit) {
-    try {
-      const res = await axios.get(`/api/conversations/${conversationId}/messages`, {
-        params: { offset, limit },
-      })
-      return res.data
-    } catch (err) {
-      rethrowWithStatusCode(err)
-    }
+    const res = await fetch(
+      `/api/conversations/${encodeURIComponent(conversationId)}/messages?offset=${offset}&limit=${limit}`,
+    )
+    if (!res.ok) throw Object.assign(new Error(res.statusText), { statusCode: res.status })
+    return res.json()
   },
 
   async sendMessage(conversationId, message) {
-    try {
-      const res = await axios.post(`/api/conversations/${conversationId}/messages`, { message })
-      return res.data
-    } catch (err) {
-      rethrowWithStatusCode(err)
-    }
+    const res = await fetch(`/api/conversations/${encodeURIComponent(conversationId)}/messages`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ message }),
+    })
+    if (!res.ok) throw Object.assign(new Error(res.statusText), { statusCode: res.status })
+    return res.json()
   },
 }
 ```
 
 Each method must return a promise resolving to the correct response type. The plugin does not validate response shapes at runtime — ensure your backend returns data matching the interfaces above.
 
-::: tip Error contract compliance
-The `rethrowWithStatusCode` helper above ensures Axios errors are re-thrown with a `.statusCode` property, which the plugin needs for [status code mapping](#error-contract). Without this, all errors would show a generic message.
+::: tip Automatic Axios error support
+When using the built-in helper with an Axios instance, error status codes are automatically extracted from `error.response.status`. No manual `.statusCode` attachment is needed — the plugin handles both Axios errors and custom `error.statusCode` for backward compatibility.
 :::
 
 ## Error Contract
 
-When an API call fails, the client should throw an `Error` with a `.statusCode` property set to the HTTP status code. The plugin maps these codes to user-friendly error messages:
+When an API call fails, the plugin extracts the HTTP status code from the error to map it to a user-friendly message. Two error shapes are supported:
+
+| Error Shape           | How Status Code Is Extracted |
+| --------------------- | ---------------------------- |
+| Axios error           | `error.response.status`      |
+| Custom / legacy error | `error.statusCode`           |
+
+If both properties exist, `error.response.status` takes priority.
+
+The plugin maps status codes to user-friendly error messages:
 
 | Status Code  | Error Message                   |
 | ------------ | ------------------------------- |

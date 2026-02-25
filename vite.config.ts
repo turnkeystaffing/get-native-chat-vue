@@ -24,7 +24,7 @@ export default defineConfig({
       formats: ['es'],
     },
     rollupOptions: {
-      external: [/^vue/, /^vuetify/],
+      external: [/^vue/, /^vuetify/, /^axios/],
       output: {
         globals: {
           vue: 'Vue',

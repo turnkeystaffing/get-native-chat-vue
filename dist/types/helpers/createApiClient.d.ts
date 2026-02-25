@@ -1,6 +1,6 @@
+import { AxiosInstance } from 'axios';
 import { NativeChatApiClient } from '../types/api';
 export declare function createNativeChatApiClient(config: {
-    baseUrl: string;
-    getAccessToken: () => string | Promise<string>;
+    axiosInstance: AxiosInstance;
 }): NativeChatApiClient;
 //# sourceMappingURL=createApiClient.d.ts.map

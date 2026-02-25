@@ -15,5 +15,6 @@ export interface UseChatReturn {
     loadMore(): Promise<void>;
     retry(): Promise<void>;
 }
+export declare function extractStatusCode(error: unknown): number | undefined;
 export declare function useChat(apiClient: NativeChatApiClient, config: NativeChatPluginOptions): UseChatReturn;
 //# sourceMappingURL=useChat.d.ts.map

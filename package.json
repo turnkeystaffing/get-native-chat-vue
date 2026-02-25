@@ -19,8 +19,14 @@
     "*.css"
   ],
   "peerDependencies": {
+    "axios": "^1.0.0",
     "vue": "^3.5.0",
     "vuetify": "^3.11.0"
+  },
+  "peerDependenciesMeta": {
+    "axios": {
+      "optional": true
+    }
   },
   "devDependencies": {
     "@mdi/font": "^7.4.0",
@@ -28,6 +34,7 @@
     "@vitejs/plugin-vue": "^5.2.0",
     "@vue/eslint-config-typescript": "^14.0.0",
     "@vue/test-utils": "^2.4.6",
+    "axios": "^1.9.0",
     "eslint": "^10.0.0",
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-vue": "^10.8.0",

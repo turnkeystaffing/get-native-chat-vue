@@ -1,4 +1,4 @@
-import { useChat } from '@/composables/useChat'
+import { useChat, extractStatusCode } from '@/composables/useChat'
 import type { NativeChatApiClient } from '@/types/api'
 import type { NativeChatPluginOptions } from '@/types/config'
 import { isReadonly, isRef } from 'vue'
@@ -998,6 +998,37 @@ describe('useChat', () => {
       )
     })
 
+    // Axios error shape integration (error.response.status flows through pipeline)
+    it('maps Axios-shaped 429 error to rate-limit message', async () => {
+      const { apiClient, chat } = await setupWithOpenChat()
+      ;(apiClient.sendMessage as ReturnType<typeof vi.fn>).mockRejectedValue(
+        Object.assign(new Error('Too Many Requests'), { response: { status: 429 } }),
+      )
+
+      await chat.sendMessage('Hello')
+
+      expect(chat.messages.value[0].content).toBe(
+        "You're sending messages too quickly. Please wait a moment and try again.",
+      )
+    })
+
+    it('calls onError with statusCode from Axios-shaped error', async () => {
+      const onError = vi.fn()
+      const { apiClient, chat } = await setupWithOpenChat({ onError })
+      const originalError = Object.assign(new Error('Too Many Requests'), {
+        response: { status: 429 },
+      })
+      ;(apiClient.sendMessage as ReturnType<typeof vi.fn>).mockRejectedValue(originalError)
+
+      await chat.sendMessage('Hello')
+
+      expect(onError).toHaveBeenCalledWith({
+        message: "You're sending messages too quickly. Please wait a moment and try again.",
+        statusCode: 429,
+        originalError,
+      })
+    })
+
     // AC#3: onError callback
     it('calls onError callback with ChatError containing message, statusCode, and originalError', async () => {
       const onError = vi.fn()
@@ -1266,5 +1297,50 @@ describe('useChat', () => {
 
       expect(apiClient.getMessages).toHaveBeenCalledWith('conv-1', 0, 50)
     })
+  })
+})
+
+describe('extractStatusCode', () => {
+  it('extracts status from Axios-style error (error.response.status)', () => {
+    const axiosError = { response: { status: 429 }, message: 'Too Many Requests' }
+    expect(extractStatusCode(axiosError)).toBe(429)
+  })
+
+  it('extracts status from custom/legacy error (error.statusCode)', () => {
+    const customError = { statusCode: 503, message: 'Service Unavailable' }
+    expect(extractStatusCode(customError)).toBe(503)
+  })
+
+  it('prefers Axios shape when both properties exist (dual-property edge case)', () => {
+    const dualError = { response: { status: 500 }, statusCode: 503 }
+    expect(extractStatusCode(dualError)).toBe(500)
+  })
+
+  it('returns undefined for malformed non-numeric status', () => {
+    const badError = { response: { status: '429' } }
+    expect(extractStatusCode(badError)).toBeUndefined()
+  })
+
+  it('returns undefined for null error', () => {
+    expect(extractStatusCode(null)).toBeUndefined()
+  })
+
+  it('returns undefined for undefined error', () => {
+    expect(extractStatusCode(undefined)).toBeUndefined()
+  })
+
+  it('returns undefined for non-object error', () => {
+    expect(extractStatusCode('string error')).toBeUndefined()
+    expect(extractStatusCode(42)).toBeUndefined()
+  })
+
+  it('returns undefined when response exists but has no status', () => {
+    const noStatusError = { response: { data: 'error' } }
+    expect(extractStatusCode(noStatusError)).toBeUndefined()
+  })
+
+  it('returns undefined for non-numeric statusCode', () => {
+    const badCodeError = { statusCode: '503' }
+    expect(extractStatusCode(badCodeError)).toBeUndefined()
   })
 })

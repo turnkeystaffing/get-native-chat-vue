@@ -4,15 +4,17 @@ The plugin accepts a `NativeChatPluginOptions` object when registered with `app.
 
 ## Options Reference
 
-| Property         | Type                              | Required | Default                        | Description                                      |
-| ---------------- | --------------------------------- | -------- | ------------------------------ | ------------------------------------------------ |
-| `apiClient`      | `NativeChatApiClient`             | Yes      | —                              | API client instance for server communication     |
-| `position`       | `'bottom-left' \| 'bottom-right'` | No       | `'bottom-right'`               | Floating button screen position                  |
-| `welcomeMessage` | `string`                          | No       | `'Hello! How can I help you?'` | Text shown in the empty chat state               |
-| `batchSize`      | `number`                          | No       | `20`                           | Number of messages loaded per pagination request |
-| `conversationId` | `string`                          | No       | —                              | Resume a specific conversation on load           |
-| `assistantBubbleFullWidth` | `boolean`                | No       | `false`                        | Remove bubble chrome on assistant messages for full-width content |
-| `onError`        | `(error: ChatError) => void`      | No       | —                              | Callback invoked when a chat error occurs        |
+| Property                   | Type                              | Required | Default                        | Description                                                       |
+| -------------------------- | --------------------------------- | -------- | ------------------------------ | ----------------------------------------------------------------- |
+| `apiClient`                | `NativeChatApiClient`             | Yes      | —                              | API client instance for server communication                      |
+| `position`                 | `'bottom-left' \| 'bottom-right'` | No       | `'bottom-right'`               | Floating button screen position                                   |
+| `welcomeMessage`           | `string`                          | No       | `'Hello! How can I help you?'` | Text shown in the empty chat state                                |
+| `batchSize`                | `number`                          | No       | `20`                           | Number of messages loaded per pagination request                  |
+| `conversationId`           | `string`                          | No       | —                              | Resume a specific conversation on load                            |
+| `hideToggleWhenOpen`       | `boolean`                         | No       | `false`                        | Hide the floating toggle button when the chat panel is open       |
+| `showBubbleHeaders`        | `boolean`                         | No       | `true`                         | Show role headers (You / Assistant) on message bubbles            |
+| `assistantBubbleFullWidth` | `boolean`                         | No       | `false`                        | Remove bubble chrome on assistant messages for full-width content |
+| `onError`                  | `(error: ChatError) => void`      | No       | —                              | Callback invoked when a chat error occurs                         |
 
 ## `ChatError` Type
 
@@ -106,13 +108,14 @@ No component is registered and no error is thrown. The host application continue
 ## Full Configuration Example
 
 ```ts
+import axios from 'axios'
 import { NativeChatPlugin, createNativeChatApiClient } from 'native-chat-vue'
 import type { ChatError } from 'native-chat-vue'
 
-const apiClient = createNativeChatApiClient({
-  baseUrl: 'https://api.example.com',
-  getAccessToken: () => authStore.token,
-})
+const axiosInstance = axios.create({ baseURL: 'https://api.example.com' })
+// axiosInstance.interceptors.request.use(...) — add auth, retry, etc.
+
+const apiClient = createNativeChatApiClient({ axiosInstance })
 
 app.use(NativeChatPlugin, {
   apiClient,
@@ -120,6 +123,8 @@ app.use(NativeChatPlugin, {
   welcomeMessage: 'Hi there! How can I help?',
   batchSize: 50,
   conversationId: savedConversationId,
+  hideToggleWhenOpen: false,
+  showBubbleHeaders: true,
   assistantBubbleFullWidth: false,
   onError: (error: ChatError) => {
     errorReporter.captureError(error)

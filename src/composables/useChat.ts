@@ -18,15 +18,34 @@ export interface UseChatReturn {
   retry(): Promise<void>
 }
 
+export function extractStatusCode(error: unknown): number | undefined {
+  if (error && typeof error === 'object') {
+    // Axios error shape: error.response.status
+    if (
+      'response' in error &&
+      error.response &&
+      typeof error.response === 'object' &&
+      'status' in error.response
+    ) {
+      const status = (error.response as { status: unknown }).status
+      if (typeof status === 'number') return status
+    }
+    // Custom/legacy error shape: error.statusCode
+    if ('statusCode' in error) {
+      const code = (error as { statusCode: unknown }).statusCode
+      if (typeof code === 'number') return code
+    }
+  }
+  return undefined
+}
+
 function getErrorContent(error: unknown): string {
-  if (error && typeof error === 'object' && 'statusCode' in error) {
-    const statusCode = (error as { statusCode: number }).statusCode
-    if (statusCode === 429) {
-      return "You're sending messages too quickly. Please wait a moment and try again."
-    }
-    if (statusCode === 503 || statusCode === 504) {
-      return 'The service is temporarily unavailable. Please try again in a moment.'
-    }
+  const statusCode = extractStatusCode(error)
+  if (statusCode === 429) {
+    return "You're sending messages too quickly. Please wait a moment and try again."
+  }
+  if (statusCode === 503 || statusCode === 504) {
+    return 'The service is temporarily unavailable. Please try again in a moment.'
   }
   return 'Something went wrong. You can try sending your message again.'
 }
@@ -68,10 +87,7 @@ export function useChat(
         Promise.resolve(
           config.onError({
             message: errorContent,
-            statusCode:
-              error && typeof error === 'object' && 'statusCode' in error
-                ? (error as { statusCode: number }).statusCode
-                : undefined,
+            statusCode: extractStatusCode(error),
             originalError: error,
           }),
         ).catch(() => {})
