@@ -1,10 +1,10 @@
 ---
 project_name: 'native-chat-vue'
 user_name: 'Volodymyr'
-date: '2026-02-20'
+date: '2026-02-25'
 sections_completed: ['technology_stack', 'language_rules', 'framework_rules', 'testing_rules', 'quality_rules', 'workflow_rules', 'anti_patterns']
 status: 'complete'
-rule_count: 52
+rule_count: 57
 optimized_for_llm: true
 ---
 
@@ -27,12 +27,14 @@ _This file contains critical rules and patterns that AI agents must follow when 
 | Vitest | ^4.0.0 | Test runner (jsdom, globals) |
 | @vue/test-utils | ^2.4.6 | Component mounting in tests |
 | Prettier | ^3.8.0 | single quotes, no semi, trailing commas, 100 width |
+| Playwright | ^1.58.2 | Performance benchmarking (`yarn perf`) |
 | Yarn | 4.12.x | Package manager |
 
 **Constraints:**
 - No runtime dependencies beyond `marked` and `dompurify` — budget is <50KB gzipped
 - ESM-only output — no CJS consumers
 - Vue and Vuetify are externalized (never bundled)
+- Axios externalized in rollup config (`/^axios/`) — optional peer dependency, never bundled
 
 ## Critical Implementation Rules
 
@@ -44,6 +46,7 @@ _This file contains critical rules and patterns that AI agents must follow when 
 - **Use `import type`** for type-only imports
 - **Only `src/index.ts` exports publicly** — internal modules are not re-exported
 - **`vitest/globals` in tsconfig** — no need to import `describe`, `it`, `vi`, `expect` in tests
+- **Timer types**: `ReturnType<typeof setTimeout>` for timer IDs — never `number` or `NodeJS.Timeout`
 - **`tsconfig.build.json`** excludes `__tests__/`, `docs/`, config files from declaration output
 
 ### Vue & Vuetify Rules
@@ -60,6 +63,7 @@ _This file contains critical rules and patterns that AI agents must follow when 
 - **Colors via theme tokens only**: `rgb(var(--v-theme-primary))` — no hardcoded hex values
 - **Theme**: `nativeChatTheme` registered lazily, merged with Vuetify light defaults
 - **Responsive**: use Vuetify `useDisplay()` — no custom media query JS
+- **Props with defaults**: `withDefaults(defineProps<Props>(), { ... })` — keeps type-only props while providing default values
 - **Animations**: use Vue `<Transition>` for enter/leave, CSS `@keyframes` for element animations. Always include `@media (prefers-reduced-motion: reduce)` block to disable. Naming: `nc-{name}` prefix for transition names and keyframes
 
 ### Testing Rules
@@ -96,6 +100,8 @@ _This file contains critical rules and patterns that AI agents must follow when 
 - **Always run before PR**: `yarn lint && yarn test && yarn build`
 - **Package manager**: Yarn 4.x — use `yarn` not `npm` or `pnpm`
 - **Single CSS output**: `cssCodeSplit: false` — all styles in one file
+- **Performance tests**: `yarn perf` runs Playwright benchmarks via `playwright.config.ts` — separate from unit tests
+- **Docs structure**: VitePress docs in `docs/` with `guide/`, `components/`, `performance/` sections — `yarn docs:dev` for local preview, `yarn docs:build` for static output
 - **Exports map**: `"."` for JS, `"./style.css"` for CSS — consumers must import CSS separately
 
 ### Critical Don't-Miss Rules
@@ -144,4 +150,4 @@ _This file contains critical rules and patterns that AI agents must follow when 
 - Review quarterly for outdated rules
 - Remove rules that become obvious over time
 
-Last Updated: 2026-02-20
+Last Updated: 2026-02-25
