@@ -1,144 +1,154 @@
 # Source Tree Analysis — native-chat-vue
 
-> Generated: 2026-02-23 | Scan Level: Exhaustive | Mode: Full Rescan
+> Generated: 2026-02-25 | Scan level: exhaustive | Mode: full_rescan
 
 ## Annotated Directory Tree
 
 ```
 native-chat-vue/
-├── src/                           # Library source code
-│   ├── index.ts                   # ★ ENTRY POINT — exports plugin, widget, API client, types
-│   ├── plugin.ts                  # Vue plugin (install method, provide config, register component)
-│   ├── keys.ts                    # Typed InjectionKeys (CONFIG_KEY, CHAT_STATE_KEY)
-│   ├── styles.css                 # CSS @layer native-chat base isolation layer
+├── src/                            # ★ LIBRARY SOURCE — all published code
+│   ├── index.ts                    # ★ ENTRY POINT — barrel exports (plugin, widget, factory, types)
+│   ├── plugin.ts                   # Vue plugin install (registers widget globally, provides config)
+│   ├── keys.ts                     # Typed InjectionKeys (CONFIG_KEY, CHAT_STATE_KEY)
+│   ├── styles.css                  # Base CSS layer declaration (@layer native-chat)
 │   │
-│   ├── components/                # Vue single-file components (8 SFCs)
-│   │   ├── NativeChatWidget.vue   # Root orchestrator: theme provider, useChat init, state provider
-│   │   ├── ChatPanel.vue          # Floating panel: Teleport to body, responsive, Escape close, transitions
-│   │   ├── ChatHeader.vue         # Title bar: star icon + "AI Assistant" title + close button + divider
-│   │   ├── ChatInput.vue          # Message input: auto-grow textarea, inline send/spinner, Enter/Shift+Enter
-│   │   ├── MessageList.vue        # Message display: v-infinite-scroll, auto-scroll, scroll preservation, animations
-│   │   ├── MessageBubble.vue      # Message rendering: user/assistant/error, markdown+DOMPurify, copy, animations
-│   │   ├── FloatingButton.vue     # FAB trigger: position config, toggle, hideToggleWhenOpen, icon transition
-│   │   ├── WelcomeState.vue       # Empty state: configurable welcome message
-│   │   └── __tests__/             # Component unit + integration tests (9 files, 175+ test cases)
-│   │       ├── ChatHeader.test.ts         # 8 tests — rendering, close action, aria, sizing
-│   │       ├── ChatInput.test.ts          # 23 tests — send, keyboard, focus, spinner, retry text
-│   │       ├── ChatPanel.test.ts          # 13 tests — panel, responsive, Escape, welcome, focus
-│   │       ├── FloatingButton.test.ts     # 17 tests — toggle, position, a11y, hideToggleWhenOpen
-│   │       ├── MessageBubble.test.ts      # 32 tests — markdown, copy, error styling, warning icon, animations
-│   │       ├── MessageList.test.ts        # 34 tests — scroll, infinite load, preservation, animation tracking
-│   │       ├── NativeChatWidget.test.ts   # 11 tests — plugin, theme, provide/inject
-│   │       ├── SendReceiveFlow.test.ts    # 18 tests — integration: send/receive/error/retry flow
-│   │       └── WelcomeState.test.ts       # 3 tests — default/custom message
-│   │
-│   ├── composables/               # Vue composition functions
-│   │   ├── useChat.ts             # Core state machine: messages, open/close, send, loadMore, retry, error handling
+│   ├── types/                      # TypeScript type definitions (public API)
+│   │   ├── index.ts                # Barrel re-exports all types
+│   │   ├── api.ts                  # NativeChatApiClient interface + 5 API response types
+│   │   ├── chat.ts                 # ChatMessage, MessageStatus, ChatError domain types
+│   │   ├── config.ts               # NativeChatPluginOptions (9 config fields)
 │   │   └── __tests__/
-│   │       └── useChat.test.ts    # 70+ tests — exhaustive composable coverage
+│   │       └── types.test.ts       # Compile-time type shape validation (11 tests)
 │   │
-│   ├── helpers/                   # Utility functions
-│   │   ├── createApiClient.ts     # Default NativeChatApiClient via fetch + Bearer token
+│   ├── composables/                # Vue Composition API composables
+│   │   ├── useChat.ts              # ★ CORE LOGIC — chat state, messaging, pagination, error handling (227 LOC)
 │   │   └── __tests__/
-│   │       └── createApiClient.test.ts  # 12 tests — HTTP methods, auth, URL encoding, errors
+│   │       └── useChat.test.ts     # Comprehensive composable tests (70+ tests)
 │   │
-│   ├── icons/                     # Inline SVG icon components (6 icons)
-│   │   ├── IconCheck.vue          # Checkmark (copy confirmation feedback)
-│   │   ├── IconClose.vue          # X mark (close button, FAB close state)
-│   │   ├── IconCopy.vue           # Clipboard (copy action on assistant messages)
-│   │   ├── IconSend.vue           # Arrow (send button in ChatInput)
-│   │   ├── IconStar.vue           # Star (branding: FAB, header, assistant bubble)
-│   │   └── IconWarning.vue        # ▲ Triangle warning (error message indicator) [NEW]
+│   ├── helpers/                    # Utility/factory functions
+│   │   ├── createApiClient.ts      # Axios instance → NativeChatApiClient adapter factory (49 LOC)
+│   │   └── __tests__/
+│   │       └── createApiClient.test.ts  # Factory validation + URL encoding tests (12 tests)
 │   │
-│   ├── theme/                     # Vuetify theme configuration
-│   │   └── nativeChatTheme.ts     # Custom color palette: primary=#002B38, secondary=#C4105B, etc.
+│   ├── components/                 # Vue SFC components (8 files)
+│   │   ├── NativeChatWidget.vue    # ★ ROOT — theme provider, useChat init, state provider (56 LOC)
+│   │   ├── FloatingButton.vue      # FAB toggle: position config, icon transition, a11y (103 LOC)
+│   │   ├── ChatPanel.vue           # Panel: Teleport to body, responsive, Escape key (160 LOC)
+│   │   ├── ChatHeader.vue          # Header: avatar + title + close button (46 LOC)
+│   │   ├── ChatInput.vue           # Input: auto-grow textarea, Enter to send, focus mgmt (133 LOC)
+│   │   ├── MessageList.vue         # Feed: v-infinite-scroll, scroll-to-bottom FAB, animations (235 LOC)
+│   │   ├── MessageBubble.vue       # Message: markdown+DOMPurify, copy, error variant (303 LOC)
+│   │   ├── WelcomeState.vue        # Empty state: configurable welcome message (31 LOC)
+│   │   └── __tests__/              # Component unit + integration tests
+│   │       ├── NativeChatWidget.test.ts  # Plugin + widget composition (13 tests)
+│   │       ├── FloatingButton.test.ts    # Toggle UX + positioning (17 tests)
+│   │       ├── ChatPanel.test.ts         # Visibility + child rendering + Escape (15 tests)
+│   │       ├── ChatHeader.test.ts        # Header layout + close action (10 tests)
+│   │       ├── ChatInput.test.ts         # Input + send logic + focus mgmt (23 tests)
+│   │       ├── MessageList.test.ts       # Infinite scroll + FAB + animation (36 tests)
+│   │       ├── MessageBubble.test.ts     # Markdown + copy + error + config (35 tests)
+│   │       ├── WelcomeState.test.ts      # Welcome message rendering (3 tests)
+│   │       └── SendReceiveFlow.test.ts   # E2E integration: send→receive→error→retry (13 tests)
 │   │
-│   └── types/                     # TypeScript type definitions (public API)
-│       ├── index.ts               # Barrel re-exports all types
-│       ├── api.ts                 # NativeChatApiClient interface + 5 response types
-│       ├── chat.ts                # ChatMessage, MessageStatus, ChatError
-│       ├── config.ts              # NativeChatPluginOptions (incl. hideToggleWhenOpen) [UPDATED]
-│       └── __tests__/
-│           └── types.test.ts      # 10 tests — type shape verification
+│   ├── icons/                      # Inline SVG icon components (currentColor, 1em sizing)
+│   │   ├── IconArrowDown.vue       # Scroll-to-bottom FAB
+│   │   ├── IconCheck.vue           # Copy confirmation
+│   │   ├── IconClose.vue           # Close panel/FAB
+│   │   ├── IconCopy.vue            # Copy message
+│   │   ├── IconSend.vue            # Send button
+│   │   ├── IconStar.vue            # Assistant avatar / branding
+│   │   └── IconWarning.vue         # Error message indicator
+│   │
+│   └── theme/
+│       └── nativeChatTheme.ts      # Vuetify ThemeDefinition (brand colors + custom tokens, 29 LOC)
 │
-├── docs/                          # VitePress documentation site
-│   ├── index.md                   # Home page with feature highlights
+├── docs/                           # VitePress documentation site
+│   ├── index.md                    # Landing page (hero + 6 feature cards)
 │   ├── guide/
-│   │   ├── getting-started.md     # Installation and setup
-│   │   ├── configuration.md       # Plugin options reference
-│   │   └── api-client.md          # API client usage and custom implementations
+│   │   ├── getting-started.md      # Install, register, SSR setup
+│   │   ├── configuration.md        # Plugin options reference table
+│   │   └── api-client.md           # NativeChatApiClient interface + custom impl guide
 │   ├── components/
-│   │   ├── widget.md              # Full widget demo + docs
-│   │   ├── chat-input.md          # Chat input demo + docs
-│   │   ├── message-bubble.md      # Message bubble demo + docs
-│   │   └── demos/                 # Interactive demo components
+│   │   ├── widget.md               # Full widget demo (live + config toggles + error simulation)
+│   │   ├── message-bubble.md       # Message variant showcase
+│   │   ├── chat-input.md           # Input behavior demo
+│   │   └── demos/                  # Interactive demo Vue components
 │   │       ├── ChatInputDemo.vue
 │   │       ├── MessageBubbleDemo.vue
 │   │       ├── WidgetDemo.vue
+│   │       ├── WidgetConfigDemo.vue
 │   │       └── WidgetErrorDemo.vue
 │   ├── performance/
-│   │   └── benchmark.md           # Scroll performance benchmark page (1000-message FPS test)
+│   │   └── benchmark.md            # Scroll benchmark page (PerfBenchmark component)
 │   └── .vitepress/
-│       ├── config.ts              # VitePress config: nav, sidebar, Vuetify plugin, path aliases
-│       ├── theme/
-│       │   ├── index.ts           # Custom theme: Vuetify + NativeChatPlugin with mock client
-│       │   ├── Layout.vue         # Custom layout wrapper
-│       │   └── overrides.css      # CSS overrides for VitePress resets (list styles, padding)
+│       ├── config.ts               # VitePress + Vuetify plugin config, nav/sidebar
+│       ├── components/
+│       │   ├── DemoBlock.vue       # Reusable code+preview container with source toggle
+│       │   └── PerfBenchmark.vue   # FPS benchmark harness (1000 messages, drift tracking)
 │       ├── mock/
-│       │   └── mockApiClient.ts   # Mock API client with 50+ canned messages + error simulation
-│       ├── styles/
-│       │   └── vuetify-settings.scss  # Vuetify SCSS customization
-│       └── components/
-│           ├── DemoBlock.vue      # Reusable demo wrapper component
-│           └── PerfBenchmark.vue  # Performance benchmark Vue component
+│       │   ├── demoConfig.ts       # Demo plugin options (reactive)
+│       │   └── mockApiClient.ts    # Simulated API (40 messages, latency, error modes)
+│       ├── theme/
+│       │   ├── index.ts            # Theme registration (Vuetify + NativeChat plugin)
+│       │   ├── Layout.vue          # Custom VitePress layout wrapper
+│       │   └── overrides.css       # VitePress style overrides
+│       └── styles/
+│           └── vuetify-settings.scss  # Vuetify SASS variable overrides
 │
-├── perf/                          # Playwright performance tests
-│   └── scroll-benchmark.spec.ts   # 2 tests: static 1000-msg scroll + infinite scroll benchmarks
+├── perf/                           # Playwright performance tests
+│   └── scroll-benchmark.spec.ts    # 2 tests: static 1000-msg scroll + infinite scroll FPS benchmarks
 │
-├── design/                        # Design assets
-│   └── Screenshot *.png           # UI reference screenshot (Figma)
-│
-├── package.json                   # Package manifest (library mode: main, module, exports, types)
-├── tsconfig.json                  # TypeScript config (strict, ES2022, bundler resolution, @/ paths)
-├── tsconfig.build.json            # Build TS config (extends base, excludes tests + docs)
-├── vite.config.ts                 # Vite build config (library mode, vue + dts plugins, external vue/vuetify)
-├── vitest.config.ts               # Vitest config (jsdom env, globals, Vuetify inline deps)
-├── vitest.setup.ts                # Test setup (ResizeObserver polyfill, Vuetify global plugin)
-├── playwright.config.ts           # Playwright config (chromium headless, docs dev server on :5174)
-├── eslint.config.ts               # ESLint 10 flat config (Vue + TS recommended + Prettier)
-├── .prettierrc                    # Prettier configuration
-├── .prettierignore                # Prettier ignore patterns
-├── .yarnrc.yml                    # Yarn 4 Berry configuration
-├── .gitignore                     # Git ignore (node_modules, dist, coverage, cache)
-└── yarn.lock                      # Yarn 4 lockfile
+├── package.json                    # @turnkeystaffing/get-native-chat-vue v1.0.1
+├── vite.config.ts                  # Vite library build (ES only, externals: vue/vuetify/axios)
+├── vitest.config.ts                # Vitest config (jsdom, globals, Vuetify inline deps)
+├── vitest.setup.ts                 # Test setup (ResizeObserver polyfill, Vuetify global plugin)
+├── tsconfig.json                   # Base TS config (ES2022, strict, bundler resolution, @/ paths)
+├── tsconfig.build.json             # Build-only TS config (excludes tests/docs)
+├── eslint.config.ts                # ESLint 10 flat config (vue-recommended + TS + Prettier)
+├── playwright.config.ts            # Playwright config (chromium headless, VitePress dev :5174)
+├── .prettierrc                     # Prettier (single quotes, no semi, trailing commas, 100 width)
+├── .prettierignore                 # Prettier ignores (dist, node_modules, tooling dirs)
+├── .gitignore                      # Git ignores (node_modules, dist, coverage, cache, Yarn PnP)
+├── .yarnrc.yml                     # Yarn 4 (node-modules linker, GitHub Packages scope)
+└── yarn.lock                       # Dependency lockfile
 ```
 
-## Critical Folders Summary
+## Critical Folders
 
 | Folder | Purpose | Key Files |
 |--------|---------|-----------|
-| `src/` | All library source code | `index.ts` (entry), `plugin.ts` (Vue plugin) |
-| `src/components/` | 8 Vue SFCs forming the chat widget UI | `NativeChatWidget.vue` (root) |
-| `src/composables/` | Core business logic via Vue composition API | `useChat.ts` (state machine) |
-| `src/helpers/` | Utility functions for consumers | `createApiClient.ts` (default API impl) |
-| `src/types/` | TypeScript interfaces and type exports | `api.ts` (client contract) |
-| `src/icons/` | 6 inline SVG icon components | Used throughout UI |
-| `src/theme/` | Vuetify theme customization | `nativeChatTheme.ts` |
-| `docs/` | VitePress documentation site with interactive demos | `index.md`, demos/ |
+| `src/` | All library source code shipped to consumers | `index.ts` (entry), `plugin.ts` (Vue plugin) |
+| `src/components/` | 8 Vue SFC components forming the chat widget UI | `NativeChatWidget.vue` (root), `MessageList.vue` (complex scroll) |
+| `src/composables/` | Core business logic as Vue composable | `useChat.ts` — the heart of the library (227 LOC) |
+| `src/types/` | TypeScript interfaces and public type exports | `api.ts` (NativeChatApiClient contract) |
+| `src/helpers/` | Factory/adapter utilities | `createApiClient.ts` (Axios → API client adapter) |
+| `src/icons/` | 7 inline SVG icon components | All use currentColor + 1em sizing |
+| `src/theme/` | Vuetify theme definition | `nativeChatTheme.ts` (brand colors + custom tokens) |
+| `docs/` | VitePress documentation site with live demos | `.vitepress/mock/` (simulated API) |
 | `perf/` | Playwright performance benchmarks | `scroll-benchmark.spec.ts` |
+
+## Entry Points
+
+| Entry Point | Purpose | Build Output |
+|-------------|---------|--------------|
+| `src/index.ts` | Library entry — plugin + widget + factory + types | `dist/get-native-chat-vue.es.js` + `dist/types/` + `dist/get-native-chat-vue.css` |
+| `docs/index.md` | Documentation site entry | VitePress static site |
 
 ## Component Hierarchy
 
 ```
-NativeChatWidget (root)
-├── FloatingButton          ← FAB trigger, toggles open/close, hideToggleWhenOpen
-└── ChatPanel               ← Floating panel (Teleport to body, fixed position)
-    ├── ChatHeader          ← Star icon + "AI Assistant" title + close button
-    ├── [Loading Spinner]   ← v-progress-circular (while loading, no messages)
-    ├── [WelcomeState]      ← Empty state (no messages, not sending)
-    ├── [MessageList]       ← v-infinite-scroll (when messages exist)
-    │   └── MessageBubble   ← Per message: user/assistant/error bubbles
-    └── ChatInput           ← Auto-grow textarea + inline send/spinner button
+NativeChatWidget (root, provides nativeChat theme + CHAT_STATE_KEY)
+├── FloatingButton (FAB toggle, position config, icon transition)
+└── ChatPanel (Teleport to body, responsive overlay, Escape key)
+    ├── ChatHeader (avatar + "AI Assistant" title + close button)
+    ├── v-progress-circular (loading state, conditional)
+    ├── WelcomeState (empty state, conditional)
+    ├── MessageList (v-infinite-scroll, scroll mgmt, animations)
+    │   ├── MessageBubble × N (markdown, copy, error variant)
+    │   │   └── Icons: IconStar, IconWarning, IconCopy, IconCheck
+    │   └── IconArrowDown (scroll-to-bottom FAB)
+    └── ChatInput (auto-grow textarea, Enter to send)
+        └── IconSend / v-progress-circular
 ```
 
 ## Data Flow
@@ -146,37 +156,38 @@ NativeChatWidget (root)
 ```
 Consumer App
   │
-  ├── app.use(NativeChatPlugin, { apiClient, ... })
-  │     └── provide(CONFIG_KEY, options)
-  │     └── app.component('NativeChatWidget')
+  ├── createNativeChatApiClient({ axiosInstance }) → NativeChatApiClient
+  │     (Adapter: wraps Axios instance with domain-specific methods)
   │
-  └── <NativeChatWidget />
+  └── app.use(NativeChatPlugin, { apiClient, ...options })
         │
-        ├── inject(CONFIG_KEY) → config
-        ├── useChat(apiClient, config) → chatState
-        ├── provide(CHAT_STATE_KEY, chatState)
-        ├── Register nativeChat Vuetify theme (merged at runtime)
-        │
-        └── All children inject(CHAT_STATE_KEY) for:
-              ├── messages (DeepReadonly<Ref<ChatMessage[]>>)
-              ├── isOpen / isLoading / isSending / hasMore (Readonly<Ref<boolean>>)
-              ├── failedMessageText (Readonly<Ref<string | null>>)
-              ├── open() → resolve conversation → fetch messages → isOpen=true
-              ├── close() → isOpen=false → focus returns to FloatingButton
-              ├── sendMessage(text) → optimistic UI → API call → replace/error
-              ├── loadMore() → paginated fetch → prepend → preserve scroll position
-              └── retry() → resend failedMessageText
+        ├── app.provide(CONFIG_KEY, options)
+        └── app.component('NativeChatWidget', NativeChatWidget)
+              │
+              ├── inject(CONFIG_KEY) → config
+              ├── useChat(apiClient, config) → UseChatReturn
+              ├── provide(CHAT_STATE_KEY, chatState)
+              │
+              └── All children inject(CHAT_STATE_KEY) for:
+                    ├── messages (DeepReadonly<Ref<ChatMessage[]>>)
+                    ├── isOpen / isLoading / isSending / hasMore (Readonly<Ref<boolean>>)
+                    ├── failedMessageText (Readonly<Ref<string | null>>)
+                    ├── open()  → resolve conversation → fetch messages → isOpen=true
+                    ├── close() → isOpen=false → focus returns to FloatingButton
+                    ├── sendMessage(text) → optimistic UI → API → merge response or error
+                    ├── loadMore() → paginated fetch → prepend → preserve scroll
+                    └── retry() → resend failedMessageText
 ```
 
-## Recent Changes (since 2026-02-21)
+## File Statistics
 
-- **Floating panel layout**: Replaced `v-navigation-drawer` with fixed-position floating panel using `Teleport to="body"`. Desktop: 420px wide, rounded corners. Mobile: full-screen slide-up.
-- **Panel transitions**: Open/close animations (scale + translate from bottom-right, mobile: slide-up). `prefers-reduced-motion` respected.
-- **Message bubble animations**: Entrance slide animations (user: slide-right, assistant: slide-left). Animation tracking via `knownIds` Set + `animatingIds` ref.
-- **Redesigned ChatInput**: Inline send button inside `v-textarea` via `#append-inner` slot. Loading spinner replaces send icon during `isSending`.
-- **Error message styling**: Warning icon (`IconWarning.vue`) + subtle red-tinted bubble background for error messages.
-- **Panel header polish**: Header divider (1px border-bottom), close button using `v-btn icon variant="plain"`.
-- **hideToggleWhenOpen config**: New option to hide FloatingButton when chat panel is open.
-- **Theme refinements**: Added `title` and `chat-background` colors to theme definition.
-- **Enriched demo**: Mock API client expanded with 20 additional Vue Q&A pairs for realistic scroll testing.
-- **VitePress fixes**: CSS overrides for markdown list rendering inside message bubbles.
+| Category | Files | Approx. LOC |
+|----------|-------|-------------|
+| Core source (TS) | 10 | ~431 |
+| Components (Vue SFC) | 8 | ~1,067 |
+| Icons (Vue SVG) | 7 | ~98 |
+| Unit/integration tests | 12 | ~2,200+ |
+| Performance tests (Playwright) | 1 | ~60 |
+| Documentation (MD + Vue + TS) | 18 | ~1,500+ |
+| Config files | 11 | ~120 |
+| **Total (excluding lockfile)** | **67** | **~5,476+** |

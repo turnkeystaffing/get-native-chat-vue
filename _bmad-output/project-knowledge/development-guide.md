@@ -1,13 +1,13 @@
 # Development Guide — native-chat-vue
 
-> Generated: 2026-02-23 | Scan Level: Exhaustive | Mode: Full Rescan
+> Generated: 2026-02-25 | Scan Level: Exhaustive | Mode: Full Rescan
 
 ## Prerequisites
 
 | Requirement | Version | Notes |
 |-------------|---------|-------|
 | Node.js | ES2022-compatible (v18+) | Required by TypeScript target |
-| Yarn | 4.12.0 (Berry) | Managed via corepack (`packageManager` field) |
+| Yarn | 4.12.0 (Berry) | Managed via corepack (`packageManager` field in package.json) |
 | Corepack | Built into Node 16+ | Run `corepack enable` to activate |
 
 ## Installation
@@ -41,19 +41,33 @@ Yarn 4 is configured with `nodeLinker: node-modules` (`.yarnrc.yml`), so depende
 
 The library is built using Vite in **library mode**:
 
-1. **Type checking**: `vue-tsc --noEmit -p tsconfig.build.json` validates types (excludes tests)
+1. **Type checking**: `vue-tsc --noEmit -p tsconfig.build.json` validates types (excludes tests/docs)
 2. **Vite build**: Produces:
-   - `dist/native-chat-vue.es.js` — ES module bundle
-   - `dist/native-chat-vue.css` — Compiled CSS (single file, no code splitting)
+   - `dist/get-native-chat-vue.es.js` — ES module bundle
+   - `dist/get-native-chat-vue.css` — Compiled CSS (single file, no code splitting)
    - `dist/types/` — TypeScript declaration files (via `vite-plugin-dts`)
 
 **Build configuration highlights** (`vite.config.ts`):
 - Entry point: `src/index.ts`
+- Library name: `NativeChatVue`
 - Format: ES module only (`formats: ['es']`)
-- External dependencies: `vue` and `vuetify` are not bundled (peer deps, regex-matched)
+- External dependencies: `vue`, `vuetify`, and `axios` are not bundled (peer deps, regex-matched)
 - CSS: No code splitting (`cssCodeSplit: false`)
 - Public directory: Disabled (`copyPublicDir: false`)
 - Plugins: `@vitejs/plugin-vue` + `vite-plugin-dts` (type generation from `tsconfig.build.json`)
+
+**Package exports** (`package.json`):
+- `.` → `dist/get-native-chat-vue.es.js` (import) + `dist/types/index.d.ts` (types)
+- `./style.css` → `dist/get-native-chat-vue.css`
+
+## Publishing
+
+- **Registry**: GitHub Packages (`npm.pkg.github.com`)
+- **Scope**: `@turnkeystaffing`
+- **Package name**: `@turnkeystaffing/get-native-chat-vue`
+- **Files shipped**: Only `dist/` directory
+- **Peer dependencies**: `vue ^3.5.0`, `vuetify ^3.11.0`, `axios ^1.0.0` (optional)
+- **Runtime dependencies**: `dompurify ^3.3.0`, `marked ^17.0.0`
 
 ## Testing
 
@@ -71,17 +85,18 @@ yarn test:watch    # Watch mode
 - Setup file: `vitest.setup.ts`
   - Polyfills `ResizeObserver` for jsdom (required by Vuetify)
   - Registers global Vuetify instance with all components + directives
+- Vuetify inlined via `server.deps.inline: ['vuetify']`
 
-**Test coverage:** 175+ test cases across 12 files:
+**Test coverage:** 300+ test cases across 12 files:
 
 | Category | Files | Tests | Key Coverage Areas |
 |----------|-------|-------|-------------------|
-| Components | 9 | ~105 | Rendering, interactions, a11y, focus, animations |
+| Components | 9 | ~165 | Rendering, interactions, a11y, focus, scroll, animations |
 | Composable | 1 | ~70 | State machine: open/close/send/loadMore/retry/error |
-| Helper | 1 | ~12 | HTTP methods, auth headers, URL encoding, errors |
-| Types | 1 | ~10 | Interface shape verification |
+| Helper | 1 | ~12 | HTTP methods, URL encoding, validation, error propagation |
+| Types | 1 | ~11 | Interface shape verification |
 
-Notable integration coverage in `SendReceiveFlow.test.ts`: full send/receive/error/retry lifecycle across composable + component layers.
+Notable integration coverage in `SendReceiveFlow.test.ts`: full send/receive/error/retry lifecycle across composable + component layers with real `useChat` composable.
 
 ### Performance Tests (Playwright)
 
@@ -95,9 +110,9 @@ yarn perf
 - Timeout: 120 seconds
 - Web server: Starts VitePress dev on port 5174
 
-**Benchmarks** (`scroll-benchmark.spec.ts`):
+**Benchmarks** (`perf/scroll-benchmark.spec.ts`):
 - **Static scroll**: 1000 messages, measures FPS (target: >=30fps avg, no frame >50ms)
-- **Infinite scroll**: Progressive load 20->1000 messages, measures scroll position preservation (<1px drift)
+- **Infinite scroll**: Progressive load 20→1000 messages, measures scroll position preservation (<=1px drift) and FPS during concurrent load+scroll
 
 ## Linting & Formatting
 
@@ -106,8 +121,8 @@ yarn perf
 - Plugins: `eslint-plugin-vue` (flat/recommended) + `@vue/eslint-config-typescript` (recommended)
 - Custom rules:
   - `vue/multi-word-component-names`: off (allows single-word component names)
-  - `vue/one-component-per-file`: off in test files
-- Prettier integration via `eslint-config-prettier`
+  - `vue/one-component-per-file`: off in test files only
+- Prettier integration via `eslint-config-prettier` (disables conflicting rules)
 - Ignores: `dist/`, `node_modules/`, `docs/.vitepress/dist|cache/`, `coverage/`, `_bmad/`, `_bmad-output/`, `.claude/`, `.yarn/`, `design/`
 
 **Prettier** (`.prettierrc`):
@@ -118,7 +133,7 @@ yarn perf
 **Base** (`tsconfig.json`):
 - Strict mode enabled
 - Target: ES2022, Module: ESNext, Resolution: bundler
-- Path alias: `@/*` -> `./src/*`
+- Path alias: `@/*` → `./src/*`
 - Globals: `vitest/globals` types included
 - Source maps and declaration maps enabled
 - Includes: `src/**/*`, `src/**/*.vue`, `docs/**/*`, `*.config.ts`, `vitest.setup.ts`
@@ -131,9 +146,20 @@ yarn perf
 ## Environment & Configuration
 
 - **No `.env` files** — The library has no runtime environment configuration
-- **No CI/CD pipelines** — No `.github/workflows/`, Jenkinsfile, or similar
+- **No CI/CD pipelines** — No `.github/workflows/`, Jenkinsfile, or similar found
 - **No Docker** — No containerization setup
 - **No deployment config** — Library is distributed as an npm package via `dist/`
+- **No CONTRIBUTING.md** — No formal contribution guidelines document
+
+## Code Conventions
+
+- **Component style**: `<script setup lang="ts">` with Composition API
+- **CSS isolation**: All component styles scoped, using `@layer native-chat { ... }`
+- **State sharing**: Vue provide/inject via typed InjectionKeys (`CONFIG_KEY`, `CHAT_STATE_KEY`)
+- **Icon pattern**: Inline SVG components with `width="1em" height="1em" fill="currentColor" aria-hidden="true"`
+- **Accessibility**: ARIA labels on all interactive elements, `aria-live` on message list, semantic HTML
+- **Error handling**: Optimistic UI updates with graceful error recovery and user-friendly messages
+- **Animation**: CSS transitions with `prefers-reduced-motion` respect
 
 ## Common Development Tasks
 
@@ -169,16 +195,19 @@ yarn perf
 3. Update `useChat.ts` if new methods are used
 4. Update mock in `docs/.vitepress/mock/mockApiClient.ts`
 5. Update tests in `createApiClient.test.ts` and `useChat.test.ts`
+6. Update docs in `docs/guide/api-client.md`
 
 ### Testing patterns
 
 - **Component tests**: Mock `UseChatReturn` via `provide(CHAT_STATE_KEY, mockState)` and `provide(CONFIG_KEY, mockConfig)`
-- **Composable tests**: Create real `useChat()` with mock `NativeChatApiClient`
+- **Composable tests**: Create real `useChat()` with mock `NativeChatApiClient` (vi.fn methods)
 - **Integration tests**: Full component tree with real composable for end-to-end flows
-- **Teleport testing**: ChatPanel uses `<Teleport to="body">` — test with `document.body.innerHTML` assertions
+- **Teleport testing**: ChatPanel uses `<Teleport to="body">` — test with `attachTo: document.body` + stubs
 - **Keyboard events**: Use `wrapper.trigger('keydown', { key: 'Enter' })`
-- **Focus testing**: Spy on `HTMLElement.prototype.focus`
+- **Focus testing**: Spy on `HTMLElement.prototype.focus` via `vi.spyOn`
 - **Animation testing**: Check CSS classes (`nc-message-bubble--animate-in`)
+- **Async flows**: Use `await flushPromises()` + `await nextTick()` for API call chains
+- **Fake timers**: `vi.useFakeTimers()` + `vi.advanceTimersByTime()` for copy feedback, etc.
 
 ### Working with the docs site
 
@@ -186,5 +215,6 @@ yarn perf
 2. Edit pages in `docs/` (markdown + Vue components)
 3. Demo components live in `docs/components/demos/`
 4. Mock API client in `docs/.vitepress/mock/mockApiClient.ts` — provides canned data with simulated latency
-5. CSS overrides for VitePress resets in `docs/.vitepress/theme/overrides.css`
-6. Build static site: `yarn docs:build` (output: `docs/.vitepress/dist/`)
+5. Demo config in `docs/.vitepress/mock/demoConfig.ts` — reactive plugin options for live demos
+6. CSS overrides for VitePress resets in `docs/.vitepress/theme/overrides.css`
+7. Build static site: `yarn docs:build` (output: `docs/.vitepress/dist/`)
