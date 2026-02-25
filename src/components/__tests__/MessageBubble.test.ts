@@ -383,17 +383,23 @@ describe('MessageBubble', () => {
     })
 
     it('does not apply --flat class when assistantBubbleFullWidth is false', () => {
-      const wrapper = mountBubbleWithConfig(createMessage({ role: 'assistant', content: 'Hello' }), {
-        assistantBubbleFullWidth: false,
-      })
+      const wrapper = mountBubbleWithConfig(
+        createMessage({ role: 'assistant', content: 'Hello' }),
+        {
+          assistantBubbleFullWidth: false,
+        },
+      )
 
       expect(wrapper.classes()).not.toContain('nc-message-bubble--flat')
     })
 
     it('applies --flat class to assistant message when assistantBubbleFullWidth is true', () => {
-      const wrapper = mountBubbleWithConfig(createMessage({ role: 'assistant', content: 'Hello' }), {
-        assistantBubbleFullWidth: true,
-      })
+      const wrapper = mountBubbleWithConfig(
+        createMessage({ role: 'assistant', content: 'Hello' }),
+        {
+          assistantBubbleFullWidth: true,
+        },
+      )
 
       expect(wrapper.classes()).toContain('nc-message-bubble--flat')
     })
@@ -416,9 +422,12 @@ describe('MessageBubble', () => {
     })
 
     it('copy button is still present when assistantBubbleFullWidth is true', () => {
-      const wrapper = mountBubbleWithConfig(createMessage({ role: 'assistant', content: 'Hello' }), {
-        assistantBubbleFullWidth: true,
-      })
+      const wrapper = mountBubbleWithConfig(
+        createMessage({ role: 'assistant', content: 'Hello' }),
+        {
+          assistantBubbleFullWidth: true,
+        },
+      )
 
       expect(wrapper.find('[aria-label="Copy message"]').exists()).toBe(true)
     })

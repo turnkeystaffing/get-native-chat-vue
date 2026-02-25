@@ -72,8 +72,21 @@ async function copySource() {
             fill="none"
             aria-hidden="true"
           >
-            <rect x="5" y="5" width="9" height="9" rx="1.5" stroke="currentColor" stroke-width="1.5" />
-            <path d="M3 11V3C3 2.44772 3.44772 2 4 2H12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
+            <rect
+              x="5"
+              y="5"
+              width="9"
+              height="9"
+              rx="1.5"
+              stroke="currentColor"
+              stroke-width="1.5"
+            />
+            <path
+              d="M3 11V3C3 2.44772 3.44772 2 4 2H12"
+              stroke="currentColor"
+              stroke-width="1.5"
+              stroke-linecap="round"
+            />
           </svg>
           <svg
             v-else
@@ -105,7 +118,9 @@ async function copySource() {
         <div class="nc-demo-block__source-header">
           <span class="nc-demo-block__source-lang">.vue</span>
         </div>
-        <pre class="nc-demo-block__pre"><code class="nc-demo-block__code"><span v-for="(line, i) in sourceLines" :key="i" class="nc-demo-block__line">{{ line }}
+        <pre
+          class="nc-demo-block__pre"
+        ><code class="nc-demo-block__code"><span v-for="(line, i) in sourceLines" :key="i" class="nc-demo-block__line">{{ line }}
 </span></code></pre>
       </div>
     </div>
@@ -127,8 +142,7 @@ async function copySource() {
   /* Preview: subtle dot-grid canvas */
   .nc-demo-block__preview {
     padding: 32px 24px;
-    background:
-      radial-gradient(circle, rgba(var(--v-theme-on-surface), 0.07) 1px, transparent 1px);
+    background: radial-gradient(circle, rgba(var(--v-theme-on-surface), 0.07) 1px, transparent 1px);
     background-size: 16px 16px;
     background-color: rgb(var(--v-theme-surface));
   }
@@ -158,7 +172,9 @@ async function copySource() {
     padding: 6px 10px;
     border-radius: 6px;
     min-height: 32px;
-    transition: color 0.15s ease, background-color 0.15s ease;
+    transition:
+      color 0.15s ease,
+      background-color 0.15s ease;
     user-select: none;
   }
 
@@ -190,13 +206,15 @@ async function copySource() {
 
   /* Copied checkmark color */
   .nc-demo-block__check-icon {
-    color: #41A58D;
+    color: #41a58d;
   }
 
   /* Icon swap transition */
   .nc-demo-block__icon-swap-enter-active,
   .nc-demo-block__icon-swap-leave-active {
-    transition: opacity 0.12s ease, transform 0.12s ease;
+    transition:
+      opacity 0.12s ease,
+      transform 0.12s ease;
   }
 
   .nc-demo-block__icon-swap-enter-from {
@@ -239,7 +257,7 @@ async function copySource() {
     font-size: 11px;
     font-weight: 600;
     letter-spacing: 0.03em;
-    color: #C4105B;
+    color: #c4105b;
     background: rgba(196, 16, 91, 0.12);
     padding: 2px 8px;
     border-radius: 4px;
@@ -250,7 +268,7 @@ async function copySource() {
     margin: 0;
     padding: 16px 0;
     overflow-x: auto;
-    background: #002B38;
+    background: #002b38;
     counter-reset: line;
   }
 

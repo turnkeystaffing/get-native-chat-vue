@@ -40,7 +40,7 @@ const olderMessagePairs: [string, string][] = [
   ],
   [
     'Can you explain Vue Router basics?',
-    "Vue Router maps URL paths to components. Define routes as an array of `{ path, component }` objects, create a router with `createRouter()`, and install it via `app.use(router)`. Use `<RouterView>` to render matched components and `<RouterLink>` for navigation.",
+    'Vue Router maps URL paths to components. Define routes as an array of `{ path, component }` objects, create a router with `createRouter()`, and install it via `app.use(router)`. Use `<RouterView>` to render matched components and `<RouterLink>` for navigation.',
   ],
   [
     'What is Pinia and how does it compare to Vuex?',
@@ -52,7 +52,7 @@ const olderMessagePairs: [string, string][] = [
   ],
   [
     'What are slots in Vue?',
-    "Slots let a parent component inject template content into a child. The child declares `<slot />` placeholders, and the parent fills them. **Named slots** (`<slot name=\"header\" />`) allow multiple injection points, while **scoped slots** pass data back to the parent.",
+    'Slots let a parent component inject template content into a child. The child declares `<slot />` placeholders, and the parent fills them. **Named slots** (`<slot name="header" />`) allow multiple injection points, while **scoped slots** pass data back to the parent.',
   ],
   [
     'How do I use provide/inject?',
@@ -76,7 +76,7 @@ const olderMessagePairs: [string, string][] = [
   ],
   [
     'Can you explain the Vue lifecycle hooks?',
-    "The main hooks in order are: `setup()` (Composition API entry), `onBeforeMount`, `onMounted` (DOM ready), `onBeforeUpdate`, `onUpdated`, `onBeforeUnmount`, and `onUnmounted`. Most day-to-day work uses `onMounted` for data fetching and `onUnmounted` for cleanup.",
+    'The main hooks in order are: `setup()` (Composition API entry), `onBeforeMount`, `onMounted` (DOM ready), `onBeforeUpdate`, `onUpdated`, `onBeforeUnmount`, and `onUnmounted`. Most day-to-day work uses `onMounted` for data fetching and `onUnmounted` for cleanup.',
   ],
   [
     'What is the difference between v-if and v-show?',
@@ -84,11 +84,11 @@ const olderMessagePairs: [string, string][] = [
   ],
   [
     'How do transitions and animations work in Vue?',
-    "Wrap elements in `<Transition>` to apply enter/leave CSS classes automatically. Vue adds classes like `v-enter-from`, `v-enter-active`, and `v-leave-to` that you style with CSS transitions or animations. For lists, use `<TransitionGroup>` which also handles move animations via FLIP.",
+    'Wrap elements in `<Transition>` to apply enter/leave CSS classes automatically. Vue adds classes like `v-enter-from`, `v-enter-active`, and `v-leave-to` that you style with CSS transitions or animations. For lists, use `<TransitionGroup>` which also handles move animations via FLIP.',
   ],
   [
     'What is SSR in Vue and when should I use it?',
-    "Server-Side Rendering generates HTML on the server so the browser shows content immediately. Use it when SEO or first-paint performance matters. Nuxt is the go-to SSR framework for Vue — it handles routing, data fetching, and hydration out of the box.",
+    'Server-Side Rendering generates HTML on the server so the browser shows content immediately. Use it when SEO or first-paint performance matters. Nuxt is the go-to SSR framework for Vue — it handles routing, data fetching, and hydration out of the box.',
   ],
   [
     'How do I test Vue components?',
@@ -252,10 +252,7 @@ const handWrittenMessages: MessageResponse[] = [
 ]
 
 // Combine: older generated messages first, then the 10 hand-written ones
-const cannedMessages: MessageResponse[] = [
-  ...generateOlderMessages(),
-  ...handWrittenMessages,
-]
+const cannedMessages: MessageResponse[] = [...generateOlderMessages(), ...handWrittenMessages]
 
 // Canned replies for sendMessage — cycled through
 const cannedReplies = [

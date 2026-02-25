@@ -108,7 +108,11 @@ onBeforeUnmount(() => {
       :aria-label="copied ? 'Message copied' : 'Copy message'"
       @click="handleCopy"
     >
-      <v-icon :icon="copied ? IconCheck : IconCopy" size="small" :color="copied ? 'success' : 'title'"></v-icon>
+      <v-icon
+        :icon="copied ? IconCheck : IconCopy"
+        size="small"
+        :color="copied ? 'success' : 'title'"
+      ></v-icon>
     </v-btn>
   </li>
 </template>
