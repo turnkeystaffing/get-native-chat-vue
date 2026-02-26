@@ -1,5 +1,16 @@
 <script setup lang="ts">
+import { ref, watch } from 'vue'
 import { demoConfig } from '../../.vitepress/mock/demoConfig'
+import {
+  simulateFreshConversation,
+  setSimulateFreshConversation,
+} from '../../.vitepress/mock/mockApiClient'
+
+const freshConversation = ref(simulateFreshConversation)
+
+watch(freshConversation, (val) => {
+  setSimulateFreshConversation(val)
+})
 </script>
 
 <template>
@@ -23,6 +34,17 @@ import { demoConfig } from '../../.vitepress/mock/demoConfig'
         hide-details
         class="mt-2"
       />
+      <v-switch
+        v-model="freshConversation"
+        label="New Conversation (close & reopen chat)"
+        color="primary"
+        density="compact"
+        hide-details
+        class="mt-2"
+      />
+      <p class="nc-config-demo__hint">
+        Toggle 'New Conversation' then close and reopen the chat to see the welcome state.
+      </p>
     </div>
   </v-theme-provider>
 </template>
@@ -36,5 +58,11 @@ import { demoConfig } from '../../.vitepress/mock/demoConfig'
   margin-bottom: 12px;
   font-size: 14px;
   color: rgba(var(--v-theme-on-surface), 0.7);
+}
+
+.nc-config-demo__hint {
+  margin-top: 8px;
+  font-size: 12px;
+  color: rgba(var(--v-theme-on-surface), 0.5);
 }
 </style>

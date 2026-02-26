@@ -1,9 +1,12 @@
 <script setup lang="ts">
 import { ref, computed, watch, inject, nextTick, useTemplateRef } from 'vue'
-import { CHAT_STATE_KEY } from '@/keys'
+import { CHAT_STATE_KEY, CONFIG_KEY } from '@/keys'
 import IconSend from '@/icons/IconSend.vue'
 
 const chatState = inject(CHAT_STATE_KEY)!
+const config = inject(CONFIG_KEY)
+
+const placeholder = computed(() => config?.placeholder ?? 'Type your message...')
 
 const inputText = ref('')
 const textareaRef = useTemplateRef<{ focus: () => void }>('textareaRef')
@@ -77,7 +80,7 @@ watch(
       variant="solo"
       density="compact"
       flat
-      placeholder="How can I help you? Ask me anything..."
+      :placeholder="placeholder"
       aria-label="Type a message"
       :disabled="chatState.isSending.value"
       class="nc-chat-input__textarea"

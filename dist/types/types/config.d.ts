@@ -4,6 +4,7 @@ export interface NativeChatPluginOptions {
     apiClient: NativeChatApiClient;
     position?: 'bottom-left' | 'bottom-right';
     welcomeMessage?: string;
+    placeholder?: string;
     batchSize?: number;
     conversationId?: string;
     hideToggleWhenOpen?: boolean;

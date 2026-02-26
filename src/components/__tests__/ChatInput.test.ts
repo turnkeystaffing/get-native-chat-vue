@@ -2,8 +2,9 @@ import { mount } from '@vue/test-utils'
 import { ref, readonly, nextTick } from 'vue'
 import ChatInput from '@/components/ChatInput.vue'
 import IconSend from '@/icons/IconSend.vue'
-import { CHAT_STATE_KEY } from '@/keys'
+import { CHAT_STATE_KEY, CONFIG_KEY } from '@/keys'
 import type { UseChatReturn } from '@/composables/useChat'
+import type { NativeChatPluginOptions } from '@/types/config'
 
 function createMockChatState(overrides?: Partial<UseChatReturn>): UseChatReturn {
   const isSending = ref(false)
@@ -24,12 +25,16 @@ function createMockChatState(overrides?: Partial<UseChatReturn>): UseChatReturn 
   }
 }
 
-function mountChatInput(chatState?: UseChatReturn) {
+function mountChatInput(
+  chatState?: UseChatReturn,
+  config?: NativeChatPluginOptions,
+) {
   const state = chatState ?? createMockChatState()
   const wrapper = mount(ChatInput, {
     global: {
       provide: {
         [CHAT_STATE_KEY as symbol]: state,
+        [CONFIG_KEY as symbol]: config ?? {},
       },
     },
   })
@@ -314,5 +319,28 @@ describe('ChatInput', () => {
 
     // User text should remain
     expect(textarea.element.value).toBe('user typed text')
+  })
+
+  it('renders default placeholder "Type your message..." when no config placeholder', () => {
+    const { wrapper } = mountChatInput()
+    const textarea = wrapper.find('textarea')
+
+    expect(textarea.attributes('placeholder')).toBe('Type your message...')
+  })
+
+  it('renders custom placeholder from config', () => {
+    const mockApiClient = {
+      createConversation: vi.fn(),
+      getConversations: vi.fn(),
+      getMessages: vi.fn(),
+      sendMessage: vi.fn(),
+    }
+    const { wrapper } = mountChatInput(undefined, {
+      apiClient: mockApiClient,
+      placeholder: 'Ask anything...',
+    })
+    const textarea = wrapper.find('textarea')
+
+    expect(textarea.attributes('placeholder')).toBe('Ask anything...')
   })
 })

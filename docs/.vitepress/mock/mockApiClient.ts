@@ -15,6 +15,14 @@ export function setSimulateError(code: number | null) {
   simulateErrorCode = code
 }
 
+// ====== Fresh Conversation Simulation ======
+
+export let simulateFreshConversation = false
+
+export function setSimulateFreshConversation(value: boolean) {
+  simulateFreshConversation = value
+}
+
 function checkError() {
   if (simulateErrorCode) {
     const error = new Error('Simulated error')
@@ -280,6 +288,9 @@ export const mockApiClient: NativeChatApiClient = {
 
   async getConversations(offset: number, limit: number): Promise<ConversationListResponse> {
     checkError()
+    if (simulateFreshConversation) {
+      return { conversations: [], has_more: false }
+    }
     const allConversations = [
       {
         id: MOCK_CONVERSATION_ID,
@@ -300,6 +311,9 @@ export const mockApiClient: NativeChatApiClient = {
     checkError()
     // Simulate 300ms–1s network latency
     await new Promise((resolve) => setTimeout(resolve, 300 + Math.random() * 700))
+    if (simulateFreshConversation) {
+      return { messages: [], has_more: false }
+    }
     const page = messagesNewestFirst.slice(offset, offset + limit)
     return {
       messages: page,
