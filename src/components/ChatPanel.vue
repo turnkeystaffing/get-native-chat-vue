@@ -73,87 +73,81 @@ onUnmounted(() => {
 </template>
 
 <style scoped>
-/* Unlayered — must beat Vuetify's unlayered .v-theme-provider background */
 .nc-chat-panel {
   background: rgb(var(--v-theme-chat-background));
+  position: fixed;
+  right: 25px;
+  bottom: 20px;
+  top: 20px;
+  width: 420px;
+  border-radius: 20px;
+  box-shadow: 0 8px 40px rgba(0, 0, 0, 0.12);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  z-index: 10000;
 }
 
-@layer native-chat {
-  .nc-chat-panel {
-    position: fixed;
-    right: 25px;
-    bottom: 20px;
-    top: 20px;
-    width: 420px;
-    border-radius: 20px;
-    box-shadow: 0 8px 40px rgba(0, 0, 0, 0.12);
-    display: flex;
-    flex-direction: column;
-    overflow: hidden;
-    z-index: 10000;
-  }
+.nc-chat-panel--mobile {
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  width: 100%;
+  height: 100dvh;
+  border-radius: 0;
+  box-shadow: none;
+}
 
-  .nc-chat-panel--mobile {
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    width: 100%;
-    height: 100dvh;
-    border-radius: 0;
-    box-shadow: none;
-  }
+.nc-chat-panel__body {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  overflow: hidden;
+}
 
-  .nc-chat-panel__body {
-    display: flex;
-    flex-direction: column;
-    flex: 1;
-    overflow: hidden;
-  }
+.nc-chat-panel__loader {
+  align-self: center;
+  margin-top: 32px;
+}
 
-  .nc-chat-panel__loader {
-    align-self: center;
-    margin-top: 32px;
-  }
+/* Panel open/close transition — grows from bottom-right (floating button) */
+.nc-panel-enter-active {
+  transition:
+    opacity 280ms cubic-bezier(0.16, 1, 0.3, 1),
+    transform 280ms cubic-bezier(0.16, 1, 0.3, 1);
+  transform-origin: bottom right;
+}
 
-  /* Panel open/close transition — grows from bottom-right (floating button) */
-  .nc-panel-enter-active {
-    transition:
-      opacity 280ms cubic-bezier(0.16, 1, 0.3, 1),
-      transform 280ms cubic-bezier(0.16, 1, 0.3, 1);
-    transform-origin: bottom right;
-  }
+.nc-panel-leave-active {
+  transition:
+    opacity 200ms cubic-bezier(0.4, 0, 1, 1),
+    transform 200ms cubic-bezier(0.4, 0, 1, 1);
+  transform-origin: bottom right;
+}
 
+.nc-panel-enter-from,
+.nc-panel-leave-to {
+  opacity: 0;
+  transform: scale(0.9) translateY(20px);
+}
+
+/* Mobile: slide up from bottom instead of scale */
+.nc-chat-panel--mobile.nc-panel-enter-active,
+.nc-chat-panel--mobile.nc-panel-leave-active {
+  transform-origin: bottom center;
+}
+
+.nc-chat-panel--mobile.nc-panel-enter-from,
+.nc-chat-panel--mobile.nc-panel-leave-to {
+  opacity: 1;
+  transform: translateY(100%);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .nc-panel-enter-active,
   .nc-panel-leave-active {
-    transition:
-      opacity 200ms cubic-bezier(0.4, 0, 1, 1),
-      transform 200ms cubic-bezier(0.4, 0, 1, 1);
-    transform-origin: bottom right;
-  }
-
-  .nc-panel-enter-from,
-  .nc-panel-leave-to {
-    opacity: 0;
-    transform: scale(0.9) translateY(20px);
-  }
-
-  /* Mobile: slide up from bottom instead of scale */
-  .nc-chat-panel--mobile.nc-panel-enter-active,
-  .nc-chat-panel--mobile.nc-panel-leave-active {
-    transform-origin: bottom center;
-  }
-
-  .nc-chat-panel--mobile.nc-panel-enter-from,
-  .nc-chat-panel--mobile.nc-panel-leave-to {
-    opacity: 1;
-    transform: translateY(100%);
-  }
-
-  @media (prefers-reduced-motion: reduce) {
-    .nc-panel-enter-active,
-    .nc-panel-leave-active {
-      transition-duration: 0ms;
-    }
+    transition-duration: 0ms;
   }
 }
 </style>

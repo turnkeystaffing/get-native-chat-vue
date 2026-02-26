@@ -102,26 +102,24 @@ provide(CONFIG_KEY, {
 </template>
 
 <style scoped>
-@layer native-chat {
-  .nc-message-bubble-demo {
-    padding: 16px;
-  }
+.nc-message-bubble-demo {
+  padding: 16px;
+}
 
-  .nc-message-bubble-demo__section-title {
-    font-size: 14px;
-    font-weight: 600;
-    color: rgba(var(--v-theme-on-surface), 0.7);
-    margin: 16px 0 8px;
-  }
+.nc-message-bubble-demo__section-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: rgba(var(--v-theme-on-surface), 0.7);
+  margin: 16px 0 8px;
+}
 
-  .nc-message-bubble-demo__section-title:first-child {
-    margin-top: 0;
-  }
+.nc-message-bubble-demo__section-title:first-child {
+  margin-top: 0;
+}
 
-  .nc-message-bubble-demo__list {
-    list-style: none;
-    padding: 0;
-    margin: 0;
-  }
+.nc-message-bubble-demo__list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
 }
 </style>

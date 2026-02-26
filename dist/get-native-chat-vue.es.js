@@ -253,7 +253,7 @@ const Wn = /* @__PURE__ */ Z(Ns, [["render", Ps]]), zs = /* @__PURE__ */ fe({
       [Pn, !l.value]
     ]);
   }
-}), Bs = /* @__PURE__ */ Z(zs, [["__scopeId", "data-v-ac00f54f"]]), Fs = { class: "nc-chat-header" }, Us = { class: "nc-chat-header__left" }, Hs = /* @__PURE__ */ fe({
+}), Bs = /* @__PURE__ */ Z(zs, [["__scopeId", "data-v-25f0bf7d"]]), Fs = { class: "nc-chat-header" }, Us = { class: "nc-chat-header__left" }, Hs = /* @__PURE__ */ fe({
   __name: "ChatHeader",
   setup(s) {
     const e = pe(Ce);
@@ -291,7 +291,7 @@ const Wn = /* @__PURE__ */ Z(Ns, [["render", Ps]]), zs = /* @__PURE__ */ fe({
       })
     ]));
   }
-}), Ws = /* @__PURE__ */ Z(Hs, [["__scopeId", "data-v-20f4b784"]]), Gs = { class: "nc-welcome-state" }, qs = { class: "nc-welcome-state__text" }, Zs = /* @__PURE__ */ fe({
+}), Ws = /* @__PURE__ */ Z(Hs, [["__scopeId", "data-v-3269c11e"]]), Gs = { class: "nc-welcome-state" }, qs = { class: "nc-welcome-state__text" }, Zs = /* @__PURE__ */ fe({
   __name: "WelcomeState",
   props: {
     message: {}
@@ -301,7 +301,7 @@ const Wn = /* @__PURE__ */ Z(Ns, [["render", Ps]]), zs = /* @__PURE__ */ fe({
       P("p", qs, zn(s.message ?? "Hello! How can I help you?"), 1)
     ]));
   }
-}), Ys = /* @__PURE__ */ Z(Zs, [["__scopeId", "data-v-6d3eccea"]]);
+}), Ys = /* @__PURE__ */ Z(Zs, [["__scopeId", "data-v-8eb32e96"]]);
 function Ht() {
   return { async: !1, breaks: !1, extensions: null, gfm: !0, hooks: null, pedantic: !1, renderer: null, silent: !1, tokenizer: null, walkTokens: null };
 }
@@ -2111,7 +2111,7 @@ const ma = /* @__PURE__ */ Z(fa, [["render", ga]]), ka = ["aria-label"], ba = {
       }, 8, ["aria-label"])) : Lt("", !0)
     ], 10, ka));
   }
-}), ya = /* @__PURE__ */ Z(va, [["__scopeId", "data-v-8b3aa1a9"]]), Sa = {}, Aa = {
+}), ya = /* @__PURE__ */ Z(va, [["__scopeId", "data-v-8550489a"]]), Sa = {}, Aa = {
   xmlns: "http://www.w3.org/2000/svg",
   viewBox: "0 0 24 24",
   width: "1em",
@@ -2233,7 +2233,7 @@ const Ra = /* @__PURE__ */ Z(Sa, [["render", Ea]]), Ca = { class: "nc-message-li
       })
     ]));
   }
-}), Na = /* @__PURE__ */ Z(Oa, [["__scopeId", "data-v-ace94df9"]]), $a = {}, Pa = {
+}), Na = /* @__PURE__ */ Z(Oa, [["__scopeId", "data-v-097a2440"]]), $a = {}, Pa = {
   xmlns: "http://www.w3.org/2000/svg",
   viewBox: "0 0 24 24",
   width: "1em",
@@ -2334,7 +2334,7 @@ const Ba = /* @__PURE__ */ Z($a, [["render", za]]), Fa = { class: "nc-chat-input
       }, 8, ["modelValue", "disabled"])
     ]));
   }
-}), Ha = /* @__PURE__ */ Z(Ua, [["__scopeId", "data-v-81fc160e"]]), Wa = { class: "nc-chat-panel__body" }, Ga = /* @__PURE__ */ fe({
+}), Ha = /* @__PURE__ */ Z(Ua, [["__scopeId", "data-v-dc833e4e"]]), Wa = { class: "nc-chat-panel__body" }, Ga = /* @__PURE__ */ fe({
   __name: "ChatPanel",
   setup(s) {
     const e = pe(Ce), n = pe(He), r = H(() => n?.welcomeMessage), t = As(), l = H(() => t.width.value < 768), i = (c) => {
@@ -2381,7 +2381,7 @@ const Ba = /* @__PURE__ */ Z($a, [["render", za]]), Fa = { class: "nc-chat-input
       })
     ]));
   }
-}), qa = /* @__PURE__ */ Z(Ga, [["__scopeId", "data-v-c00684a0"]]), Za = /* @__PURE__ */ fe({
+}), qa = /* @__PURE__ */ Z(Ga, [["__scopeId", "data-v-39979cf7"]]), Za = /* @__PURE__ */ fe({
   __name: "NativeChatWidget",
   setup(s) {
     const e = Es();

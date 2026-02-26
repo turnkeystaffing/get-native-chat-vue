@@ -80,27 +80,25 @@ provide(CONFIG_KEY, {
 </template>
 
 <style scoped>
-@layer native-chat {
-  .nc-chat-input-demo {
-    padding: 16px;
-  }
+.nc-chat-input-demo {
+  padding: 16px;
+}
 
-  .nc-chat-input-demo__hint {
-    font-size: 14px;
-    color: rgba(var(--v-theme-on-surface), 0.7);
-    margin-bottom: 12px;
-  }
+.nc-chat-input-demo__hint {
+  font-size: 14px;
+  color: rgba(var(--v-theme-on-surface), 0.7);
+  margin-bottom: 12px;
+}
 
-  .nc-chat-input-demo__container {
-    border: 1px solid rgba(var(--v-theme-on-surface), 0.12);
-    border-radius: 8px;
-    overflow: hidden;
-  }
+.nc-chat-input-demo__container {
+  border: 1px solid rgba(var(--v-theme-on-surface), 0.12);
+  border-radius: 8px;
+  overflow: hidden;
+}
 
-  .nc-chat-input-demo__status {
-    margin-top: 8px;
-    font-size: 13px;
-    color: rgba(var(--v-theme-on-surface), 0.6);
-  }
+.nc-chat-input-demo__status {
+  margin-top: 8px;
+  font-size: 13px;
+  color: rgba(var(--v-theme-on-surface), 0.6);
 }
 </style>

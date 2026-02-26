@@ -1,8 +1,4 @@
-@layer native-chat {
-  /* Base layer for native-chat-vue plugin CSS isolation */
-
-  .nc-chat-panel,
-  .nc-floating-button-wrapper {
-    font-family: 'Open Sans', sans-serif !important;
-  }
+.nc-chat-panel,
+.nc-floating-button-wrapper {
+  font-family: 'Open Sans', sans-serif !important;
 }

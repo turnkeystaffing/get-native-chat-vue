@@ -13,12 +13,10 @@
 </template>
 
 <style scoped>
-@layer native-chat {
-  .nc-widget-demo {
-    padding: 16px;
-    text-align: center;
-    color: rgba(var(--v-theme-on-surface), 0.7);
-    font-size: 14px;
-  }
+.nc-widget-demo {
+  padding: 16px;
+  text-align: center;
+  color: rgba(var(--v-theme-on-surface), 0.7);
+  font-size: 14px;
 }
 </style>

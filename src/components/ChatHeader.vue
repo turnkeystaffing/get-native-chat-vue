@@ -22,24 +22,22 @@ const chatState = inject(CHAT_STATE_KEY)!
 </template>
 
 <style scoped>
-@layer native-chat {
-  .nc-chat-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 12px 16px;
-    border-bottom: 1px solid rgba(var(--v-theme-on-surface), 0.12);
-  }
+.nc-chat-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
+  border-bottom: 1px solid rgba(var(--v-theme-on-surface), 0.12);
+}
 
-  .nc-chat-header__left {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-  }
+.nc-chat-header__left {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
 
-  .nc-chat-header__title {
-    font-weight: 600;
-    font-size: 14px;
-  }
+.nc-chat-header__title {
+  font-weight: 600;
+  font-size: 14px;
 }
 </style>

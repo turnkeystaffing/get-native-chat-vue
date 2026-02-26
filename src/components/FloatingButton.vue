@@ -54,49 +54,47 @@ defineExpose({ focus })
 </template>
 
 <style scoped>
-@layer native-chat {
-  .nc-floating-button-wrapper {
-    position: fixed;
-    z-index: 9999;
-    bottom: 24px;
-  }
+.nc-floating-button-wrapper {
+  position: fixed;
+  z-index: 9999;
+  bottom: 24px;
+}
 
-  .nc-floating-button-wrapper--right {
-    right: 24px;
-  }
+.nc-floating-button-wrapper--right {
+  right: 24px;
+}
 
-  .nc-floating-button-wrapper--left {
-    left: 24px;
-  }
+.nc-floating-button-wrapper--left {
+  left: 24px;
+}
 
-  .nc-floating-button__icon-wrap {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-  }
+.nc-floating-button__icon-wrap {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
 
+.nc-fab-icon-enter-active,
+.nc-fab-icon-leave-active {
+  transition:
+    opacity 120ms ease,
+    transform 120ms ease;
+}
+
+.nc-fab-icon-enter-from {
+  opacity: 0;
+  transform: rotate(-90deg) scale(0.6);
+}
+
+.nc-fab-icon-leave-to {
+  opacity: 0;
+  transform: rotate(90deg) scale(0.6);
+}
+
+@media (prefers-reduced-motion: reduce) {
   .nc-fab-icon-enter-active,
   .nc-fab-icon-leave-active {
-    transition:
-      opacity 120ms ease,
-      transform 120ms ease;
-  }
-
-  .nc-fab-icon-enter-from {
-    opacity: 0;
-    transform: rotate(-90deg) scale(0.6);
-  }
-
-  .nc-fab-icon-leave-to {
-    opacity: 0;
-    transform: rotate(90deg) scale(0.6);
-  }
-
-  @media (prefers-reduced-motion: reduce) {
-    .nc-fab-icon-enter-active,
-    .nc-fab-icon-leave-active {
-      transition-duration: 0ms;
-    }
+    transition-duration: 0ms;
   }
 }
 </style>

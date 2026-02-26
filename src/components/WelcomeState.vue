@@ -11,20 +11,18 @@ defineProps<{
 </template>
 
 <style scoped>
-@layer native-chat {
-  .nc-welcome-state {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex: 1;
-    padding: 24px;
-  }
+.nc-welcome-state {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: 1;
+  padding: 24px;
+}
 
-  .nc-welcome-state__text {
-    font-size: 24px;
-    font-weight: 400;
-    color: rgb(var(--v-theme-welcome-text));
-    text-align: center;
-  }
+.nc-welcome-state__text {
+  font-size: 24px;
+  font-weight: 400;
+  color: rgb(var(--v-theme-welcome-text));
+  text-align: center;
 }
 </style>

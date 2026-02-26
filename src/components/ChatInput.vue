@@ -108,25 +108,23 @@ watch(
 </template>
 
 <style scoped>
-@layer native-chat {
-  .nc-chat-input {
-    padding: 8px 16px 16px;
-    flex-shrink: 0;
-  }
+.nc-chat-input {
+  padding: 8px 16px 16px;
+  flex-shrink: 0;
+}
 
-  .nc-chat-input__textarea :deep(.v-field) {
-    border-radius: 15px !important;
-    overflow: hidden;
-  }
+.nc-chat-input__textarea :deep(.v-field) {
+  border-radius: 15px !important;
+  overflow: hidden;
+}
 
-  .nc-chat-input__textarea :deep(textarea) {
-    color: rgb(var(--v-theme-input-text));
-    font-family: inherit;
-  }
+.nc-chat-input__textarea :deep(textarea) {
+  color: rgb(var(--v-theme-input-text));
+  font-family: inherit;
+}
 
-  .nc-chat-input__textarea :deep(.v-field__append-inner) {
-    align-self: flex-end;
-    padding-bottom: 2px;
-  }
+.nc-chat-input__textarea :deep(.v-field__append-inner) {
+  align-self: flex-end;
+  padding-bottom: 2px;
 }
 </style>

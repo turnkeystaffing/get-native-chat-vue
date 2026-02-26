@@ -64,27 +64,25 @@ onBeforeUnmount(() => setSimulateError(null))
 </template>
 
 <style scoped>
-@layer native-chat {
-  .nc-error-demo {
-    padding: 16px;
-  }
+.nc-error-demo {
+  padding: 16px;
+}
 
-  .nc-error-demo__description {
-    margin-bottom: 12px;
-    font-size: 14px;
-    color: rgba(var(--v-theme-on-surface), 0.7);
-  }
+.nc-error-demo__description {
+  margin-bottom: 12px;
+  font-size: 14px;
+  color: rgba(var(--v-theme-on-surface), 0.7);
+}
 
-  .nc-error-demo__buttons {
-    display: flex;
-    gap: 8px;
-    flex-wrap: wrap;
-  }
+.nc-error-demo__buttons {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
 
-  .nc-error-demo__status {
-    margin-top: 12px;
-    font-size: 13px;
-    color: rgb(var(--v-theme-error));
-  }
+.nc-error-demo__status {
+  margin-top: 12px;
+  font-size: 13px;
+  color: rgb(var(--v-theme-error));
 }
 </style>

@@ -28,15 +28,13 @@ import { demoConfig } from '../../.vitepress/mock/demoConfig'
 </template>
 
 <style scoped>
-@layer native-chat {
-  .nc-config-demo {
-    padding: 16px;
-  }
+.nc-config-demo {
+  padding: 16px;
+}
 
-  .nc-config-demo__description {
-    margin-bottom: 12px;
-    font-size: 14px;
-    color: rgba(var(--v-theme-on-surface), 0.7);
-  }
+.nc-config-demo__description {
+  margin-bottom: 12px;
+  font-size: 14px;
+  color: rgba(var(--v-theme-on-surface), 0.7);
 }
 </style>

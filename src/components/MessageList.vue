@@ -173,62 +173,60 @@ async function handleLoadMore({ done }: { done: (status: InfiniteScrollStatus) =
 </template>
 
 <style scoped>
-@layer native-chat {
-  .nc-message-list-wrapper {
-    position: relative;
-    display: flex;
-    flex-direction: column;
-    flex: 1;
-    overflow: hidden;
-  }
+.nc-message-list-wrapper {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  overflow: hidden;
+}
 
-  .nc-message-list-scroll {
-    flex: 1;
-    overflow-y: auto;
-    scrollbar-color: rgba(0, 0, 0, 0.2) transparent;
-  }
+.nc-message-list-scroll {
+  flex: 1;
+  overflow-y: auto;
+  scrollbar-color: rgba(0, 0, 0, 0.2) transparent;
+}
 
-  .nc-message-list {
-    display: flex;
-    flex-direction: column;
-    gap: 16px;
-    list-style: none;
-    padding: 8px 16px;
-    margin: 0;
-  }
+.nc-message-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  list-style: none;
+  padding: 8px 16px;
+  margin: 0;
+}
 
-  .nc-message-list__loader {
-    display: flex;
-    justify-content: center;
-    padding: 8px 0;
-  }
+.nc-message-list__loader {
+  display: flex;
+  justify-content: center;
+  padding: 8px 0;
+}
 
-  .nc-scroll-fab {
-    position: absolute;
-    bottom: 5px;
-    left: 50%;
-    transform: translateX(-50%);
-    z-index: 1;
-  }
+.nc-scroll-fab {
+  position: absolute;
+  bottom: 5px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 1;
+}
 
+.nc-scroll-fab-enter-active,
+.nc-scroll-fab-leave-active {
+  transition:
+    opacity 200ms ease,
+    transform 200ms ease;
+}
+
+.nc-scroll-fab-enter-from,
+.nc-scroll-fab-leave-to {
+  opacity: 0;
+  transform: translateX(-50%) translateY(8px) scale(0.9);
+}
+
+@media (prefers-reduced-motion: reduce) {
   .nc-scroll-fab-enter-active,
   .nc-scroll-fab-leave-active {
-    transition:
-      opacity 200ms ease,
-      transform 200ms ease;
-  }
-
-  .nc-scroll-fab-enter-from,
-  .nc-scroll-fab-leave-to {
-    opacity: 0;
-    transform: translateX(-50%) translateY(8px) scale(0.9);
-  }
-
-  @media (prefers-reduced-motion: reduce) {
-    .nc-scroll-fab-enter-active,
-    .nc-scroll-fab-leave-active {
-      transition-duration: 0ms;
-    }
+    transition-duration: 0ms;
   }
 }
 </style>
