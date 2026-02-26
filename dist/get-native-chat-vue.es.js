@@ -1,4 +1,4 @@
-import { ref as j, readonly as Re, openBlock as T, createElementBlock as R, createElementVNode as O, defineComponent as fe, inject as oe, computed as z, useTemplateRef as at, withDirectives as Pn, normalizeClass as Bt, createVNode as E, withCtx as F, Transition as Ft, vShow as zn, unref as ne, onMounted as Bn, onUnmounted as Fn, toDisplayString as Lt, createCommentVNode as tt, onBeforeUnmount as Un, Fragment as Mt, createBlock as le, watch as ke, nextTick as he, renderList as vs, Teleport as ys, provide as Ss } from "vue";
+import { ref as j, readonly as Re, openBlock as T, createElementBlock as R, createElementVNode as O, defineComponent as fe, inject as oe, computed as $, useTemplateRef as at, withDirectives as Pn, normalizeClass as Bt, createVNode as E, withCtx as F, Transition as Ft, vShow as zn, unref as ne, onMounted as Bn, onUnmounted as Fn, toDisplayString as Lt, createCommentVNode as tt, onBeforeUnmount as Un, Fragment as Mt, createBlock as le, watch as ke, nextTick as he, renderList as vs, Teleport as ys, provide as Ss } from "vue";
 import { useDisplay as As, useTheme as Es } from "vuetify";
 import { VBtn as He } from "vuetify/components/VBtn";
 import { VIcon as be } from "vuetify/components/VIcon";
@@ -25,7 +25,7 @@ function Is(s) {
   return e === 429 ? "You're sending messages too quickly. Please wait a moment and try again." : e === 503 || e === 504 ? "The service is temporarily unavailable. Please try again in a moment." : "Something went wrong. You can try sending your message again.";
 }
 function Ls(s, e) {
-  const n = j([]), r = j(!1), t = j(!1), i = j(!1), l = j(!1), c = j(null), o = j(null), p = j(0), h = e.batchSize ?? 20;
+  const n = j([]), r = j(!1), t = j(!1), i = j(!1), l = j(!1), c = j(null), o = j(null), h = j(0), p = e.batchSize ?? 20;
   function g(x, M, X) {
     n.value = n.value.filter((Y) => Y.id !== X && !Y.id.startsWith("error-"));
     const v = Is(x), Q = {
@@ -64,8 +64,8 @@ function Ls(s, e) {
             o.value = v.id;
           }
         }
-        const x = await s.getMessages(o.value, 0, h), M = [...x.messages].reverse();
-        n.value = M, l.value = x.has_more, p.value = M.length;
+        const x = await s.getMessages(o.value, 0, p), M = [...x.messages].reverse();
+        n.value = M, l.value = x.has_more, h.value = M.length;
       } catch {
       } finally {
         t.value = !1, r.value = !0;
@@ -118,10 +118,10 @@ function Ls(s, e) {
       try {
         const x = await s.getMessages(
           o.value,
-          p.value,
-          h
+          h.value,
+          p
         ), M = [...x.messages].reverse();
-        n.value = [...M, ...n.value], p.value += M.length, l.value = x.has_more;
+        n.value = [...M, ...n.value], h.value += M.length, l.value = x.has_more;
       } catch {
       } finally {
         t.value = !1;
@@ -204,18 +204,18 @@ function Ps(s, e) {
 const qn = /* @__PURE__ */ Z(Ns, [["render", Ps]]), zs = /* @__PURE__ */ fe({
   __name: "FloatingButton",
   setup(s, { expose: e }) {
-    const n = oe(Ce), r = oe(Ie), t = z(() => r.isOpen.value), i = z(() => t.value && (n?.hideToggleWhenOpen ?? !1)), l = z(() => n?.position ?? "bottom-right"), c = z(
-      () => `nc-floating-button-wrapper--${l.value === "bottom-left" ? "left" : "right"}`
+    const n = oe(Ce), r = oe(Ie), t = $(() => r.isOpen.value), i = $(() => r.isLoading.value), l = $(() => t.value && (n?.hideToggleWhenOpen ?? !1)), c = $(() => n?.position ?? "bottom-right"), o = $(
+      () => `nc-floating-button-wrapper--${c.value === "bottom-left" ? "left" : "right"}`
     );
-    function o() {
+    function h() {
       r.isOpen.value ? r.close() : r.open();
     }
     const p = at("triggerBtn");
-    function h() {
+    function g() {
       p.value?.$el?.focus();
     }
-    return e({ focus: h }), (g, m) => Pn((T(), R("div", {
-      class: Bt(["nc-floating-button-wrapper", c.value])
+    return e({ focus: g }), (m, y) => Pn((T(), R("div", {
+      class: Bt(["nc-floating-button-wrapper", o.value])
     }, [
       E(He, {
         ref_key: "triggerBtn",
@@ -224,9 +224,10 @@ const qn = /* @__PURE__ */ Z(Ns, [["render", Ps]]), zs = /* @__PURE__ */ fe({
         size: "56",
         color: "secondary",
         elevation: "4",
-        "aria-label": t.value ? "Close chat" : "Open chat",
+        loading: i.value,
+        "aria-label": i.value ? "Loading chat" : t.value ? "Close chat" : "Open chat",
         "aria-expanded": t.value.toString(),
-        onClick: o
+        onClick: h
       }, {
         default: F(() => [
           E(Ft, {
@@ -248,12 +249,12 @@ const qn = /* @__PURE__ */ Z(Ns, [["render", Ps]]), zs = /* @__PURE__ */ fe({
           })
         ]),
         _: 1
-      }, 8, ["aria-label", "aria-expanded"])
+      }, 8, ["loading", "aria-label", "aria-expanded"])
     ], 2)), [
-      [zn, !i.value]
+      [zn, !l.value]
     ]);
   }
-}), Bs = /* @__PURE__ */ Z(zs, [["__scopeId", "data-v-25f0bf7d"]]), Fs = { class: "nc-chat-header" }, Us = { class: "nc-chat-header__left" }, Hs = /* @__PURE__ */ fe({
+}), Bs = /* @__PURE__ */ Z(zs, [["__scopeId", "data-v-22c20194"]]), Fs = { class: "nc-chat-header" }, Us = { class: "nc-chat-header__left" }, Hs = /* @__PURE__ */ fe({
   __name: "ChatHeader",
   setup(s) {
     const e = oe(Ie);
@@ -307,7 +308,7 @@ const qn = /* @__PURE__ */ Z(Ns, [["render", Ps]]), zs = /* @__PURE__ */ fe({
     message: {}
   },
   setup(s) {
-    const e = s, n = z(() => e.message ?? "What can I help you with today?"), r = j(""), t = j(!0);
+    const e = s, n = $(() => e.message ?? "What can I help you with today?"), r = j(""), t = j(!0);
     let i = null;
     return Bn(() => {
       if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
@@ -317,7 +318,7 @@ const qn = /* @__PURE__ */ Z(Ns, [["render", Ps]]), zs = /* @__PURE__ */ fe({
       let c = 0;
       i = setInterval(() => {
         c++, r.value = n.value.slice(0, c), c >= n.value.length && (clearInterval(i), i = null, t.value = !1);
-      }, 40);
+      }, 70);
     }), Fn(() => {
       i !== null && (clearInterval(i), i = null);
     }), (l, c) => (T(), R("div", Gs, [
@@ -328,7 +329,7 @@ const qn = /* @__PURE__ */ Z(Ns, [["render", Ps]]), zs = /* @__PURE__ */ fe({
       ])
     ]));
   }
-}), Xs = /* @__PURE__ */ Z(js, [["__scopeId", "data-v-2d3cc457"]]);
+}), Xs = /* @__PURE__ */ Z(js, [["__scopeId", "data-v-252e5cec"]]);
 function Wt() {
   return { async: !1, breaks: !1, extensions: null, gfm: !0, hooks: null, pedantic: !1, renderer: null, silent: !1, tokenizer: null, walkTokens: null };
 }
@@ -368,8 +369,8 @@ function An(s) {
 }
 function En(s, e) {
   let n = s.replace(W.findPipe, (i, l, c) => {
-    let o = !1, p = l;
-    for (; --p >= 0 && c[p] === "\\"; ) o = !o;
+    let o = !1, h = l;
+    for (; --h >= 0 && c[h] === "\\"; ) o = !o;
     return o ? "|" : " |";
   }), r = n.split(W.splitPipe), t = 0;
   if (r[0].trim() || r.shift(), r.length > 0 && !r.at(-1)?.trim() && r.pop(), e) if (r.length > e) r.splice(e);
@@ -474,14 +475,14 @@ var st = class {
         else if (!l) c.push(n[o]);
         else break;
         n = n.slice(o);
-        let p = c.join(`
-`), h = p.replace(this.rules.other.blockquoteSetextReplace, `
+        let h = c.join(`
+`), p = h.replace(this.rules.other.blockquoteSetextReplace, `
     $1`).replace(this.rules.other.blockquoteSetextReplace2, "");
         r = r ? `${r}
-${p}` : p, t = t ? `${t}
-${h}` : h;
+${h}` : h, t = t ? `${t}
+${p}` : p;
         let g = this.lexer.state.top;
-        if (this.lexer.state.top = !0, this.lexer.blockTokens(h, i, !0), this.lexer.state.top = g, n.length === 0) break;
+        if (this.lexer.state.top = !0, this.lexer.blockTokens(p, i, !0), this.lexer.state.top = g, n.length === 0) break;
         let m = i.at(-1);
         if (m?.type === "code") break;
         if (m?.type === "blockquote") {
@@ -509,31 +510,31 @@ ${h}` : h;
       n = r ? `\\d{1,9}\\${n.slice(-1)}` : `\\${n}`, this.options.pedantic && (n = r ? n : "[*+-]");
       let i = this.rules.other.listItemRegex(n), l = !1;
       for (; s; ) {
-        let o = !1, p = "", h = "";
+        let o = !1, h = "", p = "";
         if (!(e = i.exec(s)) || this.rules.block.hr.test(s)) break;
-        p = e[0], s = s.substring(p.length);
+        h = e[0], s = s.substring(h.length);
         let g = Pr(e[2].split(`
 `, 1)[0], e[1].length), m = s.split(`
 `, 1)[0], y = !g.trim(), _ = 0;
-        if (this.options.pedantic ? (_ = 2, h = g.trimStart()) : y ? _ = e[1].length + 1 : (_ = g.search(this.rules.other.nonSpaceChar), _ = _ > 4 ? 1 : _, h = g.slice(_), _ += e[1].length), y && this.rules.other.blankLine.test(m) && (p += m + `
+        if (this.options.pedantic ? (_ = 2, p = g.trimStart()) : y ? _ = e[1].length + 1 : (_ = g.search(this.rules.other.nonSpaceChar), _ = _ > 4 ? 1 : _, p = g.slice(_), _ += e[1].length), y && this.rules.other.blankLine.test(m) && (h += m + `
 `, s = s.substring(m.length + 1), o = !0), !o) {
           let k = this.rules.other.nextBulletRegex(_), I = this.rules.other.hrRegex(_), x = this.rules.other.fencesBeginRegex(_), M = this.rules.other.headingBeginRegex(_), X = this.rules.other.htmlBeginRegex(_), v = this.rules.other.blockquoteBeginRegex(_);
           for (; s; ) {
             let Q = s.split(`
 `, 1)[0], Y;
             if (m = Q, this.options.pedantic ? (m = m.replace(this.rules.other.listReplaceNesting, "  "), Y = m) : Y = m.replace(this.rules.other.tabCharGlobal, "    "), x.test(m) || M.test(m) || X.test(m) || v.test(m) || k.test(m) || I.test(m)) break;
-            if (Y.search(this.rules.other.nonSpaceChar) >= _ || !m.trim()) h += `
+            if (Y.search(this.rules.other.nonSpaceChar) >= _ || !m.trim()) p += `
 ` + Y.slice(_);
             else {
               if (y || g.replace(this.rules.other.tabCharGlobal, "    ").search(this.rules.other.nonSpaceChar) >= 4 || x.test(g) || M.test(g) || I.test(g)) break;
-              h += `
+              p += `
 ` + m;
             }
-            y = !m.trim(), p += Q + `
+            y = !m.trim(), h += Q + `
 `, s = s.substring(Q.length + 1), g = Y.slice(_);
           }
         }
-        t.loose || (l ? t.loose = !0 : this.rules.other.doubleBlankLine.test(p) && (l = !0)), t.items.push({ type: "list_item", raw: p, task: !!this.options.gfm && this.rules.other.listIsTask.test(h), loose: !1, text: h, tokens: [] }), t.raw += p;
+        t.loose || (l ? t.loose = !0 : this.rules.other.doubleBlankLine.test(h) && (l = !0)), t.items.push({ type: "list_item", raw: h, task: !!this.options.gfm && this.rules.other.listIsTask.test(p), loose: !1, text: p, tokens: [] }), t.raw += h;
       }
       let c = t.items.at(-1);
       if (c) c.raw = c.raw.trimEnd(), c.text = c.text.trimEnd();
@@ -543,25 +544,25 @@ ${h}` : h;
         if (this.lexer.state.top = !1, o.tokens = this.lexer.blockTokens(o.text, []), o.task) {
           if (o.text = o.text.replace(this.rules.other.listReplaceTask, ""), o.tokens[0]?.type === "text" || o.tokens[0]?.type === "paragraph") {
             o.tokens[0].raw = o.tokens[0].raw.replace(this.rules.other.listReplaceTask, ""), o.tokens[0].text = o.tokens[0].text.replace(this.rules.other.listReplaceTask, "");
-            for (let h = this.lexer.inlineQueue.length - 1; h >= 0; h--) if (this.rules.other.listIsTask.test(this.lexer.inlineQueue[h].src)) {
-              this.lexer.inlineQueue[h].src = this.lexer.inlineQueue[h].src.replace(this.rules.other.listReplaceTask, "");
+            for (let p = this.lexer.inlineQueue.length - 1; p >= 0; p--) if (this.rules.other.listIsTask.test(this.lexer.inlineQueue[p].src)) {
+              this.lexer.inlineQueue[p].src = this.lexer.inlineQueue[p].src.replace(this.rules.other.listReplaceTask, "");
               break;
             }
           }
-          let p = this.rules.other.listTaskCheckbox.exec(o.raw);
-          if (p) {
-            let h = { type: "checkbox", raw: p[0] + " ", checked: p[0] !== "[ ]" };
-            o.checked = h.checked, t.loose ? o.tokens[0] && ["paragraph", "text"].includes(o.tokens[0].type) && "tokens" in o.tokens[0] && o.tokens[0].tokens ? (o.tokens[0].raw = h.raw + o.tokens[0].raw, o.tokens[0].text = h.raw + o.tokens[0].text, o.tokens[0].tokens.unshift(h)) : o.tokens.unshift({ type: "paragraph", raw: h.raw, text: h.raw, tokens: [h] }) : o.tokens.unshift(h);
+          let h = this.rules.other.listTaskCheckbox.exec(o.raw);
+          if (h) {
+            let p = { type: "checkbox", raw: h[0] + " ", checked: h[0] !== "[ ]" };
+            o.checked = p.checked, t.loose ? o.tokens[0] && ["paragraph", "text"].includes(o.tokens[0].type) && "tokens" in o.tokens[0] && o.tokens[0].tokens ? (o.tokens[0].raw = p.raw + o.tokens[0].raw, o.tokens[0].text = p.raw + o.tokens[0].text, o.tokens[0].tokens.unshift(p)) : o.tokens.unshift({ type: "paragraph", raw: p.raw, text: p.raw, tokens: [p] }) : o.tokens.unshift(p);
           }
         }
         if (!t.loose) {
-          let p = o.tokens.filter((g) => g.type === "space"), h = p.length > 0 && p.some((g) => this.rules.other.anyLine.test(g.raw));
-          t.loose = h;
+          let h = o.tokens.filter((g) => g.type === "space"), p = h.length > 0 && h.some((g) => this.rules.other.anyLine.test(g.raw));
+          t.loose = p;
         }
       }
       if (t.loose) for (let o of t.items) {
         o.loose = !0;
-        for (let p of o.tokens) p.type === "text" && (p.type = "paragraph");
+        for (let h of o.tokens) h.type === "text" && (h.type = "paragraph");
       }
       return t;
     }
@@ -651,8 +652,8 @@ ${h}` : h;
   emStrong(s, e, n = "") {
     let r = this.rules.inline.emStrongLDelim.exec(s);
     if (!(!r || r[3] && n.match(this.rules.other.unicodeAlphaNumeric)) && (!(r[1] || r[2]) || !n || this.rules.inline.punctuation.exec(n))) {
-      let t = [...r[0]].length - 1, i, l, c = t, o = 0, p = r[0][0] === "*" ? this.rules.inline.emStrongRDelimAst : this.rules.inline.emStrongRDelimUnd;
-      for (p.lastIndex = 0, e = e.slice(-1 * s.length + t); (r = p.exec(e)) != null; ) {
+      let t = [...r[0]].length - 1, i, l, c = t, o = 0, h = r[0][0] === "*" ? this.rules.inline.emStrongRDelimAst : this.rules.inline.emStrongRDelimUnd;
+      for (h.lastIndex = 0, e = e.slice(-1 * s.length + t); (r = h.exec(e)) != null; ) {
         if (i = r[1] || r[2] || r[3] || r[4] || r[5] || r[6], !i) continue;
         if (l = [...i].length, r[3] || r[4]) {
           c += l;
@@ -663,7 +664,7 @@ ${h}` : h;
         }
         if (c -= l, c > 0) continue;
         l = Math.min(l, l + c + o);
-        let h = [...r[0]][0].length, g = s.slice(0, t + r.index + h + l);
+        let p = [...r[0]][0].length, g = s.slice(0, t + r.index + p + l);
         if (Math.min(t, l) % 2) {
           let y = g.slice(1, -1);
           return { type: "em", raw: g, text: y, tokens: this.lexer.inlineTokens(y) };
@@ -696,8 +697,8 @@ ${h}` : h;
         }
         if (c -= l, c > 0) continue;
         l = Math.min(l, l + c);
-        let p = [...r[0]][0].length, h = s.slice(0, t + r.index + p + l), g = h.slice(t, -t);
-        return { type: "del", raw: h, text: g, tokens: this.lexer.inlineTokens(g) };
+        let h = [...r[0]][0].length, p = s.slice(0, t + r.index + h + l), g = p.slice(t, -t);
+        return { type: "del", raw: p, text: g, tokens: this.lexer.inlineTokens(g) };
       }
     }
   }
@@ -823,8 +824,8 @@ ${h}` : h;
       let i = e;
       if (this.options.extensions?.startBlock) {
         let l = 1 / 0, c = e.slice(1), o;
-        this.options.extensions.startBlock.forEach((p) => {
-          o = p.call({ lexer: this }, c), typeof o == "number" && o >= 0 && (l = Math.min(l, o));
+        this.options.extensions.startBlock.forEach((h) => {
+          o = h.call({ lexer: this }, c), typeof o == "number" && o >= 0 && (l = Math.min(l, o));
         }), l < 1 / 0 && l >= 0 && (i = e.substring(0, l + 1));
       }
       if (this.state.top && (t = this.tokenizer.paragraph(i))) {
@@ -871,7 +872,7 @@ ${h}` : h;
     for (; e; ) {
       l || (c = ""), l = !1;
       let o;
-      if (this.options.extensions?.inline?.some((h) => (o = h.call({ lexer: this }, e, n)) ? (e = e.substring(o.raw.length), n.push(o), !0) : !1)) continue;
+      if (this.options.extensions?.inline?.some((p) => (o = p.call({ lexer: this }, e, n)) ? (e = e.substring(o.raw.length), n.push(o), !0) : !1)) continue;
       if (o = this.tokenizer.escape(e)) {
         e = e.substring(o.raw.length), n.push(o);
         continue;
@@ -886,8 +887,8 @@ ${h}` : h;
       }
       if (o = this.tokenizer.reflink(e, this.tokens.links)) {
         e = e.substring(o.raw.length);
-        let h = n.at(-1);
-        o.type === "text" && h?.type === "text" ? (h.raw += o.raw, h.text += o.text) : n.push(o);
+        let p = n.at(-1);
+        o.type === "text" && p?.type === "text" ? (p.raw += o.raw, p.text += o.text) : n.push(o);
         continue;
       }
       if (o = this.tokenizer.emStrong(e, r, c)) {
@@ -914,25 +915,25 @@ ${h}` : h;
         e = e.substring(o.raw.length), n.push(o);
         continue;
       }
-      let p = e;
+      let h = e;
       if (this.options.extensions?.startInline) {
-        let h = 1 / 0, g = e.slice(1), m;
+        let p = 1 / 0, g = e.slice(1), m;
         this.options.extensions.startInline.forEach((y) => {
-          m = y.call({ lexer: this }, g), typeof m == "number" && m >= 0 && (h = Math.min(h, m));
-        }), h < 1 / 0 && h >= 0 && (p = e.substring(0, h + 1));
+          m = y.call({ lexer: this }, g), typeof m == "number" && m >= 0 && (p = Math.min(p, m));
+        }), p < 1 / 0 && p >= 0 && (h = e.substring(0, p + 1));
       }
-      if (o = this.tokenizer.inlineText(p)) {
+      if (o = this.tokenizer.inlineText(h)) {
         e = e.substring(o.raw.length), o.raw.slice(-1) !== "_" && (c = o.raw.slice(-1)), l = !0;
-        let h = n.at(-1);
-        h?.type === "text" ? (h.raw += o.raw, h.text += o.text) : n.push(o);
+        let p = n.at(-1);
+        p?.type === "text" ? (p.raw += o.raw, p.text += o.text) : n.push(o);
         continue;
       }
       if (e) {
-        let h = "Infinite loop on byte: " + e.charCodeAt(0);
+        let p = "Infinite loop on byte: " + e.charCodeAt(0);
         if (this.options.silent) {
-          console.error(h);
+          console.error(p);
           break;
-        } else throw new Error(h);
+        } else throw new Error(p);
       }
     }
     return n;
@@ -1323,9 +1324,9 @@ ${s}</tr>
           if (!(i in t)) throw new Error(`renderer '${i}' does not exist`);
           if (["options", "parser"].includes(i)) continue;
           let l = i, c = n.renderer[l], o = t[l];
-          t[l] = (...p) => {
-            let h = c.apply(t, p);
-            return h === !1 && (h = o.apply(t, p)), h || "";
+          t[l] = (...h) => {
+            let p = c.apply(t, h);
+            return p === !1 && (p = o.apply(t, h)), p || "";
           };
         }
         r.renderer = t;
@@ -1336,9 +1337,9 @@ ${s}</tr>
           if (!(i in t)) throw new Error(`tokenizer '${i}' does not exist`);
           if (["options", "rules", "lexer"].includes(i)) continue;
           let l = i, c = n.tokenizer[l], o = t[l];
-          t[l] = (...p) => {
-            let h = c.apply(t, p);
-            return h === !1 && (h = o.apply(t, p)), h;
+          t[l] = (...h) => {
+            let p = c.apply(t, h);
+            return p === !1 && (p = o.apply(t, h)), p;
           };
         }
         r.tokenizer = t;
@@ -1349,20 +1350,20 @@ ${s}</tr>
           if (!(i in t)) throw new Error(`hook '${i}' does not exist`);
           if (["options", "block"].includes(i)) continue;
           let l = i, c = n.hooks[l], o = t[l];
-          Ue.passThroughHooks.has(i) ? t[l] = (p) => {
+          Ue.passThroughHooks.has(i) ? t[l] = (h) => {
             if (this.defaults.async && Ue.passThroughHooksRespectAsync.has(i)) return (async () => {
-              let g = await c.call(t, p);
+              let g = await c.call(t, h);
               return o.call(t, g);
             })();
-            let h = c.call(t, p);
-            return o.call(t, h);
-          } : t[l] = (...p) => {
+            let p = c.call(t, h);
+            return o.call(t, p);
+          } : t[l] = (...h) => {
             if (this.defaults.async) return (async () => {
-              let g = await c.apply(t, p);
-              return g === !1 && (g = await o.apply(t, p)), g;
+              let g = await c.apply(t, h);
+              return g === !1 && (g = await o.apply(t, h)), g;
             })();
-            let h = c.apply(t, p);
-            return h === !1 && (h = o.apply(t, p)), h;
+            let p = c.apply(t, h);
+            return p === !1 && (p = o.apply(t, h)), p;
           };
         }
         r.hooks = t;
@@ -1395,8 +1396,8 @@ ${s}</tr>
       if (t.hooks && (t.hooks.options = t, t.hooks.block = s), t.async) return (async () => {
         let l = t.hooks ? await t.hooks.preprocess(e) : e, c = await (t.hooks ? await t.hooks.provideLexer() : s ? ee.lex : ee.lexInline)(l, t), o = t.hooks ? await t.hooks.processAllTokens(c) : c;
         t.walkTokens && await Promise.all(this.walkTokens(o, t.walkTokens));
-        let p = await (t.hooks ? await t.hooks.provideParser() : s ? te.parse : te.parseInline)(o, t);
-        return t.hooks ? await t.hooks.postprocess(p) : p;
+        let h = await (t.hooks ? await t.hooks.provideParser() : s ? te.parse : te.parseInline)(o, t);
+        return t.hooks ? await t.hooks.postprocess(h) : h;
       })().catch(i);
       try {
         t.hooks && (e = t.hooks.preprocess(e));
@@ -1614,8 +1615,8 @@ function ls() {
     HTMLTemplateElement: l,
     Node: c,
     Element: o,
-    NodeFilter: p,
-    NamedNodeMap: h = s.NamedNodeMap || s.MozNamedAttrMap,
+    NodeFilter: h,
+    NamedNodeMap: p = s.NamedNodeMap || s.MozNamedAttrMap,
     HTMLFormElement: g,
     DOMParser: m,
     trustedTypes: y
@@ -1649,7 +1650,7 @@ function ls() {
     IS_ALLOWED_URI: Jt
   } = Nn, N = null;
   const en = b({}, [...Ln, ...Et, ...Rt, ...Ct, ...Mn]);
-  let $ = null;
+  let P = null;
   const tn = b({}, [...Dn, ...It, ...On, ...Je]);
   let C = Object.seal($t(null, {
     tagNameCheck: {
@@ -1706,7 +1707,7 @@ function ls() {
     let a = arguments.length > 0 && arguments[0] !== void 0 ? arguments[0] : {};
     if (!(Ae && Ae === a)) {
       if ((!a || typeof a != "object") && (a = {}), a = ie(a), De = // eslint-disable-next-line unicorn/prefer-includes
-      bs.indexOf(a.PARSER_MEDIA_TYPE) === -1 ? _s : a.PARSER_MEDIA_TYPE, D = De === "application/xhtml+xml" ? St : et, N = J(a, "ALLOWED_TAGS") ? b({}, a.ALLOWED_TAGS, D) : en, $ = J(a, "ALLOWED_ATTR") ? b({}, a.ALLOWED_ATTR, D) : tn, xt = J(a, "ALLOWED_NAMESPACES") ? b({}, a.ALLOWED_NAMESPACES, St) : ms, bt = J(a, "ADD_URI_SAFE_ATTR") ? b(ie(un), a.ADD_URI_SAFE_ATTR, D) : un, on = J(a, "ADD_DATA_URI_TAGS") ? b(ie(cn), a.ADD_DATA_URI_TAGS, D) : cn, se = J(a, "FORBID_CONTENTS") ? b({}, a.FORBID_CONTENTS, D) : kt, Le = J(a, "FORBID_TAGS") ? b({}, a.FORBID_TAGS, D) : ie({}), ht = J(a, "FORBID_ATTR") ? b({}, a.FORBID_ATTR, D) : ie({}), ye = J(a, "USE_PROFILES") ? a.USE_PROFILES : !1, nn = a.ALLOW_ARIA_ATTR !== !1, ft = a.ALLOW_DATA_ATTR !== !1, sn = a.ALLOW_UNKNOWN_PROTOCOLS || !1, rn = a.ALLOW_SELF_CLOSE_IN_ATTR !== !1, Te = a.SAFE_FOR_TEMPLATES || !1, Ge = a.SAFE_FOR_XML !== !1, de = a.WHOLE_DOCUMENT || !1, ve = a.RETURN_DOM || !1, qe = a.RETURN_DOM_FRAGMENT || !1, Ze = a.RETURN_TRUSTED_TYPE || !1, gt = a.FORCE_BODY || !1, an = a.SANITIZE_DOM !== !1, ln = a.SANITIZE_NAMED_PROPS || !1, mt = a.KEEP_CONTENT !== !1, Me = a.IN_PLACE || !1, Jt = a.ALLOWED_URI_REGEXP || as, Se = a.NAMESPACE || ce, je = a.MATHML_TEXT_INTEGRATION_POINTS || je, Xe = a.HTML_INTEGRATION_POINTS || Xe, C = a.CUSTOM_ELEMENT_HANDLING || {}, a.CUSTOM_ELEMENT_HANDLING && pn(a.CUSTOM_ELEMENT_HANDLING.tagNameCheck) && (C.tagNameCheck = a.CUSTOM_ELEMENT_HANDLING.tagNameCheck), a.CUSTOM_ELEMENT_HANDLING && pn(a.CUSTOM_ELEMENT_HANDLING.attributeNameCheck) && (C.attributeNameCheck = a.CUSTOM_ELEMENT_HANDLING.attributeNameCheck), a.CUSTOM_ELEMENT_HANDLING && typeof a.CUSTOM_ELEMENT_HANDLING.allowCustomizedBuiltInElements == "boolean" && (C.allowCustomizedBuiltInElements = a.CUSTOM_ELEMENT_HANDLING.allowCustomizedBuiltInElements), Te && (ft = !1), qe && (ve = !0), ye && (N = b({}, Mn), $ = [], ye.html === !0 && (b(N, Ln), b($, Dn)), ye.svg === !0 && (b(N, Et), b($, It), b($, Je)), ye.svgFilters === !0 && (b(N, Rt), b($, It), b($, Je)), ye.mathMl === !0 && (b(N, Ct), b($, On), b($, Je))), a.ADD_TAGS && (typeof a.ADD_TAGS == "function" ? we.tagCheck = a.ADD_TAGS : (N === en && (N = ie(N)), b(N, a.ADD_TAGS, D))), a.ADD_ATTR && (typeof a.ADD_ATTR == "function" ? we.attributeCheck = a.ADD_ATTR : ($ === tn && ($ = ie($)), b($, a.ADD_ATTR, D))), a.ADD_URI_SAFE_ATTR && b(bt, a.ADD_URI_SAFE_ATTR, D), a.FORBID_CONTENTS && (se === kt && (se = ie(se)), b(se, a.FORBID_CONTENTS, D)), a.ADD_FORBID_CONTENTS && (se === kt && (se = ie(se)), b(se, a.ADD_FORBID_CONTENTS, D)), mt && (N["#text"] = !0), de && b(N, ["html", "head", "body"]), N.table && (b(N, ["tbody"]), delete Le.tbody), a.TRUSTED_TYPES_POLICY) {
+      bs.indexOf(a.PARSER_MEDIA_TYPE) === -1 ? _s : a.PARSER_MEDIA_TYPE, D = De === "application/xhtml+xml" ? St : et, N = J(a, "ALLOWED_TAGS") ? b({}, a.ALLOWED_TAGS, D) : en, P = J(a, "ALLOWED_ATTR") ? b({}, a.ALLOWED_ATTR, D) : tn, xt = J(a, "ALLOWED_NAMESPACES") ? b({}, a.ALLOWED_NAMESPACES, St) : ms, bt = J(a, "ADD_URI_SAFE_ATTR") ? b(ie(un), a.ADD_URI_SAFE_ATTR, D) : un, on = J(a, "ADD_DATA_URI_TAGS") ? b(ie(cn), a.ADD_DATA_URI_TAGS, D) : cn, se = J(a, "FORBID_CONTENTS") ? b({}, a.FORBID_CONTENTS, D) : kt, Le = J(a, "FORBID_TAGS") ? b({}, a.FORBID_TAGS, D) : ie({}), ht = J(a, "FORBID_ATTR") ? b({}, a.FORBID_ATTR, D) : ie({}), ye = J(a, "USE_PROFILES") ? a.USE_PROFILES : !1, nn = a.ALLOW_ARIA_ATTR !== !1, ft = a.ALLOW_DATA_ATTR !== !1, sn = a.ALLOW_UNKNOWN_PROTOCOLS || !1, rn = a.ALLOW_SELF_CLOSE_IN_ATTR !== !1, Te = a.SAFE_FOR_TEMPLATES || !1, Ge = a.SAFE_FOR_XML !== !1, de = a.WHOLE_DOCUMENT || !1, ve = a.RETURN_DOM || !1, qe = a.RETURN_DOM_FRAGMENT || !1, Ze = a.RETURN_TRUSTED_TYPE || !1, gt = a.FORCE_BODY || !1, an = a.SANITIZE_DOM !== !1, ln = a.SANITIZE_NAMED_PROPS || !1, mt = a.KEEP_CONTENT !== !1, Me = a.IN_PLACE || !1, Jt = a.ALLOWED_URI_REGEXP || as, Se = a.NAMESPACE || ce, je = a.MATHML_TEXT_INTEGRATION_POINTS || je, Xe = a.HTML_INTEGRATION_POINTS || Xe, C = a.CUSTOM_ELEMENT_HANDLING || {}, a.CUSTOM_ELEMENT_HANDLING && pn(a.CUSTOM_ELEMENT_HANDLING.tagNameCheck) && (C.tagNameCheck = a.CUSTOM_ELEMENT_HANDLING.tagNameCheck), a.CUSTOM_ELEMENT_HANDLING && pn(a.CUSTOM_ELEMENT_HANDLING.attributeNameCheck) && (C.attributeNameCheck = a.CUSTOM_ELEMENT_HANDLING.attributeNameCheck), a.CUSTOM_ELEMENT_HANDLING && typeof a.CUSTOM_ELEMENT_HANDLING.allowCustomizedBuiltInElements == "boolean" && (C.allowCustomizedBuiltInElements = a.CUSTOM_ELEMENT_HANDLING.allowCustomizedBuiltInElements), Te && (ft = !1), qe && (ve = !0), ye && (N = b({}, Mn), P = [], ye.html === !0 && (b(N, Ln), b(P, Dn)), ye.svg === !0 && (b(N, Et), b(P, It), b(P, Je)), ye.svgFilters === !0 && (b(N, Rt), b(P, It), b(P, Je)), ye.mathMl === !0 && (b(N, Ct), b(P, On), b(P, Je))), a.ADD_TAGS && (typeof a.ADD_TAGS == "function" ? we.tagCheck = a.ADD_TAGS : (N === en && (N = ie(N)), b(N, a.ADD_TAGS, D))), a.ADD_ATTR && (typeof a.ADD_ATTR == "function" ? we.attributeCheck = a.ADD_ATTR : (P === tn && (P = ie(P)), b(P, a.ADD_ATTR, D))), a.ADD_URI_SAFE_ATTR && b(bt, a.ADD_URI_SAFE_ATTR, D), a.FORBID_CONTENTS && (se === kt && (se = ie(se)), b(se, a.FORBID_CONTENTS, D)), a.ADD_FORBID_CONTENTS && (se === kt && (se = ie(se)), b(se, a.ADD_FORBID_CONTENTS, D)), mt && (N["#text"] = !0), de && b(N, ["html", "head", "body"]), N.table && (b(N, ["tbody"]), delete Le.tbody), a.TRUSTED_TYPES_POLICY) {
         if (typeof a.TRUSTED_TYPES_POLICY.createHTML != "function")
           throw ze('TRUSTED_TYPES_POLICY configuration option must provide a "createHTML" hook.');
         if (typeof a.TRUSTED_TYPES_POLICY.createScriptURL != "function")
@@ -1785,11 +1786,11 @@ function ls() {
       a.ownerDocument || a,
       a,
       // eslint-disable-next-line no-bitwise
-      p.SHOW_ELEMENT | p.SHOW_COMMENT | p.SHOW_TEXT | p.SHOW_PROCESSING_INSTRUCTION | p.SHOW_CDATA_SECTION,
+      h.SHOW_ELEMENT | h.SHOW_COMMENT | h.SHOW_TEXT | h.SHOW_PROCESSING_INSTRUCTION | h.SHOW_CDATA_SECTION,
       null
     );
   }, Tt = function(a) {
-    return a instanceof g && (typeof a.nodeName != "string" || typeof a.textContent != "string" || typeof a.removeChild != "function" || !(a.attributes instanceof h) || typeof a.removeAttribute != "function" || typeof a.setAttribute != "function" || typeof a.namespaceURI != "string" || typeof a.insertBefore != "function" || typeof a.hasChildNodes != "function");
+    return a instanceof g && (typeof a.nodeName != "string" || typeof a.textContent != "string" || typeof a.removeChild != "function" || !(a.attributes instanceof p) || typeof a.removeAttribute != "function" || typeof a.setAttribute != "function" || typeof a.namespaceURI != "string" || typeof a.insertBefore != "function" || typeof a.hasChildNodes != "function");
   }, mn = function(a) {
     return typeof c == "function" && a instanceof c;
   };
@@ -1834,7 +1835,7 @@ function ls() {
     if (!(ft && !ht[u] && H(ps, u))) {
       if (!(nn && H(hs, u))) {
         if (!(we.attributeCheck instanceof Function && we.attributeCheck(u, a))) {
-          if (!$[u] || ht[u]) {
+          if (!P[u] || ht[u]) {
             if (
               // First condition does a very basic check if a) it's basically a valid custom element tagname AND
               // b) if the tagName passes whatever the user has configured for CUSTOM_ELEMENT_HANDLING.tagNameCheck
@@ -1870,7 +1871,7 @@ function ls() {
       attrName: "",
       attrValue: "",
       keepAttr: !0,
-      allowedAttributes: $,
+      allowedAttributes: P,
       forceKeepAttr: void 0
     };
     let A = u.length;
@@ -1880,12 +1881,12 @@ function ls() {
         namespaceURI: V,
         value: pe
       } = B, Ee = D(L), vt = pe;
-      let P = L === "value" ? vt : Zr(vt);
-      if (f.attrName = Ee, f.attrValue = P, f.keepAttr = !0, f.forceKeepAttr = void 0, ue(U.uponSanitizeAttribute, a, f), P = f.attrValue, ln && (Ee === "id" || Ee === "name") && (ge(L, a), P = gs + P), Ge && H(/((--!?|])>)|<\/(style|title|textarea)/i, P)) {
+      let z = L === "value" ? vt : Zr(vt);
+      if (f.attrName = Ee, f.attrValue = z, f.keepAttr = !0, f.forceKeepAttr = void 0, ue(U.uponSanitizeAttribute, a, f), z = f.attrValue, ln && (Ee === "id" || Ee === "name") && (ge(L, a), z = gs + z), Ge && H(/((--!?|])>)|<\/(style|title|textarea)/i, z)) {
         ge(L, a);
         continue;
       }
-      if (Ee === "attributename" && At(P, "href")) {
+      if (Ee === "attributename" && At(z, "href")) {
         ge(L, a);
         continue;
       }
@@ -1895,32 +1896,32 @@ function ls() {
         ge(L, a);
         continue;
       }
-      if (!rn && H(/\/>/i, P)) {
+      if (!rn && H(/\/>/i, z)) {
         ge(L, a);
         continue;
       }
       Te && Ke([ct, ut, pt], (Tn) => {
-        P = Pe(P, Tn, " ");
+        z = Pe(z, Tn, " ");
       });
       const wn = D(a.nodeName);
-      if (!bn(wn, Ee, P)) {
+      if (!bn(wn, Ee, z)) {
         ge(L, a);
         continue;
       }
       if (v && typeof y == "object" && typeof y.getAttributeType == "function" && !V)
         switch (y.getAttributeType(wn, Ee)) {
           case "TrustedHTML": {
-            P = v.createHTML(P);
+            z = v.createHTML(z);
             break;
           }
           case "TrustedScriptURL": {
-            P = v.createScriptURL(P);
+            z = v.createScriptURL(z);
             break;
           }
         }
-      if (P !== vt)
+      if (z !== vt)
         try {
-          V ? a.setAttributeNS(V, L, P) : a.setAttribute(L, P), Tt(a) ? re(a) : In(e.removed);
+          V ? a.setAttributeNS(V, L, z) : a.setAttribute(L, z), Tt(a) ? re(a) : In(e.removed);
         } catch {
           ge(L, a);
         }
@@ -1970,7 +1971,7 @@ function ls() {
           B.appendChild(u.firstChild);
       else
         B = u;
-      return ($.shadowroot || $.shadowrootmode) && (B = us.call(r, B, !0)), B;
+      return (P.shadowroot || P.shadowrootmode) && (B = us.call(r, B, !0)), B;
     }
     let V = de ? u.outerHTML : u.innerHTML;
     return de && N["!doctype"] && u.ownerDocument && u.ownerDocument.doctype && u.ownerDocument.doctype.name && H(is, u.ownerDocument.doctype.name) && (V = "<!DOCTYPE " + u.ownerDocument.doctype.name + `>
@@ -2059,13 +2060,13 @@ const _a = /* @__PURE__ */ Z(ma, [["render", ba]]), xa = ["aria-label"], wa = {
     animate: { type: Boolean, default: !1 }
   },
   setup(s) {
-    const e = s, n = oe(Ce, void 0), r = z(() => n?.showBubbleHeaders ?? !0), t = z(() => n?.assistantBubbleFullWidth ?? !1), i = z(() => e.message.role === "user"), l = z(
+    const e = s, n = oe(Ce, void 0), r = $(() => n?.showBubbleHeaders ?? !0), t = $(() => n?.assistantBubbleFullWidth ?? !1), i = $(() => e.message.role === "user"), l = $(
       () => e.message.status === "failed" || e.message.id.startsWith("error-")
-    ), c = z(() => e.message.status === "sending"), o = z(() => e.message.role === "assistant" && !l.value), p = z(() => {
+    ), c = $(() => e.message.status === "sending"), o = $(() => e.message.role === "assistant" && !l.value), h = $(() => {
       if (e.message.role !== "assistant" || l.value) return null;
       const _ = S.parse(e.message.content);
       return la.sanitize(_);
-    }), h = z(() => l.value ? "Error message" : i.value ? "Message from you" : "Message from AI Assistant"), g = j(!1);
+    }), p = $(() => l.value ? "Error message" : i.value ? "Message from you" : "Message from AI Assistant"), g = j(!1);
     let m = null;
     async function y() {
       try {
@@ -2079,7 +2080,7 @@ const _a = /* @__PURE__ */ Z(ma, [["render", ba]]), xa = ["aria-label"], wa = {
       m && clearTimeout(m);
     }), (_, k) => (T(), R("li", {
       role: "listitem",
-      "aria-label": h.value,
+      "aria-label": p.value,
       class: Bt(["nc-message-bubble", {
         "nc-message-bubble--user": i.value,
         "nc-message-bubble--assistant": o.value,
@@ -2114,7 +2115,7 @@ const _a = /* @__PURE__ */ Z(ma, [["render", ba]]), xa = ["aria-label"], wa = {
         i.value || l.value ? (T(), R("div", ya, Lt(s.message.content), 1)) : (T(), R("div", {
           key: 1,
           class: "nc-message-bubble__content",
-          innerHTML: p.value
+          innerHTML: h.value
         }, null, 8, Sa))
       ]),
       o.value ? (T(), le(He, {
@@ -2174,13 +2175,13 @@ const La = /* @__PURE__ */ Z(Ra, [["render", Ia]]), Ma = { class: "nc-message-li
       const k = n.value?.$el;
       return k instanceof HTMLElement ? k : null;
     }
-    function p() {
+    function h() {
       const k = o();
       if (!k) return;
       const { scrollTop: I, scrollHeight: x, clientHeight: M } = k;
       r.value = x - I - M <= $a;
     }
-    function h() {
+    function p() {
       const k = o();
       k && (k.scrollTop = k.scrollHeight);
     }
@@ -2189,14 +2190,14 @@ const La = /* @__PURE__ */ Z(Ra, [["render", Ia]]), Ma = { class: "nc-message-li
       () => e.messages.value,
       (k) => {
         const I = k.length > 0 ? k[k.length - 1].id : null, x = I !== null && I !== g;
-        g = I, x && (m ? y = !0 : he(h));
+        g = I, x && (m ? y = !0 : he(p));
       }
     ), Bn(() => {
       e.messages.value.forEach((I) => t.add(I.id)), he(() => {
         l = !0;
-      }), e.messages.value.length > 0 && he(h), o()?.addEventListener("scroll", p, { passive: !0 });
+      }), e.messages.value.length > 0 && he(p), o()?.addEventListener("scroll", h, { passive: !0 });
     }), Un(() => {
-      o()?.removeEventListener("scroll", p);
+      o()?.removeEventListener("scroll", h);
     });
     async function _({ done: k }) {
       c = !0, m = !0;
@@ -2205,7 +2206,7 @@ const La = /* @__PURE__ */ Z(Ra, [["render", Ia]]), Ma = { class: "nc-message-li
       } catch {
         k("error");
       }
-      await he(), c = !1, m = !1, y && (y = !1, he(h));
+      await he(), c = !1, m = !1, y && (y = !1, he(p));
     }
     return (k, I) => (T(), R("div", Ma, [
       E(Rs, {
@@ -2245,7 +2246,7 @@ const La = /* @__PURE__ */ Z(Ra, [["render", Ia]]), Ma = { class: "nc-message-li
               color: "surface",
               size: "small",
               "aria-label": "Scroll to latest messages",
-              onClick: h
+              onClick: p
             }, {
               default: F(() => [
                 E(be, { icon: La })
@@ -2277,46 +2278,46 @@ function Ua(s, e) {
 const Ha = /* @__PURE__ */ Z(Ba, [["render", Ua]]), Wa = { class: "nc-chat-input" }, Ga = /* @__PURE__ */ fe({
   __name: "ChatInput",
   setup(s) {
-    const e = oe(Ie), n = oe(Ce), r = z(() => n?.placeholder ?? "Type your message..."), t = j(""), i = at("textareaRef"), l = z(() => t.value.trim().length > 0 && !e.isSending.value);
+    const e = oe(Ie), n = oe(Ce), r = $(() => n?.placeholder ?? "Type your message..."), t = j(""), i = at("textareaRef"), l = $(() => t.value.trim().length > 0 && !e.isSending.value);
     async function c() {
-      const p = t.value.trim();
-      if (!(!p || e.isSending.value)) {
+      const h = t.value.trim();
+      if (!(!h || e.isSending.value)) {
         t.value = "";
         try {
-          await e.sendMessage(p);
+          await e.sendMessage(h);
         } catch {
         }
       }
     }
-    function o(p) {
-      p.key === "Enter" && !p.shiftKey && (p.preventDefault(), c());
+    function o(h) {
+      h.key === "Enter" && !h.shiftKey && (h.preventDefault(), c());
     }
     return ke(
       () => e.failedMessageText.value,
-      (p) => {
-        p && (t.value = p);
+      (h) => {
+        h && (t.value = h);
       }
     ), ke(
       () => e.isOpen.value,
-      (p) => {
-        p && he(() => {
+      (h) => {
+        h && he(() => {
           i.value?.focus();
         });
       },
       { immediate: !0 }
     ), ke(
       () => e.isSending.value,
-      (p, h) => {
-        h && !p && he(() => {
+      (h, p) => {
+        p && !h && he(() => {
           i.value?.focus();
         });
       }
-    ), (p, h) => (T(), R("div", Wa, [
+    ), (h, p) => (T(), R("div", Wa, [
       E(Cs, {
         ref_key: "textareaRef",
         ref: i,
         modelValue: t.value,
-        "onUpdate:modelValue": h[0] || (h[0] = (g) => t.value = g),
+        "onUpdate:modelValue": p[0] || (p[0] = (g) => t.value = g),
         "auto-grow": "",
         rows: 2,
         "max-rows": 10,
@@ -2364,7 +2365,7 @@ const Ha = /* @__PURE__ */ Z(Ba, [["render", Ua]]), Wa = { class: "nc-chat-input
 }), qa = /* @__PURE__ */ Z(Ga, [["__scopeId", "data-v-1f6d9226"]]), Za = { class: "nc-chat-panel__body" }, Ya = /* @__PURE__ */ fe({
   __name: "ChatPanel",
   setup(s) {
-    const e = oe(Ie), n = oe(Ce), r = z(() => n?.welcomeMessage), t = As(), i = z(() => t.width.value < 768), l = (c) => {
+    const e = oe(Ie), n = oe(Ce), r = $(() => n?.welcomeMessage), t = As(), i = $(() => t.width.value < 768), l = (c) => {
       c.key === "Escape" && e.isOpen.value && e.close();
     };
     return ke(
