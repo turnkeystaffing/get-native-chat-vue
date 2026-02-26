@@ -1,11 +1,13 @@
 import { resolve } from 'node:path'
 import vue from '@vitejs/plugin-vue'
+import vuetify from 'vite-plugin-vuetify'
 import dts from 'vite-plugin-dts'
 import { defineConfig } from 'vite'
 
 export default defineConfig({
   plugins: [
     vue(),
+    vuetify({ autoImport: true, styles: 'none' }),
     dts({
       outDir: 'dist/types',
       tsconfigPath: './tsconfig.build.json',

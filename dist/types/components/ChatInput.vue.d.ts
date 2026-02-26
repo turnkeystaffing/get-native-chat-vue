@@ -12,6 +12,7 @@ declare const _default: import('vue').DefineComponent<{}, {}, {}, {}, {}, import
         hideSpinButtons: boolean;
         persistentHint: boolean;
         messages: string | readonly string[];
+        direction: "horizontal" | "vertical";
         clearable: boolean;
         clearIcon: import('vuetify/lib/composables/icons.mjs').IconValue;
         active: boolean;
@@ -66,7 +67,6 @@ declare const _default: import('vue').DefineComponent<{}, {}, {}, {}, {}, import
         counterValue?: ((value: any) => number) | undefined;
         prefix?: string | undefined;
         placeholder?: string | undefined;
-        maxHeight?: string | number | undefined;
         maxRows?: string | number | undefined;
         suffix?: string | undefined;
         modelModifiers?: Record<string, boolean> | undefined;
@@ -399,6 +399,7 @@ declare const _default: import('vue').DefineComponent<{}, {}, {}, {}, {}, import
         hideSpinButtons: boolean;
         persistentHint: boolean;
         messages: string | readonly string[];
+        direction: "horizontal" | "vertical";
         clearable: boolean;
         clearIcon: import('vuetify/lib/composables/icons.mjs').IconValue;
         active: boolean;
@@ -473,6 +474,7 @@ declare const _default: import('vue').DefineComponent<{}, {}, {}, {}, {}, import
         hideSpinButtons: boolean;
         persistentHint: boolean;
         messages: string | readonly string[];
+        direction: "horizontal" | "vertical";
         clearable: boolean;
         clearIcon: import('vuetify/lib/composables/icons.mjs').IconValue;
         active: boolean;
@@ -527,7 +529,6 @@ declare const _default: import('vue').DefineComponent<{}, {}, {}, {}, {}, import
         counterValue?: ((value: any) => number) | undefined;
         prefix?: string | undefined;
         placeholder?: string | undefined;
-        maxHeight?: string | number | undefined;
         maxRows?: string | number | undefined;
         suffix?: string | undefined;
         modelModifiers?: Record<string, boolean> | undefined;
@@ -854,6 +855,7 @@ declare const _default: import('vue').DefineComponent<{}, {}, {}, {}, {}, import
         hideSpinButtons: boolean;
         persistentHint: boolean;
         messages: string | readonly string[];
+        direction: "horizontal" | "vertical";
         clearable: boolean;
         clearIcon: import('vuetify/lib/composables/icons.mjs').IconValue;
         active: boolean;
