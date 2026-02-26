@@ -9,6 +9,7 @@ const config = inject(CONFIG_KEY)
 const chatState = inject(CHAT_STATE_KEY)!
 
 const isOpen = computed(() => chatState.isOpen.value)
+const isLoading = computed(() => chatState.isLoading.value)
 const isHidden = computed(() => isOpen.value && (config?.hideToggleWhenOpen ?? false))
 const position = computed(() => config?.position ?? 'bottom-right')
 const positionClass = computed(
@@ -40,7 +41,8 @@ defineExpose({ focus })
       size="56"
       color="secondary"
       elevation="4"
-      :aria-label="isOpen ? 'Close chat' : 'Open chat'"
+      :loading="isLoading"
+      :aria-label="isLoading ? 'Loading chat' : isOpen ? 'Close chat' : 'Open chat'"
       :aria-expanded="isOpen.toString()"
       @click="toggle"
     >

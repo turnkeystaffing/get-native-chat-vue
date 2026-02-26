@@ -15,9 +15,9 @@ function createMockApiClient(): NativeChatApiClient {
   }
 }
 
-function createState(isOpenValue = false) {
+function createState(isOpenValue = false, isLoadingValue = false) {
   const isOpen = ref(isOpenValue)
-  const isLoading = ref(false)
+  const isLoading = ref(isLoadingValue)
   const isSending = ref(false)
   const hasMore = ref(false)
   const failedMessageText = ref<string | null>(null)
@@ -46,10 +46,11 @@ function createState(isOpenValue = false) {
 
 function mountFloatingButton(options?: {
   isOpen?: boolean
+  isLoading?: boolean
   position?: 'bottom-left' | 'bottom-right'
   hideToggleWhenOpen?: boolean
 }) {
-  const state = createState(options?.isOpen ?? false)
+  const state = createState(options?.isOpen ?? false, options?.isLoading ?? false)
   const config = {
     apiClient: createMockApiClient(),
     position: options?.position,
@@ -167,6 +168,27 @@ describe('FloatingButton', () => {
     const wrapperDiv = wrapper.find('.nc-floating-button-wrapper')
 
     expect(wrapperDiv.element.style.display).not.toBe('none')
+  })
+
+  it('passes loading prop to v-btn when isLoading is true', () => {
+    const { wrapper } = mountFloatingButton({ isLoading: true })
+    const btn = wrapper.findComponent({ name: 'VBtn' })
+
+    expect(btn.props('loading')).toBe(true)
+  })
+
+  it('does not pass loading prop when isLoading is false', () => {
+    const { wrapper } = mountFloatingButton({ isLoading: false })
+    const btn = wrapper.findComponent({ name: 'VBtn' })
+
+    expect(btn.props('loading')).toBe(false)
+  })
+
+  it('aria-label is "Loading chat" when isLoading is true', () => {
+    const { wrapper } = mountFloatingButton({ isLoading: true })
+    const btn = wrapper.findComponent({ name: 'VBtn' })
+
+    expect(btn.attributes('aria-label')).toBe('Loading chat')
   })
 
   it('button has elevation 4', () => {
