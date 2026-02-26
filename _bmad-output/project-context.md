@@ -1,10 +1,10 @@
 ---
 project_name: 'native-chat-vue'
 user_name: 'Volodymyr'
-date: '2026-02-25'
+date: '2026-02-26'
 sections_completed: ['technology_stack', 'language_rules', 'framework_rules', 'testing_rules', 'quality_rules', 'workflow_rules', 'anti_patterns']
 status: 'complete'
-rule_count: 57
+rule_count: 56
 optimized_for_llm: true
 ---
 
@@ -118,11 +118,10 @@ _This file contains critical rules and patterns that AI agents must follow when 
 - `!important` in CSS
 - CSS animations without `prefers-reduced-motion: reduce` fallback
 
-**CSS isolation (all four layers required):**
-1. `@layer native-chat { ... }` wrapping all styles
-2. `<style scoped>` on every component
-3. `nc-` prefix on all custom CSS classes and transition/keyframe names
-4. `<v-theme-provider theme="nativeChat">` at root
+**CSS isolation (all three layers required):**
+1. `<style scoped>` on every component
+2. `nc-` prefix on all custom CSS classes and transition/keyframe names
+3. `<v-theme-provider theme="nativeChat">` at root
 
 **Error handling:**
 - Errors are `ChatMessage` objects (id: `error-*`), not separate UI
@@ -150,4 +149,4 @@ _This file contains critical rules and patterns that AI agents must follow when 
 - Review quarterly for outdated rules
 - Remove rules that become obvious over time
 
-Last Updated: 2026-02-25
+Last Updated: 2026-02-26
