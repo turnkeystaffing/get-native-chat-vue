@@ -12,7 +12,7 @@ so that the plugin participates in my app's auth lifecycle (token refresh, error
 
 ## Acceptance Criteria
 
-1. **Given** I have an Axios instance with auth interceptors attached **When** I call `createNativeChatApiClient({ axiosInstance })` **Then** all 4 API methods delegate HTTP requests through my Axios instance **And** auth tokens are injected by the Axios interceptor (not by the helper) **And** the helper uses relative paths (`/conversations`, `/conversations/:id/messages`)
+1. **Given** I have an Axios instance with auth interceptors attached **When** I call `createNativeChatApiClient({ axiosInstance })` **Then** all 4 API methods delegate HTTP requests through my Axios instance **And** auth tokens are injected by the Axios interceptor (not by the helper) **And** the helper uses relative paths (`/api/v1/conversations`, `/api/v1/conversations/:id/messages`)
 
 2. **Given** the Axios instance has a `baseURL` configured **When** any API method is called **Then** the helper passes only relative paths (e.g., `/conversations`) to the Axios instance — URL resolution to `baseURL` is Axios's responsibility, not the helper's. Verified by asserting the first argument to `axiosInstance.get()`/`.post()` starts with `/` and contains no protocol or host
 
@@ -28,8 +28,8 @@ so that the plugin participates in my app's auth lifecycle (token refresh, error
 
 - [x] Task 1: Rewrite `src/helpers/createApiClient.ts` — Axios instance delegation (AC: #1, #2)
   - [x] 1.1 Change function signature from `{ baseUrl, getAccessToken }` to `{ axiosInstance: AxiosInstance }` — use `import type { AxiosInstance } from 'axios'` (type-only import, zero runtime cost). Add a runtime guard at the top of the function: if `!config.axiosInstance` throw a descriptive `Error('[native-chat-vue] createNativeChatApiClient requires an axiosInstance')` to catch misconfiguration early
-  - [x] 1.2 Replace `fetch()` with `axiosInstance.get()` / `axiosInstance.post()` — use generic type parameters on Axios calls (e.g., `axiosInstance.post<ConversationResponse>('/conversations')`) so `response.data` is typed without casts under strict mode. Return `response.data` directly (Axios auto-parses JSON)
-  - [x] 1.3 Use relative paths for all endpoints: `/conversations`, `/conversations/${encodeURIComponent(conversationId)}/messages`
+  - [x] 1.2 Replace `fetch()` with `axiosInstance.get()` / `axiosInstance.post()` — use generic type parameters on Axios calls (e.g., `axiosInstance.post<ConversationResponse>('/api/v1/conversations')`) so `response.data` is typed without casts under strict mode. Return `response.data` directly (Axios auto-parses JSON)
+  - [x] 1.3 Use relative paths for all endpoints: `/conversations`, `/api/v1/conversations/${encodeURIComponent(conversationId)}/messages`
   - [x] 1.4 Use Axios `params` option for query parameters (`{ params: { offset, limit } }`) instead of manual URL construction
   - [x] 1.5 Remove the internal `request()` wrapper, `getAccessToken` callback, manual `Authorization` header, and `Content-Type` header (Axios handles `Content-Type: application/json` automatically for object bodies)
   - [x] 1.6 Let Axios errors propagate naturally — do NOT catch/rethrow or attach `.statusCode` (the `useChat` error extraction handles both error shapes)
@@ -51,8 +51,8 @@ so that the plugin participates in my app's auth lifecycle (token refresh, error
 
 - [x] Task 5: Rewrite `src/helpers/__tests__/createApiClient.test.ts` (AC: #1, #2)
   - [x] 5.1 Create a mock `AxiosInstance` object with `vi.fn()` for `.get()` and `.post()` — mock return `{ data: <expected response> }`. Note: this mock only covers methods the helper uses; if the implementation ever calls unmocked methods (e.g., `delete`, `patch`), the test will get `undefined` silently — this is acceptable since the helper only uses `get`/`post`
-  - [x] 5.2 Test `createConversation()` calls `axiosInstance.post('/conversations', {})` (empty body) and returns `response.data`
-  - [x] 5.3 Test `getConversations(offset, limit)` calls `axiosInstance.get('/conversations', { params: { offset, limit } })` and returns `response.data`
+  - [x] 5.2 Test `createConversation()` calls `axiosInstance.post('/api/v1/conversations', {})` (empty body) and returns `response.data`
+  - [x] 5.3 Test `getConversations(offset, limit)` calls `axiosInstance.get('/api/v1/conversations', { params: { offset, limit } })` and returns `response.data`
   - [x] 5.4 Test `getMessages(id, offset, limit)` calls `axiosInstance.get()` with encoded conversationId path and `{ params: { offset, limit } }` — returns `response.data`
   - [x] 5.5 Test `sendMessage(id, message)` calls `axiosInstance.post()` with encoded conversationId path and `{ message }` body — returns `response.data`
   - [x] 5.6 Test that Axios errors propagate without modification (no `.statusCode` wrapping)
@@ -116,25 +116,25 @@ export function createNativeChatApiClient(config: {
     async createConversation() {
       // Pass empty object body — Axios omits Content-Type for undefined body,
       // but backend may expect application/json on POST. {} ensures the header is set.
-      const response = await axiosInstance.post<ConversationResponse>('/conversations', {})
+      const response = await axiosInstance.post<ConversationResponse>('/api/v1/conversations', {})
       return response.data
     },
     async getConversations(offset: number, limit: number) {
-      const response = await axiosInstance.get<ConversationListResponse>('/conversations', {
+      const response = await axiosInstance.get<ConversationListResponse>('/api/v1/conversations', {
         params: { offset, limit },
       })
       return response.data
     },
     async getMessages(conversationId: string, offset: number, limit: number) {
       const response = await axiosInstance.get<MessageHistoryResponse>(
-        `/conversations/${encodeURIComponent(conversationId)}/messages`,
+        `/api/v1/conversations/${encodeURIComponent(conversationId)}/messages`,
         { params: { offset, limit } },
       )
       return response.data
     },
     async sendMessage(conversationId: string, message: string) {
       const response = await axiosInstance.post<SendMessageResponse>(
-        `/conversations/${encodeURIComponent(conversationId)}/messages`,
+        `/api/v1/conversations/${encodeURIComponent(conversationId)}/messages`,
         { message },
       )
       return response.data

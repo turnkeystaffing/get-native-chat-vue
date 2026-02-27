@@ -269,7 +269,7 @@ So that the plugin is configured and ready to render in my application.
 **Given** the `createNativeChatApiClient` helper is imported
 **When** I call `createNativeChatApiClient({ axiosInstance })` with a pre-configured Axios instance
 **Then** it returns an object conforming to the `NativeChatApiClient` interface
-**And** each method delegates HTTP requests to the provided Axios instance using relative paths (`/conversations`, `/conversations/:id/messages`)
+**And** each method delegates HTTP requests to the provided Axios instance using relative paths (`/api/v1/conversations`, `/api/v1/conversations/:id/messages`)
 
 **Given** the package entry point `src/index.ts`
 **When** a consumer imports from the package
@@ -365,7 +365,7 @@ So that the plugin participates in my app's auth lifecycle (token refresh, error
 **When** I call `createNativeChatApiClient({ axiosInstance })`
 **Then** all 4 API methods delegate HTTP requests through my Axios instance
 **And** auth tokens are injected by the Axios interceptor (not by the helper)
-**And** the helper uses relative paths (`/conversations`, `/conversations/:id/messages`)
+**And** the helper uses relative paths (`/api/v1/conversations`, `/api/v1/conversations/:id/messages`)
 
 **Given** the Axios instance has a `baseURL` configured
 **When** any API method is called

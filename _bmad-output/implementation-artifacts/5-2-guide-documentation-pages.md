@@ -188,10 +188,10 @@ const apiClient = createNativeChatApiClient({
 
 | Method | HTTP Verb | Endpoint |
 |---|---|---|
-| `createConversation()` | POST | `{baseUrl}/conversations` |
-| `getConversations(offset, limit)` | GET | `{baseUrl}/conversations?offset=…&limit=…` |
-| `getMessages(id, offset, limit)` | GET | `{baseUrl}/conversations/{id}/messages?offset=…&limit=…` |
-| `sendMessage(id, message)` | POST | `{baseUrl}/conversations/{id}/messages` |
+| `createConversation()` | POST | `{baseUrl}/api/v1/conversations` |
+| `getConversations(offset, limit)` | GET | `{baseUrl}/api/v1/conversations?offset=…&limit=…` |
+| `getMessages(id, offset, limit)` | GET | `{baseUrl}/api/v1/conversations/{id}/messages?offset=…&limit=…` |
+| `sendMessage(id, message)` | POST | `{baseUrl}/api/v1/conversations/{id}/messages` |
 
 **Custom implementation example:**
 
@@ -200,21 +200,21 @@ import type { NativeChatApiClient } from 'native-chat-vue'
 
 const customApiClient: NativeChatApiClient = {
   async createConversation() {
-    const res = await axios.post('/api/conversations')
+    const res = await axios.post('/api/v1/conversations')
     return res.data
   },
   async getConversations(offset, limit) {
-    const res = await axios.get('/api/conversations', { params: { offset, limit } })
+    const res = await axios.get('/api/v1/conversations', { params: { offset, limit } })
     return res.data
   },
   async getMessages(conversationId, offset, limit) {
-    const res = await axios.get(`/api/conversations/${conversationId}/messages`, {
+    const res = await axios.get(`/api/v1/conversations/${conversationId}/messages`, {
       params: { offset, limit },
     })
     return res.data
   },
   async sendMessage(conversationId, message) {
-    const res = await axios.post(`/api/conversations/${conversationId}/messages`, { message })
+    const res = await axios.post(`/api/v1/conversations/${conversationId}/messages`, { message })
     return res.data
   },
 }

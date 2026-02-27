@@ -45,7 +45,8 @@ import App from './App.vue'
 
 const vuetify = createVuetify()
 
-// Create an Axios instance with your base URL and interceptors
+// Create an Axios instance pointing to your API server root
+// (the helper adds /api/v1 to all endpoint paths automatically)
 const axiosInstance = axios.create({ baseURL: 'https://api.example.com' })
 // axiosInstance.interceptors.request.use(...) — add auth, retry, etc.
 

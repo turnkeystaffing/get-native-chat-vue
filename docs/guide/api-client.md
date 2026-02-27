@@ -119,11 +119,15 @@ const axiosInstance = axios.create({ baseURL: 'https://api.example.com' })
 const apiClient = createNativeChatApiClient({ axiosInstance })
 ```
 
+::: warning baseURL should not include `/api/v1`
+The helper automatically prefixes all endpoints with `/api/v1`. Set `baseURL` to your API server root (e.g., `https://api.example.com`), **not** `https://api.example.com/api/v1` — otherwise paths will be double-prefixed.
+:::
+
 ### How It Works
 
 - Delegates all HTTP requests through the provided Axios instance
 - Uses `axiosInstance.get()` and `axiosInstance.post()` — auth, headers, and retry logic are handled by your Axios interceptors
-- Passes only relative paths (`/conversations`, `/conversations/:id/messages`) — URL resolution to `baseURL` is Axios's responsibility
+- All endpoint paths include the `/api/v1` prefix (e.g., `/api/v1/conversations`) — Axios resolves these against `baseURL`
 - Uses Axios `params` option for query parameters
 - Returns `response.data` directly (Axios auto-parses JSON)
 - Lets Axios errors propagate naturally — no wrapping or `.statusCode` attachment
@@ -134,10 +138,10 @@ The helper passes relative paths to the Axios instance. The final URL is resolve
 
 | Method                            | HTTP Verb | Path                                                   |
 | --------------------------------- | --------- | ------------------------------------------------------ |
-| `createConversation()`            | POST      | `/conversations`                                       |
-| `getConversations(offset, limit)` | GET       | `/conversations` (params: offset, limit)               |
-| `getMessages(id, offset, limit)`  | GET       | `/conversations/{id}/messages` (params: offset, limit) |
-| `sendMessage(id, message)`        | POST      | `/conversations/{id}/messages`                         |
+| `createConversation()`            | POST      | `/api/v1/conversations`                                       |
+| `getConversations(offset, limit)` | GET       | `/api/v1/conversations` (params: offset, limit)               |
+| `getMessages(id, offset, limit)`  | GET       | `/api/v1/conversations/{id}/messages` (params: offset, limit) |
+| `sendMessage(id, message)`        | POST      | `/api/v1/conversations/{id}/messages`                         |
 
 ## Custom Implementation
 
@@ -148,27 +152,27 @@ import type { NativeChatApiClient } from '@turnkeystaffing/get-native-chat-vue'
 
 const customApiClient: NativeChatApiClient = {
   async createConversation() {
-    const res = await fetch('/api/conversations', { method: 'POST' })
+    const res = await fetch('/api/v1/conversations', { method: 'POST' })
     if (!res.ok) throw Object.assign(new Error(res.statusText), { statusCode: res.status })
     return res.json()
   },
 
   async getConversations(offset, limit) {
-    const res = await fetch(`/api/conversations?offset=${offset}&limit=${limit}`)
+    const res = await fetch(`/api/v1/conversations?offset=${offset}&limit=${limit}`)
     if (!res.ok) throw Object.assign(new Error(res.statusText), { statusCode: res.status })
     return res.json()
   },
 
   async getMessages(conversationId, offset, limit) {
     const res = await fetch(
-      `/api/conversations/${encodeURIComponent(conversationId)}/messages?offset=${offset}&limit=${limit}`,
+      `/api/v1/conversations/${encodeURIComponent(conversationId)}/messages?offset=${offset}&limit=${limit}`,
     )
     if (!res.ok) throw Object.assign(new Error(res.statusText), { statusCode: res.status })
     return res.json()
   },
 
   async sendMessage(conversationId, message) {
-    const res = await fetch(`/api/conversations/${encodeURIComponent(conversationId)}/messages`, {
+    const res = await fetch(`/api/v1/conversations/${encodeURIComponent(conversationId)}/messages`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ message }),

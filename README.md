@@ -120,15 +120,15 @@ Implement the `NativeChatApiClient` interface to connect to any backend:
 import type { NativeChatApiClient } from '@turnkeystaffing/get-native-chat-vue'
 
 const myApiClient: NativeChatApiClient = {
-  createConversation: () => fetch('/api/conversations', { method: 'POST' }).then((r) => r.json()),
+  createConversation: () => fetch('/api/v1/conversations', { method: 'POST' }).then((r) => r.json()),
   getConversations: (offset, limit) =>
-    fetch(`/api/conversations?offset=${offset}&limit=${limit}`).then((r) => r.json()),
+    fetch(`/api/v1/conversations?offset=${offset}&limit=${limit}`).then((r) => r.json()),
   getMessages: (conversationId, offset, limit) =>
     fetch(
-      `/api/conversations/${conversationId}/messages?offset=${offset}&limit=${limit}`,
+      `/api/v1/conversations/${encodeURIComponent(conversationId)}/messages?offset=${offset}&limit=${limit}`,
     ).then((r) => r.json()),
   sendMessage: (conversationId, message) =>
-    fetch(`/api/conversations/${conversationId}/messages`, {
+    fetch(`/api/v1/conversations/${encodeURIComponent(conversationId)}/messages`, {
       method: 'POST',
       body: JSON.stringify({ message }),
       headers: { 'Content-Type': 'application/json' },
@@ -156,10 +156,10 @@ The adapter maps to these endpoints:
 
 | Method | HTTP | Path |
 |--------|------|------|
-| `createConversation()` | POST | `/conversations` |
-| `getConversations()` | GET | `/conversations?offset=X&limit=Y` |
-| `getMessages()` | GET | `/conversations/{id}/messages?offset=X&limit=Y` |
-| `sendMessage()` | POST | `/conversations/{id}/messages` |
+| `createConversation()` | POST | `/api/v1/conversations` |
+| `getConversations()` | GET | `/api/v1/conversations?offset=X&limit=Y` |
+| `getMessages()` | GET | `/api/v1/conversations/{id}/messages?offset=X&limit=Y` |
+| `sendMessage()` | POST | `/api/v1/conversations/{id}/messages` |
 
 ### Configuration Options
 

@@ -2472,14 +2472,14 @@ function li(s) {
   const { axiosInstance: e } = s;
   return {
     async createConversation() {
-      const r = (await e.post("/conversations", {})).data;
+      const r = (await e.post("/api/v1/conversations", {})).data;
       return {
         id: r.conversation_id,
         createdAt: r.created_at
       };
     },
     async getConversations(n, r) {
-      const a = (await e.get("/conversations", {
+      const a = (await e.get("/api/v1/conversations", {
         params: { offset: n, limit: r }
       })).data;
       return {
@@ -2492,7 +2492,7 @@ function li(s) {
     },
     async getMessages(n, r, t) {
       const l = (await e.get(
-        `/conversations/${encodeURIComponent(n)}/messages`,
+        `/api/v1/conversations/${encodeURIComponent(n)}/messages`,
         { params: { offset: r, limit: t } }
       )).data;
       return {
@@ -2508,7 +2508,7 @@ function li(s) {
     },
     async sendMessage(n, r) {
       const a = (await e.post(
-        `/conversations/${encodeURIComponent(n)}/messages`,
+        `/api/v1/conversations/${encodeURIComponent(n)}/messages`,
         { message: r }
       )).data;
       return {

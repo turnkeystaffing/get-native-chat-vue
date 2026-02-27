@@ -83,7 +83,7 @@ import NativeChatPlugin, { createNativeChatApiClient } from '@turnkeystaffing/ge
 import '@turnkeystaffing/get-native-chat-vue/style.css'
 
 const axiosInstance = axios.create({
-  baseURL: 'https://your-api.com/chat',
+  baseURL: 'https://your-api.com',
   headers: { Authorization: `Bearer ${token}` },
 })
 

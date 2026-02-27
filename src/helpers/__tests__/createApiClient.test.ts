@@ -48,7 +48,7 @@ describe('createNativeChatApiClient', () => {
       const client = createNativeChatApiClient({ axiosInstance: mockAxios })
       const result = await client.createConversation()
 
-      expect(mockAxios.post).toHaveBeenCalledWith('/conversations', {})
+      expect(mockAxios.post).toHaveBeenCalledWith('/api/v1/conversations', {})
       expect(result).toEqual({ id: 'conv-1', createdAt: '2026-01-01T00:00:00Z' })
     })
   })
@@ -67,7 +67,7 @@ describe('createNativeChatApiClient', () => {
       const client = createNativeChatApiClient({ axiosInstance: mockAxios })
       const result = await client.getConversations(0, 20)
 
-      expect(mockAxios.get).toHaveBeenCalledWith('/conversations', {
+      expect(mockAxios.get).toHaveBeenCalledWith('/api/v1/conversations', {
         params: { offset: 0, limit: 20 },
       })
       expect(result).toEqual({
@@ -94,7 +94,7 @@ describe('createNativeChatApiClient', () => {
       const client = createNativeChatApiClient({ axiosInstance: mockAxios })
       const result = await client.getMessages('conv-42', 0, 20)
 
-      expect(mockAxios.get).toHaveBeenCalledWith('/conversations/conv-42/messages', {
+      expect(mockAxios.get).toHaveBeenCalledWith('/api/v1/conversations/conv-42/messages', {
         params: { offset: 0, limit: 20 },
       })
       expect(result).toEqual({
@@ -131,7 +131,7 @@ describe('createNativeChatApiClient', () => {
       const client = createNativeChatApiClient({ axiosInstance: mockAxios })
       await client.getMessages('abc/def 123', 0, 10)
 
-      expect(mockAxios.get).toHaveBeenCalledWith('/conversations/abc%2Fdef%20123/messages', {
+      expect(mockAxios.get).toHaveBeenCalledWith('/api/v1/conversations/abc%2Fdef%20123/messages', {
         params: { offset: 0, limit: 10 },
       })
     })
@@ -152,7 +152,7 @@ describe('createNativeChatApiClient', () => {
       const client = createNativeChatApiClient({ axiosInstance: mockAxios })
       const result = await client.sendMessage('conv-1', 'hello')
 
-      expect(mockAxios.post).toHaveBeenCalledWith('/conversations/conv-1/messages', {
+      expect(mockAxios.post).toHaveBeenCalledWith('/api/v1/conversations/conv-1/messages', {
         message: 'hello',
       })
       expect(result).toEqual({
@@ -187,7 +187,7 @@ describe('createNativeChatApiClient', () => {
       const client = createNativeChatApiClient({ axiosInstance: mockAxios })
       await client.sendMessage('abc/def 123', 'test')
 
-      expect(mockAxios.post).toHaveBeenCalledWith('/conversations/abc%2Fdef%20123/messages', {
+      expect(mockAxios.post).toHaveBeenCalledWith('/api/v1/conversations/abc%2Fdef%20123/messages', {
         message: 'test',
       })
     })

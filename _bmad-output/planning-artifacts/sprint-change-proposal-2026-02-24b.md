@@ -113,7 +113,7 @@ The `setupAuthInterceptors()` function from the host app attaches request interc
 Replace fetch-based implementation with Axios instance delegation:
 
 - Accept `{ axiosInstance: AxiosInstance }` config (single parameter)
-- Use relative paths (`/conversations`, `/conversations/:id/messages`)
+- Use relative paths (`/api/v1/conversations`, `/api/v1/conversations/:id/messages`)
 - Delegate all HTTP to the provided Axios instance (`.get()`, `.post()`)
 - Use Axios `params` option for query parameters
 - Return `response.data` directly (Axios auto-parses JSON)

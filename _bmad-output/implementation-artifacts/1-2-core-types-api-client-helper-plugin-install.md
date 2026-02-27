@@ -34,7 +34,7 @@ so that the plugin is configured and ready to render in my application.
 - [x] Task 3: Create API client helper (AC: #3)
   - [x] 3.1 Create `src/helpers/createApiClient.ts` — implement `createNativeChatApiClient({ baseUrl, getAccessToken })` that returns an object conforming to `NativeChatApiClient`
   - [x] 3.2 Each method uses `fetch()` with `Authorization: Bearer <token>` header obtained from `getAccessToken()` callback (supports both sync and async)
-  - [x] 3.3 Methods call correct REST endpoints: `POST /conversations`, `GET /conversations?offset=&limit=`, `GET /conversations/:id/messages?offset=&limit=`, `POST /conversations/:id/messages`
+  - [x] 3.3 Methods call correct REST endpoints: `POST /api/v1/conversations`, `GET /api/v1/conversations?offset=&limit=`, `GET /api/v1/conversations/:id/messages?offset=&limit=`, `POST /api/v1/conversations/:id/messages`
   - [x] 3.4 Methods throw on non-ok HTTP responses (error contract: client throws, plugin catches and maps status codes)
 
 - [x] Task 4: Create Vue plugin install function (AC: #1, #2)
@@ -159,7 +159,7 @@ export function createNativeChatApiClient(config: {
 - `getAccessToken` supports both sync and async return values (for token refresh scenarios)
 - Each request adds `Authorization: Bearer <token>` and `Content-Type: application/json` headers
 - Throws on non-ok HTTP responses with status code preserved in error
-- REST endpoints pattern: `${baseUrl}/conversations`, `${baseUrl}/conversations/${id}/messages`
+- REST endpoints pattern: `${baseUrl}/api/v1/conversations`, `${baseUrl}/api/v1/conversations/${id}/messages`
 
 ### Plugin Install Pattern
 

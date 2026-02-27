@@ -90,10 +90,10 @@ interface NativeChatApiClient {
 
 | Method | HTTP | Path |
 |--------|------|------|
-| `createConversation()` | POST | `/conversations` (body: `{}`) |
-| `getConversations()` | GET | `/conversations?offset=X&limit=Y` |
-| `getMessages()` | GET | `/conversations/{id}/messages?offset=X&limit=Y` |
-| `sendMessage()` | POST | `/conversations/{id}/messages` (body: `{ message }`) |
+| `createConversation()` | POST | `/api/v1/conversations` (body: `{}`) |
+| `getConversations()` | GET | `/api/v1/conversations?offset=X&limit=Y` |
+| `getMessages()` | GET | `/api/v1/conversations/{id}/messages?offset=X&limit=Y` |
+| `sendMessage()` | POST | `/api/v1/conversations/{id}/messages` (body: `{ message }`) |
 
 ## Component Architecture
 

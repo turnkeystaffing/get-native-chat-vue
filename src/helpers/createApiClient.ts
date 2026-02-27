@@ -19,7 +19,7 @@ export function createNativeChatApiClient(config: {
   return {
     async createConversation() {
       // Empty body {} ensures Axios sends Content-Type: application/json
-      const response = await axiosInstance.post<RawConversationResponse>('/conversations', {})
+      const response = await axiosInstance.post<RawConversationResponse>('/api/v1/conversations', {})
       const raw = response.data
       return {
         id: raw.conversation_id,
@@ -28,7 +28,7 @@ export function createNativeChatApiClient(config: {
     },
 
     async getConversations(offset: number, limit: number) {
-      const response = await axiosInstance.get<RawConversationListResponse>('/conversations', {
+      const response = await axiosInstance.get<RawConversationListResponse>('/api/v1/conversations', {
         params: { offset, limit },
       })
       const raw = response.data
@@ -43,7 +43,7 @@ export function createNativeChatApiClient(config: {
 
     async getMessages(conversationId: string, offset: number, limit: number) {
       const response = await axiosInstance.get<RawMessageHistoryResponse>(
-        `/conversations/${encodeURIComponent(conversationId)}/messages`,
+        `/api/v1/conversations/${encodeURIComponent(conversationId)}/messages`,
         { params: { offset, limit } },
       )
       const raw = response.data
@@ -61,7 +61,7 @@ export function createNativeChatApiClient(config: {
 
     async sendMessage(conversationId: string, message: string) {
       const response = await axiosInstance.post<RawSendMessageResponse>(
-        `/conversations/${encodeURIComponent(conversationId)}/messages`,
+        `/api/v1/conversations/${encodeURIComponent(conversationId)}/messages`,
         { message },
       )
       const raw = response.data
