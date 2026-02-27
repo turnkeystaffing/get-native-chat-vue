@@ -199,7 +199,7 @@ describe('MessageList', () => {
 
     const scrollContainer = wrapper.find('.v-infinite-scroll').element as HTMLElement
 
-    // Flush onMounted's deferred scrollToBottom
+    // Flush onMounted's deferred scrollToBottom + initialScrollDone
     await nextTick()
     await nextTick()
 
@@ -219,6 +219,10 @@ describe('MessageList', () => {
       writable: true,
       configurable: true,
     })
+
+    // Simulate user scrolled up so handleLoadMore guards pass
+    scrollContainer.dispatchEvent(new Event('scroll'))
+    await nextTick()
 
     // Configure loadMore to prepend older messages
     const loadMoreFn = chatState.loadMore as ReturnType<typeof vi.fn>
@@ -298,7 +302,7 @@ describe('MessageList', () => {
 
     const scrollContainer = wrapper.find('.v-infinite-scroll').element as HTMLElement
 
-    // Flush onMounted's deferred scrollToBottom
+    // Flush onMounted's deferred scrollToBottom + initialScrollDone
     await nextTick()
     await nextTick()
 
@@ -318,6 +322,10 @@ describe('MessageList', () => {
       writable: true,
       configurable: true,
     })
+
+    // Simulate user scrolled up so handleLoadMore guards pass
+    scrollContainer.dispatchEvent(new Event('scroll'))
+    await nextTick()
 
     // Configure loadMore to prepend older messages AND simulate a response arriving mid-load
     const loadMoreFn = chatState.loadMore as ReturnType<typeof vi.fn>
@@ -360,6 +368,19 @@ describe('MessageList', () => {
       const msgs = [createMessage('1', 'user')]
       const { wrapper, chatState } = mountMessageList({ messages: msgs, hasMore: true })
 
+      const scrollContainer = wrapper.find('.v-infinite-scroll').element as HTMLElement
+
+      // Flush onMounted's deferred scrollToBottom + initialScrollDone
+      await nextTick()
+      await nextTick()
+
+      // Simulate user scrolled up so handleLoadMore guards pass
+      Object.defineProperty(scrollContainer, 'scrollHeight', { value: 1000, configurable: true })
+      Object.defineProperty(scrollContainer, 'scrollTop', { value: 100, writable: true, configurable: true })
+      Object.defineProperty(scrollContainer, 'clientHeight', { value: 100, configurable: true })
+      scrollContainer.dispatchEvent(new Event('scroll'))
+      await nextTick()
+
       const infiniteScroll = wrapper.findComponent({ name: 'VInfiniteScroll' })
       const doneFn = vi.fn()
 
@@ -369,20 +390,43 @@ describe('MessageList', () => {
       expect(chatState.loadMore).toHaveBeenCalledOnce()
     })
 
-    it('v-infinite-scroll is disabled when hasMore is false', () => {
+    it('rejects @load before initial scroll-to-bottom stabilizes', async () => {
       const msgs = [createMessage('1', 'user')]
-      const { wrapper } = mountMessageList({ messages: msgs, hasMore: false })
+      const { wrapper, chatState } = mountMessageList({ messages: msgs, hasMore: true })
 
+      // Do NOT flush nextTicks — simulate @load firing immediately during mount
       const infiniteScroll = wrapper.findComponent({ name: 'VInfiniteScroll' })
-      expect(infiniteScroll.attributes('disabled')).toBe('true')
+      const doneFn = vi.fn()
+      await infiniteScroll.vm.$emit('load', { side: 'start', done: doneFn })
+
+      expect(chatState.loadMore).not.toHaveBeenCalled()
+      expect(doneFn).toHaveBeenCalledWith('ok')
     })
 
-    it('v-infinite-scroll is not disabled when hasMore is true', () => {
-      const msgs = [createMessage('1', 'user')]
-      const { wrapper } = mountMessageList({ messages: msgs, hasMore: true })
+    it('rejects @load when user is near the bottom (cascade prevention)', async () => {
+      const msgs = [createMessage('1', 'user'), createMessage('2', 'assistant')]
+      const { wrapper, chatState } = mountMessageList({ messages: msgs, hasMore: true })
 
+      // Flush onMounted's deferred scrollToBottom + initialScrollDone
+      await nextTick()
+      await nextTick()
+
+      // Simulate scrollable content so the isNearBottom guard activates
+      const scrollContainer = wrapper.findComponent({ name: 'VInfiniteScroll' }).vm.$el
+      Object.defineProperties(scrollContainer, {
+        scrollHeight: { value: 800, configurable: true },
+        clientHeight: { value: 400, configurable: true },
+        scrollTop: { value: 400, configurable: true, writable: true },
+      })
+
+      // isNearBottom starts as true (initial value) — no scroll event needed
       const infiniteScroll = wrapper.findComponent({ name: 'VInfiniteScroll' })
-      expect(infiniteScroll.attributes('disabled')).toBe('false')
+      const doneFn = vi.fn()
+      await infiniteScroll.vm.$emit('load', { side: 'start', done: doneFn })
+      await nextTick()
+
+      expect(chatState.loadMore).not.toHaveBeenCalled()
+      expect(doneFn).toHaveBeenCalledWith('ok')
     })
 
     it('loading indicator renders v-progress-circular in #loading slot', () => {
@@ -403,6 +447,19 @@ describe('MessageList', () => {
         messages: msgs,
         hasMore: true,
       })
+
+      const scrollContainer = wrapper.find('.v-infinite-scroll').element as HTMLElement
+
+      // Flush onMounted's deferred scrollToBottom + initialScrollDone
+      await nextTick()
+      await nextTick()
+
+      // Simulate user scrolled up so handleLoadMore guards pass
+      Object.defineProperty(scrollContainer, 'scrollHeight', { value: 1000, configurable: true })
+      Object.defineProperty(scrollContainer, 'scrollTop', { value: 100, writable: true, configurable: true })
+      Object.defineProperty(scrollContainer, 'clientHeight', { value: 100, configurable: true })
+      scrollContainer.dispatchEvent(new Event('scroll'))
+      await nextTick()
 
       // Configure loadMore to simulate failure (silent catch, hasMore stays true)
       const loadMoreFn = chatState.loadMore as ReturnType<typeof vi.fn>
@@ -427,6 +484,19 @@ describe('MessageList', () => {
         hasMore: true,
       })
 
+      const scrollContainer = wrapper.find('.v-infinite-scroll').element as HTMLElement
+
+      // Flush onMounted's deferred scrollToBottom + initialScrollDone
+      await nextTick()
+      await nextTick()
+
+      // Simulate user scrolled up so handleLoadMore guards pass
+      Object.defineProperty(scrollContainer, 'scrollHeight', { value: 1000, configurable: true })
+      Object.defineProperty(scrollContainer, 'scrollTop', { value: 100, writable: true, configurable: true })
+      Object.defineProperty(scrollContainer, 'clientHeight', { value: 100, configurable: true })
+      scrollContainer.dispatchEvent(new Event('scroll'))
+      await nextTick()
+
       // Configure loadMore to set hasMore to false
       const loadMoreFn = chatState.loadMore as ReturnType<typeof vi.fn>
       loadMoreFn.mockImplementation(async () => {
@@ -448,6 +518,19 @@ describe('MessageList', () => {
         messages: msgs,
         hasMore: true,
       })
+
+      const scrollContainer = wrapper.find('.v-infinite-scroll').element as HTMLElement
+
+      // Flush onMounted's deferred scrollToBottom + initialScrollDone
+      await nextTick()
+      await nextTick()
+
+      // Simulate user scrolled up so handleLoadMore guards pass
+      Object.defineProperty(scrollContainer, 'scrollHeight', { value: 1000, configurable: true })
+      Object.defineProperty(scrollContainer, 'scrollTop', { value: 100, writable: true, configurable: true })
+      Object.defineProperty(scrollContainer, 'clientHeight', { value: 100, configurable: true })
+      scrollContainer.dispatchEvent(new Event('scroll'))
+      await nextTick()
 
       const loadMoreFn = chatState.loadMore as ReturnType<typeof vi.fn>
       // First call: failure (no state change)
@@ -637,7 +720,18 @@ describe('MessageList', () => {
         messages: msgs,
         hasMore: true,
       })
+
+      const scrollContainer = wrapper.find('.v-infinite-scroll').element as HTMLElement
+
+      // Flush onMounted's deferred scrollToBottom + initialScrollDone
       await nextTick()
+      await nextTick()
+
+      // Simulate user scrolled up so handleLoadMore guards pass
+      Object.defineProperty(scrollContainer, 'scrollHeight', { value: 1000, configurable: true })
+      Object.defineProperty(scrollContainer, 'scrollTop', { value: 100, writable: true, configurable: true })
+      Object.defineProperty(scrollContainer, 'clientHeight', { value: 100, configurable: true })
+      scrollContainer.dispatchEvent(new Event('scroll'))
       await nextTick()
 
       // Configure loadMore to prepend older messages

@@ -20,6 +20,7 @@ const knownIds = new Set<string>()
 const animatingIds = ref(new Set<string>())
 let initialLoadComplete = false
 let suppressAnimation = false
+let initialScrollDone = false
 
 watch(
   () => chatState.messages.value,
@@ -91,7 +92,17 @@ onMounted(() => {
   })
 
   if (chatState.messages.value.length > 0) {
-    nextTick(scrollToBottom)
+    nextTick(() => {
+      scrollToBottom()
+      // Allow VInfiniteScroll loads only after initial scroll has settled.
+      // This prevents the sentinel from triggering a cascade during mount.
+      nextTick(() => {
+        initialScrollDone = true
+      })
+    })
+  } else {
+    // No messages to scroll to — allow loads immediately
+    initialScrollDone = true
   }
   const el = getScrollElement()
   el?.addEventListener('scroll', checkIsNearBottom, { passive: true })
@@ -103,6 +114,26 @@ onBeforeUnmount(() => {
 })
 
 async function handleLoadMore({ done }: { done: (status: InfiniteScrollStatus) => void }) {
+  // Guard: Don't load until initial scroll-to-bottom has stabilized.
+  // VInfiniteScroll's sentinel fires on mount (scrollTop=0), but we need to
+  // reach the bottom first. Reject with 'ok' to keep the sentinel alive.
+  if (!initialScrollDone) {
+    done('ok')
+    return
+  }
+
+  // Guard: Don't load when user is near the bottom. VInfiniteScroll's
+  // sentinel can become briefly visible during DOM mutations (send/receive),
+  // and its proactive re-check (done→3 rAFs→intersecting) can cascade with
+  // fast backends. Loading history is only appropriate when the user has
+  // intentionally scrolled up.
+  const el = getScrollElement()
+  const isScrollable = el != null && el.scrollHeight > el.clientHeight
+  if (isNearBottom.value && isScrollable) {
+    done('ok')
+    return
+  }
+
   suppressAnimation = true
   isLoadingMore = true
 
@@ -131,7 +162,6 @@ async function handleLoadMore({ done }: { done: (status: InfiniteScrollStatus) =
     <v-infinite-scroll
       ref="scrollContainer"
       side="start"
-      :disabled="!chatState.hasMore.value"
       class="nc-message-list-scroll"
       @load="handleLoadMore"
     >
