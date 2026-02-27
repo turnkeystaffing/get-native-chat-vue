@@ -12,9 +12,9 @@ function createMockApiClient(): NativeChatApiClient {
     createConversation: vi.fn().mockResolvedValue({ id: 'new-conv', createdAt: '2026-01-01' }),
     getConversations: vi.fn().mockResolvedValue({
       conversations: [{ id: 'conv-1', createdAt: '2026-01-01' }],
-      has_more: false,
+      hasMore: false,
     }),
-    getMessages: vi.fn().mockResolvedValue({ messages: [], has_more: false }),
+    getMessages: vi.fn().mockResolvedValue({ messages: [], hasMore: false }),
     sendMessage: vi.fn(),
   }
 }

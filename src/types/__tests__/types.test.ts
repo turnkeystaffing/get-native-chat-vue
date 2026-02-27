@@ -15,8 +15,8 @@ describe('Type definitions compile-time checks', () => {
   it('NativeChatApiClient has required method signatures', () => {
     const client: NativeChatApiClient = {
       createConversation: () => Promise.resolve({ id: '1', createdAt: '' }),
-      getConversations: () => Promise.resolve({ conversations: [], has_more: false }),
-      getMessages: () => Promise.resolve({ messages: [], has_more: false }),
+      getConversations: () => Promise.resolve({ conversations: [], hasMore: false }),
+      getMessages: () => Promise.resolve({ messages: [], hasMore: false }),
       sendMessage: () =>
         Promise.resolve({
           userMessage: { id: '1', conversationId: '1', role: 'user', content: '', createdAt: '' },
@@ -38,8 +38,8 @@ describe('Type definitions compile-time checks', () => {
   })
 
   it('ConversationListResponse shape is correct', () => {
-    const list: ConversationListResponse = { conversations: [], has_more: false }
-    expect(list.has_more).toBe(false)
+    const list: ConversationListResponse = { conversations: [], hasMore: false }
+    expect(list.hasMore).toBe(false)
   })
 
   it('MessageResponse shape is correct', () => {
@@ -54,8 +54,8 @@ describe('Type definitions compile-time checks', () => {
   })
 
   it('MessageHistoryResponse shape is correct', () => {
-    const history: MessageHistoryResponse = { messages: [], has_more: true }
-    expect(history.has_more).toBe(true)
+    const history: MessageHistoryResponse = { messages: [], hasMore: true }
+    expect(history.hasMore).toBe(true)
   })
 
   it('SendMessageResponse shape is correct', () => {
@@ -104,8 +104,8 @@ describe('Type definitions compile-time checks', () => {
     const opts: NativeChatPluginOptions = {
       apiClient: {
         createConversation: () => Promise.resolve({ id: '', createdAt: '' }),
-        getConversations: () => Promise.resolve({ conversations: [], has_more: false }),
-        getMessages: () => Promise.resolve({ messages: [], has_more: false }),
+        getConversations: () => Promise.resolve({ conversations: [], hasMore: false }),
+        getMessages: () => Promise.resolve({ messages: [], hasMore: false }),
         sendMessage: () =>
           Promise.resolve({
             userMessage: { id: '', conversationId: '', role: 'user', content: '', createdAt: '' },

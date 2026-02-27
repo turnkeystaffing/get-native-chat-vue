@@ -100,8 +100,8 @@ provide(CHAT_STATE_KEY, mockChatState)
 provide(CONFIG_KEY, {
   apiClient: {
     createConversation: async () => ({ id: '', createdAt: '' }),
-    getConversations: async () => ({ conversations: [], has_more: false }),
-    getMessages: async () => ({ messages: [], has_more: false }),
+    getConversations: async () => ({ conversations: [], hasMore: false }),
+    getMessages: async () => ({ messages: [], hasMore: false }),
     sendMessage: async () => ({
       userMessage: {
         id: '',

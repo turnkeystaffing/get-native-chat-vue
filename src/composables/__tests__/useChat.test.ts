@@ -32,7 +32,7 @@ describe('useChat', () => {
       const { apiClient, chat } = setup()
       ;(apiClient.getConversations as ReturnType<typeof vi.fn>).mockResolvedValue({
         conversations: [{ id: 'conv-1', createdAt: '2026-01-01' }],
-        has_more: false,
+        hasMore: false,
       })
       ;(apiClient.getMessages as ReturnType<typeof vi.fn>).mockResolvedValue({
         messages: [
@@ -51,7 +51,7 @@ describe('useChat', () => {
             createdAt: '2026-01-01T00:00',
           },
         ],
-        has_more: false,
+        hasMore: false,
       })
 
       await chat.open()
@@ -64,7 +64,7 @@ describe('useChat', () => {
       const { apiClient, chat } = setup()
       ;(apiClient.getConversations as ReturnType<typeof vi.fn>).mockResolvedValue({
         conversations: [],
-        has_more: false,
+        hasMore: false,
       })
       ;(apiClient.createConversation as ReturnType<typeof vi.fn>).mockResolvedValue({
         id: 'new-conv-1',
@@ -72,7 +72,7 @@ describe('useChat', () => {
       })
       ;(apiClient.getMessages as ReturnType<typeof vi.fn>).mockResolvedValue({
         messages: [],
-        has_more: false,
+        hasMore: false,
       })
 
       await chat.open()
@@ -85,7 +85,7 @@ describe('useChat', () => {
       const { apiClient, chat } = setup({ conversationId: 'provided-conv' })
       ;(apiClient.getMessages as ReturnType<typeof vi.fn>).mockResolvedValue({
         messages: [],
-        has_more: false,
+        hasMore: false,
       })
 
       await chat.open()
@@ -98,7 +98,7 @@ describe('useChat', () => {
       const { apiClient, chat } = setup()
       ;(apiClient.getConversations as ReturnType<typeof vi.fn>).mockResolvedValue({
         conversations: [{ id: 'conv-1', createdAt: '2026-01-01' }],
-        has_more: false,
+        hasMore: false,
       })
       ;(apiClient.getMessages as ReturnType<typeof vi.fn>).mockResolvedValue({
         messages: [
@@ -124,7 +124,7 @@ describe('useChat', () => {
             createdAt: '2026-01-01T00:00',
           },
         ],
-        has_more: false,
+        hasMore: false,
       })
 
       await chat.open()
@@ -139,7 +139,7 @@ describe('useChat', () => {
       let resolveMessages!: (value: unknown) => void
       ;(apiClient.getConversations as ReturnType<typeof vi.fn>).mockResolvedValue({
         conversations: [{ id: 'conv-1', createdAt: '2026-01-01' }],
-        has_more: false,
+        hasMore: false,
       })
       ;(apiClient.getMessages as ReturnType<typeof vi.fn>).mockReturnValue(
         new Promise((resolve) => {
@@ -154,7 +154,7 @@ describe('useChat', () => {
       await Promise.resolve()
       expect(chat.isLoading.value).toBe(true)
 
-      resolveMessages({ messages: [], has_more: false })
+      resolveMessages({ messages: [], hasMore: false })
       await openPromise
 
       expect(chat.isLoading.value).toBe(false)
@@ -164,11 +164,11 @@ describe('useChat', () => {
       const { apiClient, chat } = setup()
       ;(apiClient.getConversations as ReturnType<typeof vi.fn>).mockResolvedValue({
         conversations: [{ id: 'conv-1', createdAt: '2026-01-01' }],
-        has_more: false,
+        hasMore: false,
       })
       ;(apiClient.getMessages as ReturnType<typeof vi.fn>).mockResolvedValue({
         messages: [],
-        has_more: true,
+        hasMore: true,
       })
 
       await chat.open()
@@ -180,11 +180,11 @@ describe('useChat', () => {
       const { apiClient, chat } = setup()
       ;(apiClient.getConversations as ReturnType<typeof vi.fn>).mockResolvedValue({
         conversations: [{ id: 'conv-1', createdAt: '2026-01-01' }],
-        has_more: false,
+        hasMore: false,
       })
       ;(apiClient.getMessages as ReturnType<typeof vi.fn>).mockResolvedValue({
         messages: [],
-        has_more: false,
+        hasMore: false,
       })
 
       expect(chat.isOpen.value).toBe(false)
@@ -209,7 +209,7 @@ describe('useChat', () => {
       const { apiClient, chat } = setup()
       ;(apiClient.getConversations as ReturnType<typeof vi.fn>).mockResolvedValue({
         conversations: [],
-        has_more: false,
+        hasMore: false,
       })
       ;(apiClient.createConversation as ReturnType<typeof vi.fn>).mockRejectedValue(
         new Error('Server error'),
@@ -226,11 +226,11 @@ describe('useChat', () => {
       const { apiClient, chat } = setup()
       ;(apiClient.getConversations as ReturnType<typeof vi.fn>).mockResolvedValue({
         conversations: [{ id: 'conv-1', createdAt: '2026-01-01' }],
-        has_more: false,
+        hasMore: false,
       })
       ;(apiClient.getMessages as ReturnType<typeof vi.fn>).mockResolvedValue({
         messages: [],
-        has_more: false,
+        hasMore: false,
       })
 
       await chat.open()
@@ -256,7 +256,7 @@ describe('useChat', () => {
       )
       ;(apiClient.getMessages as ReturnType<typeof vi.fn>).mockResolvedValue({
         messages: [],
-        has_more: false,
+        hasMore: false,
       })
 
       // Start first open
@@ -267,7 +267,7 @@ describe('useChat', () => {
 
       resolveConversations({
         conversations: [{ id: 'conv-1', createdAt: '2026-01-01' }],
-        has_more: false,
+        hasMore: false,
       })
 
       await firstOpen
@@ -283,11 +283,11 @@ describe('useChat', () => {
       const { apiClient, chat } = setup()
       ;(apiClient.getConversations as ReturnType<typeof vi.fn>).mockResolvedValue({
         conversations: [{ id: 'conv-1', createdAt: '2026-01-01' }],
-        has_more: false,
+        hasMore: false,
       })
       ;(apiClient.getMessages as ReturnType<typeof vi.fn>).mockResolvedValue({
         messages: [],
-        has_more: false,
+        hasMore: false,
       })
 
       await chat.open()
@@ -303,11 +303,11 @@ describe('useChat', () => {
       const { apiClient, config, chat } = setup()
       ;(apiClient.getConversations as ReturnType<typeof vi.fn>).mockResolvedValue({
         conversations: [{ id: 'conv-1', createdAt: '2026-01-01' }],
-        has_more: false,
+        hasMore: false,
       })
       ;(apiClient.getMessages as ReturnType<typeof vi.fn>).mockResolvedValue({
         messages: [],
-        has_more: false,
+        hasMore: false,
       })
       await chat.open()
       return { apiClient, config, chat }
@@ -448,11 +448,11 @@ describe('useChat', () => {
       const apiClientWithError = createMockApiClient()
       ;(apiClientWithError.getConversations as ReturnType<typeof vi.fn>).mockResolvedValue({
         conversations: [{ id: 'conv-1', createdAt: '2026-01-01' }],
-        has_more: false,
+        hasMore: false,
       })
       ;(apiClientWithError.getMessages as ReturnType<typeof vi.fn>).mockResolvedValue({
         messages: [],
-        has_more: false,
+        hasMore: false,
       })
       ;(apiClientWithError.sendMessage as ReturnType<typeof vi.fn>).mockRejectedValue(
         new Error('fail'),
@@ -516,7 +516,7 @@ describe('useChat', () => {
       const apiClient = createMockApiClient()
       ;(apiClient.getConversations as ReturnType<typeof vi.fn>).mockResolvedValue({
         conversations: [{ id: 'conv-1', createdAt: '2026-01-01' }],
-        has_more: false,
+        hasMore: false,
       })
       ;(apiClient.getMessages as ReturnType<typeof vi.fn>).mockResolvedValue({
         messages: [
@@ -535,7 +535,7 @@ describe('useChat', () => {
             createdAt: '2026-01-01T00:00',
           },
         ],
-        has_more: true,
+        hasMore: true,
       })
 
       const chat = useChat(apiClient, { apiClient })
@@ -566,7 +566,7 @@ describe('useChat', () => {
             createdAt: '2025-12-31T00:00',
           },
         ],
-        has_more: false,
+        hasMore: false,
       })
 
       await chat.loadMore()
@@ -593,7 +593,7 @@ describe('useChat', () => {
             createdAt: '2025-12-31T00:00',
           },
         ],
-        has_more: false,
+        hasMore: false,
       })
 
       await chat.loadMore()
@@ -624,11 +624,11 @@ describe('useChat', () => {
       const apiClient = createMockApiClient()
       ;(apiClient.getConversations as ReturnType<typeof vi.fn>).mockResolvedValue({
         conversations: [{ id: 'conv-1', createdAt: '2026-01-01' }],
-        has_more: false,
+        hasMore: false,
       })
       ;(apiClient.getMessages as ReturnType<typeof vi.fn>).mockResolvedValue({
         messages: [],
-        has_more: false, // No more messages
+        hasMore: false, // No more messages
       })
 
       const chat = useChat(apiClient, { apiClient })
@@ -646,11 +646,11 @@ describe('useChat', () => {
       const apiClient = createMockApiClient()
       ;(apiClient.getConversations as ReturnType<typeof vi.fn>).mockResolvedValue({
         conversations: [{ id: 'conv-1', createdAt: '2026-01-01' }],
-        has_more: false,
+        hasMore: false,
       })
       ;(apiClient.getMessages as ReturnType<typeof vi.fn>).mockResolvedValue({
         messages: [],
-        has_more: false,
+        hasMore: false,
       })
 
       const chat = useChat(apiClient, { apiClient })
@@ -688,11 +688,11 @@ describe('useChat', () => {
       const apiClient = createMockApiClient()
       ;(apiClient.getConversations as ReturnType<typeof vi.fn>).mockResolvedValue({
         conversations: [{ id: 'conv-1', createdAt: '2026-01-01' }],
-        has_more: false,
+        hasMore: false,
       })
       ;(apiClient.getMessages as ReturnType<typeof vi.fn>).mockResolvedValue({
         messages: [],
-        has_more: false,
+        hasMore: false,
       })
 
       const chat = useChat(apiClient, { apiClient })
@@ -882,11 +882,11 @@ describe('useChat', () => {
       const config = createConfig({ apiClient, ...configOverrides })
       ;(apiClient.getConversations as ReturnType<typeof vi.fn>).mockResolvedValue({
         conversations: [{ id: 'conv-1', createdAt: '2026-01-01' }],
-        has_more: false,
+        hasMore: false,
       })
       ;(apiClient.getMessages as ReturnType<typeof vi.fn>).mockResolvedValue({
         messages: [],
-        has_more: false,
+        hasMore: false,
       })
       const chat = useChat(apiClient, config)
       await chat.open()
@@ -1094,11 +1094,11 @@ describe('useChat', () => {
       const config = createConfig({ apiClient })
       ;(apiClient.getConversations as ReturnType<typeof vi.fn>).mockResolvedValue({
         conversations: [{ id: 'conv-1', createdAt: '2026-01-01' }],
-        has_more: false,
+        hasMore: false,
       })
       ;(apiClient.getMessages as ReturnType<typeof vi.fn>).mockResolvedValue({
         messages: [],
-        has_more: false,
+        hasMore: false,
       })
       const chat = useChat(apiClient, config)
       await chat.open()
@@ -1179,7 +1179,7 @@ describe('useChat', () => {
       const apiClient = createMockApiClient()
       ;(apiClient.getConversations as ReturnType<typeof vi.fn>).mockResolvedValue({
         conversations: [{ id: 'conv-1', createdAt: '2026-01-01' }],
-        has_more: false,
+        hasMore: false,
       })
       ;(apiClient.getMessages as ReturnType<typeof vi.fn>).mockResolvedValue({
         messages: [
@@ -1191,7 +1191,7 @@ describe('useChat', () => {
             createdAt: '2026-01-01',
           },
         ],
-        has_more: true,
+        hasMore: true,
       })
 
       const chat = useChat(apiClient, { apiClient })
@@ -1269,11 +1269,11 @@ describe('useChat', () => {
       const { apiClient, chat } = setup()
       ;(apiClient.getConversations as ReturnType<typeof vi.fn>).mockResolvedValue({
         conversations: [{ id: 'conv-1', createdAt: '2026-01-01' }],
-        has_more: false,
+        hasMore: false,
       })
       ;(apiClient.getMessages as ReturnType<typeof vi.fn>).mockResolvedValue({
         messages: [],
-        has_more: false,
+        hasMore: false,
       })
 
       await chat.open()
@@ -1285,11 +1285,11 @@ describe('useChat', () => {
       const apiClient = createMockApiClient()
       ;(apiClient.getConversations as ReturnType<typeof vi.fn>).mockResolvedValue({
         conversations: [{ id: 'conv-1', createdAt: '2026-01-01' }],
-        has_more: false,
+        hasMore: false,
       })
       ;(apiClient.getMessages as ReturnType<typeof vi.fn>).mockResolvedValue({
         messages: [],
-        has_more: false,
+        hasMore: false,
       })
 
       const chat = useChat(apiClient, { apiClient, batchSize: 50 })

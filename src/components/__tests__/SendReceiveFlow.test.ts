@@ -397,11 +397,11 @@ describe('Error Display Flow Integration (Story 4.1)', () => {
     const apiClient = createMockApiClientLocal()
     ;(apiClient.getConversations as ReturnType<typeof vi.fn>).mockResolvedValue({
       conversations: [{ id: 'conv-1', createdAt: '2026-01-01' }],
-      has_more: false,
+      hasMore: false,
     })
     ;(apiClient.getMessages as ReturnType<typeof vi.fn>).mockResolvedValue({
       messages: [],
-      has_more: false,
+      hasMore: false,
     })
     ;(apiClient.sendMessage as ReturnType<typeof vi.fn>).mockRejectedValue(
       Object.assign(new Error('Service Unavailable'), { statusCode: 503 }),
@@ -488,11 +488,11 @@ describe('Message Retry Flow Integration (Story 4.2)', () => {
     const apiClient = createMockApiClientLocal()
     ;(apiClient.getConversations as ReturnType<typeof vi.fn>).mockResolvedValue({
       conversations: [{ id: 'conv-1', createdAt: '2026-01-01' }],
-      has_more: false,
+      hasMore: false,
     })
     ;(apiClient.getMessages as ReturnType<typeof vi.fn>).mockResolvedValue({
       messages: [],
-      has_more: false,
+      hasMore: false,
     })
 
     // First send fails

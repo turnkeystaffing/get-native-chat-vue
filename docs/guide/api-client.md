@@ -49,7 +49,7 @@ interface ConversationResponse {
 ```ts
 interface ConversationListResponse {
   conversations: ConversationResponse[]
-  has_more: boolean
+  hasMore: boolean
 }
 ```
 
@@ -70,7 +70,7 @@ interface MessageResponse {
 ```ts
 interface MessageHistoryResponse {
   messages: MessageResponse[]
-  has_more: boolean
+  hasMore: boolean
 }
 ```
 
@@ -212,7 +212,7 @@ The plugin also calls the `onError` callback (if [configured](./configuration.md
 `getMessages()` must return messages **newest-first** (most recent message at index 0). The plugin reverses messages internally for chronological display.
 :::
 
-When `has_more` is `true`, older messages exist beyond the current `offset`. The plugin loads them automatically when the user scrolls to the top of the chat history.
+When `hasMore` is `true`, older messages exist beyond the current `offset`. The plugin loads them automatically when the user scrolls to the top of the chat history.
 
 ## Next Steps
 

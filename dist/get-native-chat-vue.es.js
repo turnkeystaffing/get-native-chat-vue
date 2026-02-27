@@ -25,7 +25,7 @@ function Is(s) {
   return e === 429 ? "You're sending messages too quickly. Please wait a moment and try again." : e === 503 || e === 504 ? "The service is temporarily unavailable. Please try again in a moment." : "Something went wrong. You can try sending your message again.";
 }
 function Ls(s, e) {
-  const n = j([]), r = j(!1), t = j(!1), i = j(!1), l = j(!1), c = j(null), o = j(null), h = j(0), p = e.batchSize ?? 20;
+  const n = j([]), r = j(!1), t = j(!1), a = j(!1), l = j(!1), c = j(null), o = j(null), h = j(0), p = e.batchSize ?? 20;
   function g(x, M, X) {
     n.value = n.value.filter((Y) => Y.id !== X && !Y.id.startsWith("error-"));
     const v = Is(x), Q = {
@@ -65,7 +65,7 @@ function Ls(s, e) {
           }
         }
         const x = await s.getMessages(o.value, 0, p), M = [...x.messages].reverse();
-        n.value = M, l.value = x.has_more, h.value = M.length;
+        n.value = M, l.value = x.hasMore, h.value = M.length;
       } catch {
       } finally {
         t.value = !1, r.value = !0;
@@ -76,8 +76,8 @@ function Ls(s, e) {
     r.value = !1;
   }
   async function _(x) {
-    if (!x.trim() || i.value) return;
-    i.value = !0;
+    if (!x.trim() || a.value) return;
+    a.value = !0;
     const M = `temp-${Date.now()}`, X = {
       id: M,
       conversationId: o.value ?? "",
@@ -91,7 +91,7 @@ function Ls(s, e) {
         const v = await s.createConversation();
         o.value = v.id;
       } catch (v) {
-        g(v, x, M), i.value = !1;
+        g(v, x, M), a.value = !1;
         return;
       }
     try {
@@ -109,7 +109,7 @@ function Ls(s, e) {
     } catch (v) {
       g(v, x, M);
     } finally {
-      i.value = !1;
+      a.value = !1;
     }
   }
   async function k() {
@@ -121,7 +121,7 @@ function Ls(s, e) {
           h.value,
           p
         ), M = [...x.messages].reverse();
-        n.value = [...M, ...n.value], h.value += M.length, l.value = x.has_more;
+        n.value = [...M, ...n.value], h.value += M.length, l.value = x.hasMore;
       } catch {
       } finally {
         t.value = !1;
@@ -137,7 +137,7 @@ function Ls(s, e) {
     messages: Re(n),
     isOpen: Re(r),
     isLoading: Re(t),
-    isSending: Re(i),
+    isSending: Re(a),
     hasMore: Re(l),
     failedMessageText: Re(c),
     open: m,
@@ -204,7 +204,7 @@ function Ps(s, e) {
 const qn = /* @__PURE__ */ Z(Ns, [["render", Ps]]), zs = /* @__PURE__ */ fe({
   __name: "FloatingButton",
   setup(s, { expose: e }) {
-    const n = oe(Ce), r = oe(Ie), t = $(() => r.isOpen.value), i = $(() => r.isLoading.value), l = $(() => t.value && (n?.hideToggleWhenOpen ?? !1)), c = $(() => n?.position ?? "bottom-right"), o = $(
+    const n = oe(Ce), r = oe(Ie), t = $(() => r.isOpen.value), a = $(() => r.isLoading.value), l = $(() => t.value && (n?.hideToggleWhenOpen ?? !1)), c = $(() => n?.position ?? "bottom-right"), o = $(
       () => `nc-floating-button-wrapper--${c.value === "bottom-left" ? "left" : "right"}`
     );
     function h() {
@@ -224,8 +224,8 @@ const qn = /* @__PURE__ */ Z(Ns, [["render", Ps]]), zs = /* @__PURE__ */ fe({
         size: "56",
         color: "secondary",
         elevation: "4",
-        loading: i.value,
-        "aria-label": i.value ? "Loading chat" : t.value ? "Close chat" : "Open chat",
+        loading: a.value,
+        "aria-label": a.value ? "Loading chat" : t.value ? "Close chat" : "Open chat",
         "aria-expanded": t.value.toString(),
         onClick: h
       }, {
@@ -309,18 +309,18 @@ const qn = /* @__PURE__ */ Z(Ns, [["render", Ps]]), zs = /* @__PURE__ */ fe({
   },
   setup(s) {
     const e = s, n = $(() => e.message ?? "What can I help you with today?"), r = j(""), t = j(!0);
-    let i = null;
+    let a = null;
     return Bn(() => {
       if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
         r.value = n.value, t.value = !1;
         return;
       }
       let c = 0;
-      i = setInterval(() => {
-        c++, r.value = n.value.slice(0, c), c >= n.value.length && (clearInterval(i), i = null, t.value = !1);
+      a = setInterval(() => {
+        c++, r.value = n.value.slice(0, c), c >= n.value.length && (clearInterval(a), a = null, t.value = !1);
       }, 70);
     }), Fn(() => {
-      i !== null && (clearInterval(i), i = null);
+      a !== null && (clearInterval(a), a = null);
     }), (l, c) => (T(), R("div", Gs, [
       O("span", qs, Lt(n.value), 1),
       O("div", Zs, [
@@ -339,8 +339,8 @@ function Zn(s) {
 }
 var me = { exec: () => null };
 function w(s, e = "") {
-  let n = typeof s == "string" ? s : s.source, r = { replace: (t, i) => {
-    let l = typeof i == "string" ? i : i.source;
+  let n = typeof s == "string" ? s : s.source, r = { replace: (t, a) => {
+    let l = typeof a == "string" ? a : a.source;
     return l = l.replace(W.caret, "$1"), n = n.replace(t, l), r;
   }, getRegex: () => new RegExp(n, e) };
   return r;
@@ -368,7 +368,7 @@ function An(s) {
   return s;
 }
 function En(s, e) {
-  let n = s.replace(W.findPipe, (i, l, c) => {
+  let n = s.replace(W.findPipe, (a, l, c) => {
     let o = !1, h = l;
     for (; --h >= 0 && c[h] === "\\"; ) o = !o;
     return o ? "|" : " |";
@@ -397,15 +397,15 @@ function $r(s, e) {
 function Pr(s, e = 0) {
   let n = e, r = "";
   for (let t of s) if (t === "	") {
-    let i = 4 - n % 4;
-    r += " ".repeat(i), n += i;
+    let a = 4 - n % 4;
+    r += " ".repeat(a), n += a;
   } else r += t, n++;
   return r;
 }
 function Rn(s, e, n, r, t) {
-  let i = e.href, l = e.title || null, c = s[1].replace(t.other.outputLinkReplace, "$1");
+  let a = e.href, l = e.title || null, c = s[1].replace(t.other.outputLinkReplace, "$1");
   r.state.inLink = !0;
-  let o = { type: s[0].charAt(0) === "!" ? "image" : "link", raw: n, href: i, title: l, text: c, tokens: r.inlineTokens(c) };
+  let o = { type: s[0].charAt(0) === "!" ? "image" : "link", raw: n, href: a, title: l, text: c, tokens: r.inlineTokens(c) };
   return r.state.inLink = !1, o;
 }
 function zr(s, e, n) {
@@ -413,11 +413,11 @@ function zr(s, e, n) {
   if (r === null) return e;
   let t = r[1];
   return e.split(`
-`).map((i) => {
-    let l = i.match(n.other.beginningSpace);
-    if (l === null) return i;
+`).map((a) => {
+    let l = a.match(n.other.beginningSpace);
+    if (l === null) return a;
     let [c] = l;
-    return c.length >= t.length ? i.slice(t.length) : i;
+    return c.length >= t.length ? a.slice(t.length) : a;
   }).join(`
 `);
 }
@@ -468,7 +468,7 @@ var st = class {
     if (e) {
       let n = Ne(e[0], `
 `).split(`
-`), r = "", t = "", i = [];
+`), r = "", t = "", a = [];
       for (; n.length > 0; ) {
         let l = !1, c = [], o;
         for (o = 0; o < n.length; o++) if (this.rules.other.blockquoteStart.test(n[o])) c.push(n[o]), l = !0;
@@ -482,25 +482,25 @@ var st = class {
 ${h}` : h, t = t ? `${t}
 ${p}` : p;
         let g = this.lexer.state.top;
-        if (this.lexer.state.top = !0, this.lexer.blockTokens(p, i, !0), this.lexer.state.top = g, n.length === 0) break;
-        let m = i.at(-1);
+        if (this.lexer.state.top = !0, this.lexer.blockTokens(p, a, !0), this.lexer.state.top = g, n.length === 0) break;
+        let m = a.at(-1);
         if (m?.type === "code") break;
         if (m?.type === "blockquote") {
           let y = m, _ = y.raw + `
 ` + n.join(`
 `), k = this.blockquote(_);
-          i[i.length - 1] = k, r = r.substring(0, r.length - y.raw.length) + k.raw, t = t.substring(0, t.length - y.text.length) + k.text;
+          a[a.length - 1] = k, r = r.substring(0, r.length - y.raw.length) + k.raw, t = t.substring(0, t.length - y.text.length) + k.text;
           break;
         } else if (m?.type === "list") {
           let y = m, _ = y.raw + `
 ` + n.join(`
 `), k = this.list(_);
-          i[i.length - 1] = k, r = r.substring(0, r.length - m.raw.length) + k.raw, t = t.substring(0, t.length - y.raw.length) + k.raw, n = _.substring(i.at(-1).raw.length).split(`
+          a[a.length - 1] = k, r = r.substring(0, r.length - m.raw.length) + k.raw, t = t.substring(0, t.length - y.raw.length) + k.raw, n = _.substring(a.at(-1).raw.length).split(`
 `);
           continue;
         }
       }
-      return { type: "blockquote", raw: r, tokens: i, text: t };
+      return { type: "blockquote", raw: r, tokens: a, text: t };
     }
   }
   list(s) {
@@ -508,10 +508,10 @@ ${p}` : p;
     if (e) {
       let n = e[1].trim(), r = n.length > 1, t = { type: "list", raw: "", ordered: r, start: r ? +n.slice(0, -1) : "", loose: !1, items: [] };
       n = r ? `\\d{1,9}\\${n.slice(-1)}` : `\\${n}`, this.options.pedantic && (n = r ? n : "[*+-]");
-      let i = this.rules.other.listItemRegex(n), l = !1;
+      let a = this.rules.other.listItemRegex(n), l = !1;
       for (; s; ) {
         let o = !1, h = "", p = "";
-        if (!(e = i.exec(s)) || this.rules.block.hr.test(s)) break;
+        if (!(e = a.exec(s)) || this.rules.block.hr.test(s)) break;
         h = e[0], s = s.substring(h.length);
         let g = Pr(e[2].split(`
 `, 1)[0], e[1].length), m = s.split(`
@@ -582,12 +582,12 @@ ${p}` : p;
     let e = this.rules.block.table.exec(s);
     if (!e || !this.rules.other.tableDelimiter.test(e[2])) return;
     let n = En(e[1]), r = e[2].replace(this.rules.other.tableAlignChars, "").split("|"), t = e[3]?.trim() ? e[3].replace(this.rules.other.tableRowBlankLine, "").split(`
-`) : [], i = { type: "table", raw: e[0], header: [], align: [], rows: [] };
+`) : [], a = { type: "table", raw: e[0], header: [], align: [], rows: [] };
     if (n.length === r.length) {
-      for (let l of r) this.rules.other.tableAlignRight.test(l) ? i.align.push("right") : this.rules.other.tableAlignCenter.test(l) ? i.align.push("center") : this.rules.other.tableAlignLeft.test(l) ? i.align.push("left") : i.align.push(null);
-      for (let l = 0; l < n.length; l++) i.header.push({ text: n[l], tokens: this.lexer.inline(n[l]), header: !0, align: i.align[l] });
-      for (let l of t) i.rows.push(En(l, i.header.length).map((c, o) => ({ text: c, tokens: this.lexer.inline(c), header: !1, align: i.align[o] })));
-      return i;
+      for (let l of r) this.rules.other.tableAlignRight.test(l) ? a.align.push("right") : this.rules.other.tableAlignCenter.test(l) ? a.align.push("center") : this.rules.other.tableAlignLeft.test(l) ? a.align.push("left") : a.align.push(null);
+      for (let l = 0; l < n.length; l++) a.header.push({ text: n[l], tokens: this.lexer.inline(n[l]), header: !0, align: a.align[l] });
+      for (let l of t) a.rows.push(En(l, a.header.length).map((c, o) => ({ text: c, tokens: this.lexer.inline(c), header: !1, align: a.align[o] })));
+      return a;
     }
   }
   lheading(s) {
@@ -620,20 +620,20 @@ ${p}` : p;
       let n = e[2].trim();
       if (!this.options.pedantic && this.rules.other.startAngleBracket.test(n)) {
         if (!this.rules.other.endAngleBracket.test(n)) return;
-        let i = Ne(n.slice(0, -1), "\\");
-        if ((n.length - i.length) % 2 === 0) return;
+        let a = Ne(n.slice(0, -1), "\\");
+        if ((n.length - a.length) % 2 === 0) return;
       } else {
-        let i = $r(e[2], "()");
-        if (i === -2) return;
-        if (i > -1) {
-          let l = (e[0].indexOf("!") === 0 ? 5 : 4) + e[1].length + i;
-          e[2] = e[2].substring(0, i), e[0] = e[0].substring(0, l).trim(), e[3] = "";
+        let a = $r(e[2], "()");
+        if (a === -2) return;
+        if (a > -1) {
+          let l = (e[0].indexOf("!") === 0 ? 5 : 4) + e[1].length + a;
+          e[2] = e[2].substring(0, a), e[0] = e[0].substring(0, l).trim(), e[3] = "";
         }
       }
       let r = e[2], t = "";
       if (this.options.pedantic) {
-        let i = this.rules.other.pedanticHrefTitle.exec(r);
-        i && (r = i[1], t = i[3]);
+        let a = this.rules.other.pedanticHrefTitle.exec(r);
+        a && (r = a[1], t = a[3]);
       } else t = e[3] ? e[3].slice(1, -1) : "";
       return r = r.trim(), this.rules.other.startAngleBracket.test(r) && (this.options.pedantic && !this.rules.other.endAngleBracket.test(n) ? r = r.slice(1) : r = r.slice(1, -1)), Rn(e, { href: r && r.replace(this.rules.inline.anyPunctuation, "$1"), title: t && t.replace(this.rules.inline.anyPunctuation, "$1") }, e[0], this.lexer, this.rules);
     }
@@ -643,8 +643,8 @@ ${p}` : p;
     if ((n = this.rules.inline.reflink.exec(s)) || (n = this.rules.inline.nolink.exec(s))) {
       let r = (n[2] || n[1]).replace(this.rules.other.multipleSpaceGlobal, " "), t = e[r.toLowerCase()];
       if (!t) {
-        let i = n[0].charAt(0);
-        return { type: "text", raw: i, text: i };
+        let a = n[0].charAt(0);
+        return { type: "text", raw: a, text: a };
       }
       return Rn(n, t, n[0], this.lexer, this.rules);
     }
@@ -652,10 +652,10 @@ ${p}` : p;
   emStrong(s, e, n = "") {
     let r = this.rules.inline.emStrongLDelim.exec(s);
     if (!(!r || r[3] && n.match(this.rules.other.unicodeAlphaNumeric)) && (!(r[1] || r[2]) || !n || this.rules.inline.punctuation.exec(n))) {
-      let t = [...r[0]].length - 1, i, l, c = t, o = 0, h = r[0][0] === "*" ? this.rules.inline.emStrongRDelimAst : this.rules.inline.emStrongRDelimUnd;
+      let t = [...r[0]].length - 1, a, l, c = t, o = 0, h = r[0][0] === "*" ? this.rules.inline.emStrongRDelimAst : this.rules.inline.emStrongRDelimUnd;
       for (h.lastIndex = 0, e = e.slice(-1 * s.length + t); (r = h.exec(e)) != null; ) {
-        if (i = r[1] || r[2] || r[3] || r[4] || r[5] || r[6], !i) continue;
-        if (l = [...i].length, r[3] || r[4]) {
+        if (a = r[1] || r[2] || r[3] || r[4] || r[5] || r[6], !a) continue;
+        if (l = [...a].length, r[3] || r[4]) {
           c += l;
           continue;
         } else if ((r[5] || r[6]) && t % 3 && !((t + l) % 3)) {
@@ -688,9 +688,9 @@ ${p}` : p;
   del(s, e, n = "") {
     let r = this.rules.inline.delLDelim.exec(s);
     if (r && (!r[1] || !n || this.rules.inline.punctuation.exec(n))) {
-      let t = [...r[0]].length - 1, i, l, c = t, o = this.rules.inline.delRDelim;
+      let t = [...r[0]].length - 1, a, l, c = t, o = this.rules.inline.delRDelim;
       for (o.lastIndex = 0, e = e.slice(-1 * s.length + t); (r = o.exec(e)) != null; ) {
-        if (i = r[1] || r[2] || r[3] || r[4] || r[5] || r[6], !i || (l = [...i].length, l !== t)) continue;
+        if (a = r[1] || r[2] || r[3] || r[4] || r[5] || r[6], !a || (l = [...a].length, l !== t)) continue;
         if (r[3] || r[4]) {
           c += l;
           continue;
@@ -821,19 +821,19 @@ ${p}` : p;
         e = e.substring(t.raw.length), n.push(t);
         continue;
       }
-      let i = e;
+      let a = e;
       if (this.options.extensions?.startBlock) {
         let l = 1 / 0, c = e.slice(1), o;
         this.options.extensions.startBlock.forEach((h) => {
           o = h.call({ lexer: this }, c), typeof o == "number" && o >= 0 && (l = Math.min(l, o));
-        }), l < 1 / 0 && l >= 0 && (i = e.substring(0, l + 1));
+        }), l < 1 / 0 && l >= 0 && (a = e.substring(0, l + 1));
       }
-      if (this.state.top && (t = this.tokenizer.paragraph(i))) {
+      if (this.state.top && (t = this.tokenizer.paragraph(a))) {
         let l = n.at(-1);
         r && l?.type === "paragraph" ? (l.raw += (l.raw.endsWith(`
 `) ? "" : `
 `) + t.raw, l.text += `
-` + t.text, this.inlineQueue.pop(), this.inlineQueue.at(-1).src = l.text) : n.push(t), r = i.length !== e.length, e = e.substring(t.raw.length);
+` + t.text, this.inlineQueue.pop(), this.inlineQueue.at(-1).src = l.text) : n.push(t), r = a.length !== e.length, e = e.substring(t.raw.length);
         continue;
       }
       if (t = this.tokenizer.text(e)) {
@@ -865,8 +865,8 @@ ${p}` : p;
       if (o.length > 0) for (; (t = this.tokenizer.rules.inline.reflinkSearch.exec(r)) != null; ) o.includes(t[0].slice(t[0].lastIndexOf("[") + 1, -1)) && (r = r.slice(0, t.index) + "[" + "a".repeat(t[0].length - 2) + "]" + r.slice(this.tokenizer.rules.inline.reflinkSearch.lastIndex));
     }
     for (; (t = this.tokenizer.rules.inline.anyPunctuation.exec(r)) != null; ) r = r.slice(0, t.index) + "++" + r.slice(this.tokenizer.rules.inline.anyPunctuation.lastIndex);
-    let i;
-    for (; (t = this.tokenizer.rules.inline.blockSkip.exec(r)) != null; ) i = t[2] ? t[2].length : 0, r = r.slice(0, t.index + i) + "[" + "a".repeat(t[0].length - i - 2) + "]" + r.slice(this.tokenizer.rules.inline.blockSkip.lastIndex);
+    let a;
+    for (; (t = this.tokenizer.rules.inline.blockSkip.exec(r)) != null; ) a = t[2] ? t[2].length : 0, r = r.slice(0, t.index + a) + "[" + "a".repeat(t[0].length - a - 2) + "]" + r.slice(this.tokenizer.rules.inline.blockSkip.lastIndex);
     r = this.options.hooks?.emStrongMask?.call({ lexer: this }, r) ?? r;
     let l = !1, c = "";
     for (; e; ) {
@@ -979,8 +979,8 @@ ${this.parser.parse(s)}</blockquote>
       let c = s.items[l];
       r += this.listitem(c);
     }
-    let t = e ? "ol" : "ul", i = e && n !== 1 ? ' start="' + n + '"' : "";
-    return "<" + t + i + `>
+    let t = e ? "ol" : "ul", a = e && n !== 1 ? ' start="' + n + '"' : "";
+    return "<" + t + a + `>
 ` + r + "</" + t + `>
 `;
   }
@@ -1001,9 +1001,9 @@ ${this.parser.parse(s)}</blockquote>
     e += this.tablerow({ text: n });
     let r = "";
     for (let t = 0; t < s.rows.length; t++) {
-      let i = s.rows[t];
+      let a = s.rows[t];
       n = "";
-      for (let l = 0; l < i.length; l++) n += this.tablecell(i[l]);
+      for (let l = 0; l < a.length; l++) n += this.tablecell(a[l]);
       r += this.tablerow({ text: n });
     }
     return r && (r = `<tbody>${r}</tbody>`), `<table>
@@ -1041,16 +1041,16 @@ ${s}</tr>
     let r = this.parser.parseInline(n), t = An(s);
     if (t === null) return r;
     s = t;
-    let i = '<a href="' + s + '"';
-    return e && (i += ' title="' + ae(e) + '"'), i += ">" + r + "</a>", i;
+    let a = '<a href="' + s + '"';
+    return e && (a += ' title="' + ae(e) + '"'), a += ">" + r + "</a>", a;
   }
   image({ href: s, title: e, text: n, tokens: r }) {
     r && (n = this.parser.parseInline(r, this.parser.textRenderer));
     let t = An(s);
     if (t === null) return ae(n);
     s = t;
-    let i = `<img src="${s}" alt="${ae(n)}"`;
-    return e && (i += ` title="${ae(e)}"`), i += ">", i;
+    let a = `<img src="${s}" alt="${ae(n)}"`;
+    return e && (a += ` title="${ae(e)}"`), a += ">", a;
   }
   text(s) {
     return "tokens" in s && s.tokens ? this.parser.parseInline(s.tokens) : "escaped" in s && s.escaped ? s.text : ae(s.text);
@@ -1110,58 +1110,58 @@ ${s}</tr>
           continue;
         }
       }
-      let i = t;
-      switch (i.type) {
+      let a = t;
+      switch (a.type) {
         case "space": {
-          n += this.renderer.space(i);
+          n += this.renderer.space(a);
           break;
         }
         case "hr": {
-          n += this.renderer.hr(i);
+          n += this.renderer.hr(a);
           break;
         }
         case "heading": {
-          n += this.renderer.heading(i);
+          n += this.renderer.heading(a);
           break;
         }
         case "code": {
-          n += this.renderer.code(i);
+          n += this.renderer.code(a);
           break;
         }
         case "table": {
-          n += this.renderer.table(i);
+          n += this.renderer.table(a);
           break;
         }
         case "blockquote": {
-          n += this.renderer.blockquote(i);
+          n += this.renderer.blockquote(a);
           break;
         }
         case "list": {
-          n += this.renderer.list(i);
+          n += this.renderer.list(a);
           break;
         }
         case "checkbox": {
-          n += this.renderer.checkbox(i);
+          n += this.renderer.checkbox(a);
           break;
         }
         case "html": {
-          n += this.renderer.html(i);
+          n += this.renderer.html(a);
           break;
         }
         case "def": {
-          n += this.renderer.def(i);
+          n += this.renderer.def(a);
           break;
         }
         case "paragraph": {
-          n += this.renderer.paragraph(i);
+          n += this.renderer.paragraph(a);
           break;
         }
         case "text": {
-          n += this.renderer.text(i);
+          n += this.renderer.text(a);
           break;
         }
         default: {
-          let l = 'Token with "' + i.type + '" type was not found.';
+          let l = 'Token with "' + a.type + '" type was not found.';
           if (this.options.silent) return console.error(l), "";
           throw new Error(l);
         }
@@ -1172,15 +1172,15 @@ ${s}</tr>
   parseInline(e, n = this.renderer) {
     let r = "";
     for (let t = 0; t < e.length; t++) {
-      let i = e[t];
-      if (this.options.extensions?.renderers?.[i.type]) {
-        let c = this.options.extensions.renderers[i.type].call({ parser: this }, i);
-        if (c !== !1 || !["escape", "html", "link", "image", "strong", "em", "codespan", "br", "del", "text"].includes(i.type)) {
+      let a = e[t];
+      if (this.options.extensions?.renderers?.[a.type]) {
+        let c = this.options.extensions.renderers[a.type].call({ parser: this }, a);
+        if (c !== !1 || !["escape", "html", "link", "image", "strong", "em", "codespan", "br", "del", "text"].includes(a.type)) {
           r += c || "";
           continue;
         }
       }
-      let l = i;
+      let l = a;
       switch (l.type) {
         case "escape": {
           r += n.text(l);
@@ -1280,8 +1280,8 @@ ${s}</tr>
     for (let r of s) switch (n = n.concat(e.call(this, r)), r.type) {
       case "table": {
         let t = r;
-        for (let i of t.header) n = n.concat(this.walkTokens(i.tokens, e));
-        for (let i of t.rows) for (let l of i) n = n.concat(this.walkTokens(l.tokens, e));
+        for (let a of t.header) n = n.concat(this.walkTokens(a.tokens, e));
+        for (let a of t.rows) for (let l of a) n = n.concat(this.walkTokens(l.tokens, e));
         break;
       }
       case "list": {
@@ -1291,8 +1291,8 @@ ${s}</tr>
       }
       default: {
         let t = r;
-        this.defaults.extensions?.childTokens?.[t.type] ? this.defaults.extensions.childTokens[t.type].forEach((i) => {
-          let l = t[i].flat(1 / 0);
+        this.defaults.extensions?.childTokens?.[t.type] ? this.defaults.extensions.childTokens[t.type].forEach((a) => {
+          let l = t[a].flat(1 / 0);
           n = n.concat(this.walkTokens(l, e));
         }) : t.tokens && (n = n.concat(this.walkTokens(t.tokens, e)));
       }
@@ -1306,24 +1306,24 @@ ${s}</tr>
       if (r.async = this.defaults.async || r.async || !1, n.extensions && (n.extensions.forEach((t) => {
         if (!t.name) throw new Error("extension name required");
         if ("renderer" in t) {
-          let i = e.renderers[t.name];
-          i ? e.renderers[t.name] = function(...l) {
+          let a = e.renderers[t.name];
+          a ? e.renderers[t.name] = function(...l) {
             let c = t.renderer.apply(this, l);
-            return c === !1 && (c = i.apply(this, l)), c;
+            return c === !1 && (c = a.apply(this, l)), c;
           } : e.renderers[t.name] = t.renderer;
         }
         if ("tokenizer" in t) {
           if (!t.level || t.level !== "block" && t.level !== "inline") throw new Error("extension level must be 'block' or 'inline'");
-          let i = e[t.level];
-          i ? i.unshift(t.tokenizer) : e[t.level] = [t.tokenizer], t.start && (t.level === "block" ? e.startBlock ? e.startBlock.push(t.start) : e.startBlock = [t.start] : t.level === "inline" && (e.startInline ? e.startInline.push(t.start) : e.startInline = [t.start]));
+          let a = e[t.level];
+          a ? a.unshift(t.tokenizer) : e[t.level] = [t.tokenizer], t.start && (t.level === "block" ? e.startBlock ? e.startBlock.push(t.start) : e.startBlock = [t.start] : t.level === "inline" && (e.startInline ? e.startInline.push(t.start) : e.startInline = [t.start]));
         }
         "childTokens" in t && t.childTokens && (e.childTokens[t.name] = t.childTokens);
       }), r.extensions = e), n.renderer) {
         let t = this.defaults.renderer || new rt(this.defaults);
-        for (let i in n.renderer) {
-          if (!(i in t)) throw new Error(`renderer '${i}' does not exist`);
-          if (["options", "parser"].includes(i)) continue;
-          let l = i, c = n.renderer[l], o = t[l];
+        for (let a in n.renderer) {
+          if (!(a in t)) throw new Error(`renderer '${a}' does not exist`);
+          if (["options", "parser"].includes(a)) continue;
+          let l = a, c = n.renderer[l], o = t[l];
           t[l] = (...h) => {
             let p = c.apply(t, h);
             return p === !1 && (p = o.apply(t, h)), p || "";
@@ -1333,10 +1333,10 @@ ${s}</tr>
       }
       if (n.tokenizer) {
         let t = this.defaults.tokenizer || new st(this.defaults);
-        for (let i in n.tokenizer) {
-          if (!(i in t)) throw new Error(`tokenizer '${i}' does not exist`);
-          if (["options", "rules", "lexer"].includes(i)) continue;
-          let l = i, c = n.tokenizer[l], o = t[l];
+        for (let a in n.tokenizer) {
+          if (!(a in t)) throw new Error(`tokenizer '${a}' does not exist`);
+          if (["options", "rules", "lexer"].includes(a)) continue;
+          let l = a, c = n.tokenizer[l], o = t[l];
           t[l] = (...h) => {
             let p = c.apply(t, h);
             return p === !1 && (p = o.apply(t, h)), p;
@@ -1346,12 +1346,12 @@ ${s}</tr>
       }
       if (n.hooks) {
         let t = this.defaults.hooks || new Ue();
-        for (let i in n.hooks) {
-          if (!(i in t)) throw new Error(`hook '${i}' does not exist`);
-          if (["options", "block"].includes(i)) continue;
-          let l = i, c = n.hooks[l], o = t[l];
-          Ue.passThroughHooks.has(i) ? t[l] = (h) => {
-            if (this.defaults.async && Ue.passThroughHooksRespectAsync.has(i)) return (async () => {
+        for (let a in n.hooks) {
+          if (!(a in t)) throw new Error(`hook '${a}' does not exist`);
+          if (["options", "block"].includes(a)) continue;
+          let l = a, c = n.hooks[l], o = t[l];
+          Ue.passThroughHooks.has(a) ? t[l] = (h) => {
+            if (this.defaults.async && Ue.passThroughHooksRespectAsync.has(a)) return (async () => {
               let g = await c.call(t, h);
               return o.call(t, g);
             })();
@@ -1369,10 +1369,10 @@ ${s}</tr>
         r.hooks = t;
       }
       if (n.walkTokens) {
-        let t = this.defaults.walkTokens, i = n.walkTokens;
+        let t = this.defaults.walkTokens, a = n.walkTokens;
         r.walkTokens = function(l) {
           let c = [];
-          return c.push(i.call(this, l)), t && (c = c.concat(t.call(this, l))), c;
+          return c.push(a.call(this, l)), t && (c = c.concat(t.call(this, l))), c;
         };
       }
       this.defaults = { ...this.defaults, ...r };
@@ -1389,16 +1389,16 @@ ${s}</tr>
   }
   parseMarkdown(s) {
     return (e, n) => {
-      let r = { ...n }, t = { ...this.defaults, ...r }, i = this.onError(!!t.silent, !!t.async);
-      if (this.defaults.async === !0 && r.async === !1) return i(new Error("marked(): The async option was set to true by an extension. Remove async: false from the parse options object to return a Promise."));
-      if (typeof e > "u" || e === null) return i(new Error("marked(): input parameter is undefined or null"));
-      if (typeof e != "string") return i(new Error("marked(): input parameter is of type " + Object.prototype.toString.call(e) + ", string expected"));
+      let r = { ...n }, t = { ...this.defaults, ...r }, a = this.onError(!!t.silent, !!t.async);
+      if (this.defaults.async === !0 && r.async === !1) return a(new Error("marked(): The async option was set to true by an extension. Remove async: false from the parse options object to return a Promise."));
+      if (typeof e > "u" || e === null) return a(new Error("marked(): input parameter is undefined or null"));
+      if (typeof e != "string") return a(new Error("marked(): input parameter is of type " + Object.prototype.toString.call(e) + ", string expected"));
       if (t.hooks && (t.hooks.options = t, t.hooks.block = s), t.async) return (async () => {
         let l = t.hooks ? await t.hooks.preprocess(e) : e, c = await (t.hooks ? await t.hooks.provideLexer() : s ? ee.lex : ee.lexInline)(l, t), o = t.hooks ? await t.hooks.processAllTokens(c) : c;
         t.walkTokens && await Promise.all(this.walkTokens(o, t.walkTokens));
         let h = await (t.hooks ? await t.hooks.provideParser() : s ? te.parse : te.parseInline)(o, t);
         return t.hooks ? await t.hooks.postprocess(h) : h;
-      })().catch(i);
+      })().catch(a);
       try {
         t.hooks && (e = t.hooks.preprocess(e));
         let l = (t.hooks ? t.hooks.provideLexer() : s ? ee.lex : ee.lexInline)(e, t);
@@ -1406,7 +1406,7 @@ ${s}</tr>
         let c = (t.hooks ? t.hooks.provideParser() : s ? te.parse : te.parseInline)(l, t);
         return t.hooks && (c = t.hooks.postprocess(c)), c;
       } catch (l) {
-        return i(l);
+        return a(l);
       }
     };
   }
@@ -1475,8 +1475,8 @@ K || (K = function(e) {
   return e;
 });
 Pt || (Pt = function(e, n) {
-  for (var r = arguments.length, t = new Array(r > 2 ? r - 2 : 0), i = 2; i < r; i++)
-    t[i - 2] = arguments[i];
+  for (var r = arguments.length, t = new Array(r > 2 ? r - 2 : 0), a = 2; a < r; a++)
+    t[a - 2] = arguments[a];
   return e.apply(n, t);
 });
 zt || (zt = function(e) {
@@ -1507,8 +1507,8 @@ function b(s, e) {
   for (; r--; ) {
     let t = e[r];
     if (typeof t == "string") {
-      const i = n(t);
-      i !== t && (Fr(e) || (e[r] = i), t = i);
+      const a = n(t);
+      a !== t && (Fr(e) || (e[r] = a), t = a);
     }
     s[t] = !0;
   }
@@ -1576,9 +1576,9 @@ const Fe = {
   let r = null;
   const t = "data-tt-policy-suffix";
   n && n.hasAttribute(t) && (r = n.getAttribute(t));
-  const i = "dompurify" + (r ? "#" + r : "");
+  const a = "dompurify" + (r ? "#" + r : "");
   try {
-    return e.createPolicy(i, {
+    return e.createPolicy(a, {
       createHTML(l) {
         return l;
       },
@@ -1587,7 +1587,7 @@ const Fe = {
       }
     });
   } catch {
-    return console.warn("TrustedTypes policy " + i + " could not be created."), null;
+    return console.warn("TrustedTypes policy " + a + " could not be created."), null;
   }
 }, $n = function() {
   return {
@@ -1611,7 +1611,7 @@ function ls() {
     document: n
   } = s;
   const r = n, t = r.currentScript, {
-    DocumentFragment: i,
+    DocumentFragment: a,
     HTMLTemplateElement: l,
     Node: c,
     Element: o,
@@ -1701,43 +1701,43 @@ function ls() {
   let De = null;
   const bs = ["application/xhtml+xml", "text/html"], _s = "text/html";
   let D = null, Ae = null;
-  const xs = n.createElement("form"), pn = function(a) {
-    return a instanceof RegExp || a instanceof Function;
+  const xs = n.createElement("form"), pn = function(i) {
+    return i instanceof RegExp || i instanceof Function;
   }, wt = function() {
-    let a = arguments.length > 0 && arguments[0] !== void 0 ? arguments[0] : {};
-    if (!(Ae && Ae === a)) {
-      if ((!a || typeof a != "object") && (a = {}), a = ie(a), De = // eslint-disable-next-line unicorn/prefer-includes
-      bs.indexOf(a.PARSER_MEDIA_TYPE) === -1 ? _s : a.PARSER_MEDIA_TYPE, D = De === "application/xhtml+xml" ? St : et, N = J(a, "ALLOWED_TAGS") ? b({}, a.ALLOWED_TAGS, D) : en, P = J(a, "ALLOWED_ATTR") ? b({}, a.ALLOWED_ATTR, D) : tn, xt = J(a, "ALLOWED_NAMESPACES") ? b({}, a.ALLOWED_NAMESPACES, St) : ms, bt = J(a, "ADD_URI_SAFE_ATTR") ? b(ie(un), a.ADD_URI_SAFE_ATTR, D) : un, on = J(a, "ADD_DATA_URI_TAGS") ? b(ie(cn), a.ADD_DATA_URI_TAGS, D) : cn, se = J(a, "FORBID_CONTENTS") ? b({}, a.FORBID_CONTENTS, D) : kt, Le = J(a, "FORBID_TAGS") ? b({}, a.FORBID_TAGS, D) : ie({}), ht = J(a, "FORBID_ATTR") ? b({}, a.FORBID_ATTR, D) : ie({}), ye = J(a, "USE_PROFILES") ? a.USE_PROFILES : !1, nn = a.ALLOW_ARIA_ATTR !== !1, ft = a.ALLOW_DATA_ATTR !== !1, sn = a.ALLOW_UNKNOWN_PROTOCOLS || !1, rn = a.ALLOW_SELF_CLOSE_IN_ATTR !== !1, Te = a.SAFE_FOR_TEMPLATES || !1, Ge = a.SAFE_FOR_XML !== !1, de = a.WHOLE_DOCUMENT || !1, ve = a.RETURN_DOM || !1, qe = a.RETURN_DOM_FRAGMENT || !1, Ze = a.RETURN_TRUSTED_TYPE || !1, gt = a.FORCE_BODY || !1, an = a.SANITIZE_DOM !== !1, ln = a.SANITIZE_NAMED_PROPS || !1, mt = a.KEEP_CONTENT !== !1, Me = a.IN_PLACE || !1, Jt = a.ALLOWED_URI_REGEXP || as, Se = a.NAMESPACE || ce, je = a.MATHML_TEXT_INTEGRATION_POINTS || je, Xe = a.HTML_INTEGRATION_POINTS || Xe, C = a.CUSTOM_ELEMENT_HANDLING || {}, a.CUSTOM_ELEMENT_HANDLING && pn(a.CUSTOM_ELEMENT_HANDLING.tagNameCheck) && (C.tagNameCheck = a.CUSTOM_ELEMENT_HANDLING.tagNameCheck), a.CUSTOM_ELEMENT_HANDLING && pn(a.CUSTOM_ELEMENT_HANDLING.attributeNameCheck) && (C.attributeNameCheck = a.CUSTOM_ELEMENT_HANDLING.attributeNameCheck), a.CUSTOM_ELEMENT_HANDLING && typeof a.CUSTOM_ELEMENT_HANDLING.allowCustomizedBuiltInElements == "boolean" && (C.allowCustomizedBuiltInElements = a.CUSTOM_ELEMENT_HANDLING.allowCustomizedBuiltInElements), Te && (ft = !1), qe && (ve = !0), ye && (N = b({}, Mn), P = [], ye.html === !0 && (b(N, Ln), b(P, Dn)), ye.svg === !0 && (b(N, Et), b(P, It), b(P, Je)), ye.svgFilters === !0 && (b(N, Rt), b(P, It), b(P, Je)), ye.mathMl === !0 && (b(N, Ct), b(P, On), b(P, Je))), a.ADD_TAGS && (typeof a.ADD_TAGS == "function" ? we.tagCheck = a.ADD_TAGS : (N === en && (N = ie(N)), b(N, a.ADD_TAGS, D))), a.ADD_ATTR && (typeof a.ADD_ATTR == "function" ? we.attributeCheck = a.ADD_ATTR : (P === tn && (P = ie(P)), b(P, a.ADD_ATTR, D))), a.ADD_URI_SAFE_ATTR && b(bt, a.ADD_URI_SAFE_ATTR, D), a.FORBID_CONTENTS && (se === kt && (se = ie(se)), b(se, a.FORBID_CONTENTS, D)), a.ADD_FORBID_CONTENTS && (se === kt && (se = ie(se)), b(se, a.ADD_FORBID_CONTENTS, D)), mt && (N["#text"] = !0), de && b(N, ["html", "head", "body"]), N.table && (b(N, ["tbody"]), delete Le.tbody), a.TRUSTED_TYPES_POLICY) {
-        if (typeof a.TRUSTED_TYPES_POLICY.createHTML != "function")
+    let i = arguments.length > 0 && arguments[0] !== void 0 ? arguments[0] : {};
+    if (!(Ae && Ae === i)) {
+      if ((!i || typeof i != "object") && (i = {}), i = ie(i), De = // eslint-disable-next-line unicorn/prefer-includes
+      bs.indexOf(i.PARSER_MEDIA_TYPE) === -1 ? _s : i.PARSER_MEDIA_TYPE, D = De === "application/xhtml+xml" ? St : et, N = J(i, "ALLOWED_TAGS") ? b({}, i.ALLOWED_TAGS, D) : en, P = J(i, "ALLOWED_ATTR") ? b({}, i.ALLOWED_ATTR, D) : tn, xt = J(i, "ALLOWED_NAMESPACES") ? b({}, i.ALLOWED_NAMESPACES, St) : ms, bt = J(i, "ADD_URI_SAFE_ATTR") ? b(ie(un), i.ADD_URI_SAFE_ATTR, D) : un, on = J(i, "ADD_DATA_URI_TAGS") ? b(ie(cn), i.ADD_DATA_URI_TAGS, D) : cn, se = J(i, "FORBID_CONTENTS") ? b({}, i.FORBID_CONTENTS, D) : kt, Le = J(i, "FORBID_TAGS") ? b({}, i.FORBID_TAGS, D) : ie({}), ht = J(i, "FORBID_ATTR") ? b({}, i.FORBID_ATTR, D) : ie({}), ye = J(i, "USE_PROFILES") ? i.USE_PROFILES : !1, nn = i.ALLOW_ARIA_ATTR !== !1, ft = i.ALLOW_DATA_ATTR !== !1, sn = i.ALLOW_UNKNOWN_PROTOCOLS || !1, rn = i.ALLOW_SELF_CLOSE_IN_ATTR !== !1, Te = i.SAFE_FOR_TEMPLATES || !1, Ge = i.SAFE_FOR_XML !== !1, de = i.WHOLE_DOCUMENT || !1, ve = i.RETURN_DOM || !1, qe = i.RETURN_DOM_FRAGMENT || !1, Ze = i.RETURN_TRUSTED_TYPE || !1, gt = i.FORCE_BODY || !1, an = i.SANITIZE_DOM !== !1, ln = i.SANITIZE_NAMED_PROPS || !1, mt = i.KEEP_CONTENT !== !1, Me = i.IN_PLACE || !1, Jt = i.ALLOWED_URI_REGEXP || as, Se = i.NAMESPACE || ce, je = i.MATHML_TEXT_INTEGRATION_POINTS || je, Xe = i.HTML_INTEGRATION_POINTS || Xe, C = i.CUSTOM_ELEMENT_HANDLING || {}, i.CUSTOM_ELEMENT_HANDLING && pn(i.CUSTOM_ELEMENT_HANDLING.tagNameCheck) && (C.tagNameCheck = i.CUSTOM_ELEMENT_HANDLING.tagNameCheck), i.CUSTOM_ELEMENT_HANDLING && pn(i.CUSTOM_ELEMENT_HANDLING.attributeNameCheck) && (C.attributeNameCheck = i.CUSTOM_ELEMENT_HANDLING.attributeNameCheck), i.CUSTOM_ELEMENT_HANDLING && typeof i.CUSTOM_ELEMENT_HANDLING.allowCustomizedBuiltInElements == "boolean" && (C.allowCustomizedBuiltInElements = i.CUSTOM_ELEMENT_HANDLING.allowCustomizedBuiltInElements), Te && (ft = !1), qe && (ve = !0), ye && (N = b({}, Mn), P = [], ye.html === !0 && (b(N, Ln), b(P, Dn)), ye.svg === !0 && (b(N, Et), b(P, It), b(P, Je)), ye.svgFilters === !0 && (b(N, Rt), b(P, It), b(P, Je)), ye.mathMl === !0 && (b(N, Ct), b(P, On), b(P, Je))), i.ADD_TAGS && (typeof i.ADD_TAGS == "function" ? we.tagCheck = i.ADD_TAGS : (N === en && (N = ie(N)), b(N, i.ADD_TAGS, D))), i.ADD_ATTR && (typeof i.ADD_ATTR == "function" ? we.attributeCheck = i.ADD_ATTR : (P === tn && (P = ie(P)), b(P, i.ADD_ATTR, D))), i.ADD_URI_SAFE_ATTR && b(bt, i.ADD_URI_SAFE_ATTR, D), i.FORBID_CONTENTS && (se === kt && (se = ie(se)), b(se, i.FORBID_CONTENTS, D)), i.ADD_FORBID_CONTENTS && (se === kt && (se = ie(se)), b(se, i.ADD_FORBID_CONTENTS, D)), mt && (N["#text"] = !0), de && b(N, ["html", "head", "body"]), N.table && (b(N, ["tbody"]), delete Le.tbody), i.TRUSTED_TYPES_POLICY) {
+        if (typeof i.TRUSTED_TYPES_POLICY.createHTML != "function")
           throw ze('TRUSTED_TYPES_POLICY configuration option must provide a "createHTML" hook.');
-        if (typeof a.TRUSTED_TYPES_POLICY.createScriptURL != "function")
+        if (typeof i.TRUSTED_TYPES_POLICY.createScriptURL != "function")
           throw ze('TRUSTED_TYPES_POLICY configuration option must provide a "createScriptURL" hook.');
-        v = a.TRUSTED_TYPES_POLICY, Q = v.createHTML("");
+        v = i.TRUSTED_TYPES_POLICY, Q = v.createHTML("");
       } else
         v === void 0 && (v = ia(y, t)), v !== null && typeof Q == "string" && (Q = v.createHTML(""));
-      G && G(a), Ae = a;
+      G && G(i), Ae = i;
     }
-  }, hn = b({}, [...Et, ...Rt, ...jr]), fn = b({}, [...Ct, ...Xr]), ws = function(a) {
-    let u = X(a);
+  }, hn = b({}, [...Et, ...Rt, ...jr]), fn = b({}, [...Ct, ...Xr]), ws = function(i) {
+    let u = X(i);
     (!u || !u.tagName) && (u = {
       namespaceURI: Se,
       tagName: "template"
     });
-    const f = et(a.tagName), A = et(u.tagName);
-    return xt[a.namespaceURI] ? a.namespaceURI === Ve ? u.namespaceURI === ce ? f === "svg" : u.namespaceURI === Ye ? f === "svg" && (A === "annotation-xml" || je[A]) : !!hn[f] : a.namespaceURI === Ye ? u.namespaceURI === ce ? f === "math" : u.namespaceURI === Ve ? f === "math" && Xe[A] : !!fn[f] : a.namespaceURI === ce ? u.namespaceURI === Ve && !Xe[A] || u.namespaceURI === Ye && !je[A] ? !1 : !fn[f] && (ks[f] || !hn[f]) : !!(De === "application/xhtml+xml" && xt[a.namespaceURI]) : !1;
-  }, re = function(a) {
+    const f = et(i.tagName), A = et(u.tagName);
+    return xt[i.namespaceURI] ? i.namespaceURI === Ve ? u.namespaceURI === ce ? f === "svg" : u.namespaceURI === Ye ? f === "svg" && (A === "annotation-xml" || je[A]) : !!hn[f] : i.namespaceURI === Ye ? u.namespaceURI === ce ? f === "math" : u.namespaceURI === Ve ? f === "math" && Xe[A] : !!fn[f] : i.namespaceURI === ce ? u.namespaceURI === Ve && !Xe[A] || u.namespaceURI === Ye && !je[A] ? !1 : !fn[f] && (ks[f] || !hn[f]) : !!(De === "application/xhtml+xml" && xt[i.namespaceURI]) : !1;
+  }, re = function(i) {
     $e(e.removed, {
-      element: a
+      element: i
     });
     try {
-      X(a).removeChild(a);
+      X(i).removeChild(i);
     } catch {
-      I(a);
+      I(i);
     }
-  }, ge = function(a, u) {
+  }, ge = function(i, u) {
     try {
       $e(e.removed, {
-        attribute: u.getAttributeNode(a),
+        attribute: u.getAttributeNode(i),
         from: u
       });
     } catch {
@@ -1746,7 +1746,7 @@ function ls() {
         from: u
       });
     }
-    if (u.removeAttribute(a), a === "is")
+    if (u.removeAttribute(i), i === "is")
       if (ve || qe)
         try {
           re(u);
@@ -1754,19 +1754,19 @@ function ls() {
         }
       else
         try {
-          u.setAttribute(a, "");
+          u.setAttribute(i, "");
         } catch {
         }
-  }, dn = function(a) {
+  }, dn = function(i) {
     let u = null, f = null;
     if (gt)
-      a = "<remove></remove>" + a;
+      i = "<remove></remove>" + i;
     else {
-      const L = At(a, /^[\r\n\t ]+/);
+      const L = At(i, /^[\r\n\t ]+/);
       f = L && L[0];
     }
-    De === "application/xhtml+xml" && Se === ce && (a = '<html xmlns="http://www.w3.org/1999/xhtml"><head></head><body>' + a + "</body></html>");
-    const A = v ? v.createHTML(a) : a;
+    De === "application/xhtml+xml" && Se === ce && (i = '<html xmlns="http://www.w3.org/1999/xhtml"><head></head><body>' + i + "</body></html>");
+    const A = v ? v.createHTML(i) : i;
     if (Se === ce)
       try {
         u = new m().parseFromString(A, De);
@@ -1780,73 +1780,73 @@ function ls() {
       }
     }
     const B = u.body || u.documentElement;
-    return a && f && B.insertBefore(n.createTextNode(f), B.childNodes[0] || null), Se === ce ? cs.call(u, de ? "html" : "body")[0] : de ? u.documentElement : B;
-  }, gn = function(a) {
+    return i && f && B.insertBefore(n.createTextNode(f), B.childNodes[0] || null), Se === ce ? cs.call(u, de ? "html" : "body")[0] : de ? u.documentElement : B;
+  }, gn = function(i) {
     return ot.call(
-      a.ownerDocument || a,
-      a,
+      i.ownerDocument || i,
+      i,
       // eslint-disable-next-line no-bitwise
       h.SHOW_ELEMENT | h.SHOW_COMMENT | h.SHOW_TEXT | h.SHOW_PROCESSING_INSTRUCTION | h.SHOW_CDATA_SECTION,
       null
     );
-  }, Tt = function(a) {
-    return a instanceof g && (typeof a.nodeName != "string" || typeof a.textContent != "string" || typeof a.removeChild != "function" || !(a.attributes instanceof p) || typeof a.removeAttribute != "function" || typeof a.setAttribute != "function" || typeof a.namespaceURI != "string" || typeof a.insertBefore != "function" || typeof a.hasChildNodes != "function");
-  }, mn = function(a) {
-    return typeof c == "function" && a instanceof c;
+  }, Tt = function(i) {
+    return i instanceof g && (typeof i.nodeName != "string" || typeof i.textContent != "string" || typeof i.removeChild != "function" || !(i.attributes instanceof p) || typeof i.removeAttribute != "function" || typeof i.setAttribute != "function" || typeof i.namespaceURI != "string" || typeof i.insertBefore != "function" || typeof i.hasChildNodes != "function");
+  }, mn = function(i) {
+    return typeof c == "function" && i instanceof c;
   };
-  function ue(d, a, u) {
+  function ue(d, i, u) {
     Ke(d, (f) => {
-      f.call(e, a, u, Ae);
+      f.call(e, i, u, Ae);
     });
   }
-  const kn = function(a) {
+  const kn = function(i) {
     let u = null;
-    if (ue(U.beforeSanitizeElements, a, null), Tt(a))
-      return re(a), !0;
-    const f = D(a.nodeName);
-    if (ue(U.uponSanitizeElement, a, {
+    if (ue(U.beforeSanitizeElements, i, null), Tt(i))
+      return re(i), !0;
+    const f = D(i.nodeName);
+    if (ue(U.uponSanitizeElement, i, {
       tagName: f,
       allowedTags: N
-    }), Ge && a.hasChildNodes() && !mn(a.firstElementChild) && H(/<[/\w!]/g, a.innerHTML) && H(/<[/\w!]/g, a.textContent) || a.nodeType === Fe.progressingInstruction || Ge && a.nodeType === Fe.comment && H(/<[/\w]/g, a.data))
-      return re(a), !0;
+    }), Ge && i.hasChildNodes() && !mn(i.firstElementChild) && H(/<[/\w!]/g, i.innerHTML) && H(/<[/\w!]/g, i.textContent) || i.nodeType === Fe.progressingInstruction || Ge && i.nodeType === Fe.comment && H(/<[/\w]/g, i.data))
+      return re(i), !0;
     if (!(we.tagCheck instanceof Function && we.tagCheck(f)) && (!N[f] || Le[f])) {
       if (!Le[f] && _n(f) && (C.tagNameCheck instanceof RegExp && H(C.tagNameCheck, f) || C.tagNameCheck instanceof Function && C.tagNameCheck(f)))
         return !1;
       if (mt && !se[f]) {
-        const A = X(a) || a.parentNode, B = M(a) || a.childNodes;
+        const A = X(i) || i.parentNode, B = M(i) || i.childNodes;
         if (B && A) {
           const L = B.length;
           for (let V = L - 1; V >= 0; --V) {
             const pe = k(B[V], !0);
-            pe.__removalCount = (a.__removalCount || 0) + 1, A.insertBefore(pe, x(a));
+            pe.__removalCount = (i.__removalCount || 0) + 1, A.insertBefore(pe, x(i));
           }
         }
       }
-      return re(a), !0;
+      return re(i), !0;
     }
-    return a instanceof o && !ws(a) || (f === "noscript" || f === "noembed" || f === "noframes") && H(/<\/no(script|embed|frames)/i, a.innerHTML) ? (re(a), !0) : (Te && a.nodeType === Fe.text && (u = a.textContent, Ke([ct, ut, pt], (A) => {
+    return i instanceof o && !ws(i) || (f === "noscript" || f === "noembed" || f === "noframes") && H(/<\/no(script|embed|frames)/i, i.innerHTML) ? (re(i), !0) : (Te && i.nodeType === Fe.text && (u = i.textContent, Ke([ct, ut, pt], (A) => {
       u = Pe(u, A, " ");
-    }), a.textContent !== u && ($e(e.removed, {
-      element: a.cloneNode()
-    }), a.textContent = u)), ue(U.afterSanitizeElements, a, null), !1);
-  }, bn = function(a, u, f) {
+    }), i.textContent !== u && ($e(e.removed, {
+      element: i.cloneNode()
+    }), i.textContent = u)), ue(U.afterSanitizeElements, i, null), !1);
+  }, bn = function(i, u, f) {
     if (an && (u === "id" || u === "name") && (f in n || f in xs))
       return !1;
     if (!(ft && !ht[u] && H(ps, u))) {
       if (!(nn && H(hs, u))) {
-        if (!(we.attributeCheck instanceof Function && we.attributeCheck(u, a))) {
+        if (!(we.attributeCheck instanceof Function && we.attributeCheck(u, i))) {
           if (!P[u] || ht[u]) {
             if (
               // First condition does a very basic check if a) it's basically a valid custom element tagname AND
               // b) if the tagName passes whatever the user has configured for CUSTOM_ELEMENT_HANDLING.tagNameCheck
               // and c) if the attribute name passes whatever the user has configured for CUSTOM_ELEMENT_HANDLING.attributeNameCheck
-              !(_n(a) && (C.tagNameCheck instanceof RegExp && H(C.tagNameCheck, a) || C.tagNameCheck instanceof Function && C.tagNameCheck(a)) && (C.attributeNameCheck instanceof RegExp && H(C.attributeNameCheck, u) || C.attributeNameCheck instanceof Function && C.attributeNameCheck(u, a)) || // Alternative, second condition checks if it's an `is`-attribute, AND
+              !(_n(i) && (C.tagNameCheck instanceof RegExp && H(C.tagNameCheck, i) || C.tagNameCheck instanceof Function && C.tagNameCheck(i)) && (C.attributeNameCheck instanceof RegExp && H(C.attributeNameCheck, u) || C.attributeNameCheck instanceof Function && C.attributeNameCheck(u, i)) || // Alternative, second condition checks if it's an `is`-attribute, AND
               // the value passes whatever the user has configured for CUSTOM_ELEMENT_HANDLING.tagNameCheck
               u === "is" && C.allowCustomizedBuiltInElements && (C.tagNameCheck instanceof RegExp && H(C.tagNameCheck, f) || C.tagNameCheck instanceof Function && C.tagNameCheck(f)))
             ) return !1;
           } else if (!bt[u]) {
             if (!H(Jt, Pe(f, Kt, ""))) {
-              if (!((u === "src" || u === "xlink:href" || u === "href") && a !== "script" && qr(f, "data:") === 0 && on[a])) {
+              if (!((u === "src" || u === "xlink:href" || u === "href") && i !== "script" && qr(f, "data:") === 0 && on[i])) {
                 if (!(sn && !H(fs, Pe(f, Kt, "")))) {
                   if (f)
                     return !1;
@@ -1858,14 +1858,14 @@ function ls() {
       }
     }
     return !0;
-  }, _n = function(a) {
-    return a !== "annotation-xml" && At(a, ds);
-  }, xn = function(a) {
-    ue(U.beforeSanitizeAttributes, a, null);
+  }, _n = function(i) {
+    return i !== "annotation-xml" && At(i, ds);
+  }, xn = function(i) {
+    ue(U.beforeSanitizeAttributes, i, null);
     const {
       attributes: u
-    } = a;
-    if (!u || Tt(a))
+    } = i;
+    if (!u || Tt(i))
       return;
     const f = {
       attrName: "",
@@ -1882,30 +1882,30 @@ function ls() {
         value: pe
       } = B, Ee = D(L), vt = pe;
       let z = L === "value" ? vt : Zr(vt);
-      if (f.attrName = Ee, f.attrValue = z, f.keepAttr = !0, f.forceKeepAttr = void 0, ue(U.uponSanitizeAttribute, a, f), z = f.attrValue, ln && (Ee === "id" || Ee === "name") && (ge(L, a), z = gs + z), Ge && H(/((--!?|])>)|<\/(style|title|textarea)/i, z)) {
-        ge(L, a);
+      if (f.attrName = Ee, f.attrValue = z, f.keepAttr = !0, f.forceKeepAttr = void 0, ue(U.uponSanitizeAttribute, i, f), z = f.attrValue, ln && (Ee === "id" || Ee === "name") && (ge(L, i), z = gs + z), Ge && H(/((--!?|])>)|<\/(style|title|textarea)/i, z)) {
+        ge(L, i);
         continue;
       }
       if (Ee === "attributename" && At(z, "href")) {
-        ge(L, a);
+        ge(L, i);
         continue;
       }
       if (f.forceKeepAttr)
         continue;
       if (!f.keepAttr) {
-        ge(L, a);
+        ge(L, i);
         continue;
       }
       if (!rn && H(/\/>/i, z)) {
-        ge(L, a);
+        ge(L, i);
         continue;
       }
       Te && Ke([ct, ut, pt], (Tn) => {
         z = Pe(z, Tn, " ");
       });
-      const wn = D(a.nodeName);
+      const wn = D(i.nodeName);
       if (!bn(wn, Ee, z)) {
-        ge(L, a);
+        ge(L, i);
         continue;
       }
       if (v && typeof y == "object" && typeof y.getAttributeType == "function" && !V)
@@ -1921,21 +1921,21 @@ function ls() {
         }
       if (z !== vt)
         try {
-          V ? a.setAttributeNS(V, L, z) : a.setAttribute(L, z), Tt(a) ? re(a) : In(e.removed);
+          V ? i.setAttributeNS(V, L, z) : i.setAttribute(L, z), Tt(i) ? re(i) : In(e.removed);
         } catch {
-          ge(L, a);
+          ge(L, i);
         }
     }
-    ue(U.afterSanitizeAttributes, a, null);
-  }, Ts = function d(a) {
+    ue(U.afterSanitizeAttributes, i, null);
+  }, Ts = function d(i) {
     let u = null;
-    const f = gn(a);
-    for (ue(U.beforeSanitizeShadowDOM, a, null); u = f.nextNode(); )
-      ue(U.uponSanitizeShadowNode, u, null), kn(u), xn(u), u.content instanceof i && d(u.content);
-    ue(U.afterSanitizeShadowDOM, a, null);
+    const f = gn(i);
+    for (ue(U.beforeSanitizeShadowDOM, i, null); u = f.nextNode(); )
+      ue(U.uponSanitizeShadowNode, u, null), kn(u), xn(u), u.content instanceof a && d(u.content);
+    ue(U.afterSanitizeShadowDOM, i, null);
   };
   return e.sanitize = function(d) {
-    let a = arguments.length > 1 && arguments[1] !== void 0 ? arguments[1] : {}, u = null, f = null, A = null, B = null;
+    let i = arguments.length > 1 && arguments[1] !== void 0 ? arguments[1] : {}, u = null, f = null, A = null, B = null;
     if (_t = !d, _t && (d = "<!-->"), typeof d != "string" && !mn(d))
       if (typeof d.toString == "function") {
         if (d = d.toString(), typeof d != "string")
@@ -1944,7 +1944,7 @@ function ls() {
         throw ze("toString is not a function");
     if (!e.isSupported)
       return d;
-    if (dt || wt(a), e.removed = [], typeof d == "string" && (Me = !1), Me) {
+    if (dt || wt(i), e.removed = [], typeof d == "string" && (Me = !1), Me) {
       if (d.nodeName) {
         const pe = D(d.nodeName);
         if (!N[pe] || Le[pe])
@@ -1962,7 +1962,7 @@ function ls() {
     u && gt && re(u.firstChild);
     const L = gn(Me ? d : u);
     for (; A = L.nextNode(); )
-      kn(A), xn(A), A.content instanceof i && Ts(A.content);
+      kn(A), xn(A), A.content instanceof a && Ts(A.content);
     if (Me)
       return d;
     if (ve) {
@@ -1983,15 +1983,15 @@ function ls() {
     wt(d), dt = !0;
   }, e.clearConfig = function() {
     Ae = null, dt = !1;
-  }, e.isValidAttribute = function(d, a, u) {
+  }, e.isValidAttribute = function(d, i, u) {
     Ae || wt({});
-    const f = D(d), A = D(a);
+    const f = D(d), A = D(i);
     return bn(f, A, u);
-  }, e.addHook = function(d, a) {
-    typeof a == "function" && $e(U[d], a);
-  }, e.removeHook = function(d, a) {
-    if (a !== void 0) {
-      const u = Wr(U[d], a);
+  }, e.addHook = function(d, i) {
+    typeof i == "function" && $e(U[d], i);
+  }, e.removeHook = function(d, i) {
+    if (i !== void 0) {
+      const u = Wr(U[d], i);
       return u === -1 ? void 0 : Gr(U[d], u, 1)[0];
     }
     return In(U[d]);
@@ -2060,13 +2060,13 @@ const _a = /* @__PURE__ */ Z(ma, [["render", ba]]), xa = ["aria-label"], wa = {
     animate: { type: Boolean, default: !1 }
   },
   setup(s) {
-    const e = s, n = oe(Ce, void 0), r = $(() => n?.showBubbleHeaders ?? !0), t = $(() => n?.assistantBubbleFullWidth ?? !1), i = $(() => e.message.role === "user"), l = $(
+    const e = s, n = oe(Ce, void 0), r = $(() => n?.showBubbleHeaders ?? !0), t = $(() => n?.assistantBubbleFullWidth ?? !1), a = $(() => e.message.role === "user"), l = $(
       () => e.message.status === "failed" || e.message.id.startsWith("error-")
     ), c = $(() => e.message.status === "sending"), o = $(() => e.message.role === "assistant" && !l.value), h = $(() => {
       if (e.message.role !== "assistant" || l.value) return null;
       const _ = S.parse(e.message.content);
       return la.sanitize(_);
-    }), p = $(() => l.value ? "Error message" : i.value ? "Message from you" : "Message from AI Assistant"), g = j(!1);
+    }), p = $(() => l.value ? "Error message" : a.value ? "Message from you" : "Message from AI Assistant"), g = j(!1);
     let m = null;
     async function y() {
       try {
@@ -2082,7 +2082,7 @@ const _a = /* @__PURE__ */ Z(ma, [["render", ba]]), xa = ["aria-label"], wa = {
       role: "listitem",
       "aria-label": p.value,
       class: Bt(["nc-message-bubble", {
-        "nc-message-bubble--user": i.value,
+        "nc-message-bubble--user": a.value,
         "nc-message-bubble--assistant": o.value,
         "nc-message-bubble--error": l.value,
         "nc-message-bubble--sending": c.value,
@@ -2091,7 +2091,7 @@ const _a = /* @__PURE__ */ Z(ma, [["render", ba]]), xa = ["aria-label"], wa = {
       }])
     }, [
       r.value ? (T(), R("div", wa, [
-        i.value ? (T(), R("span", Ta, "You")) : l.value ? (T(), R(Mt, { key: 1 }, [
+        a.value ? (T(), R("span", Ta, "You")) : l.value ? (T(), R(Mt, { key: 1 }, [
           E(pa, { class: "nc-message-bubble__warning-icon" }),
           k[0] || (k[0] = O("span", { class: "nc-message-bubble__label" }, "Error", -1))
         ], 64)) : (T(), R(Mt, { key: 2 }, [
@@ -2112,7 +2112,7 @@ const _a = /* @__PURE__ */ Z(ma, [["render", ba]]), xa = ["aria-label"], wa = {
         ], 64))
       ])) : tt("", !0),
       O("div", va, [
-        i.value || l.value ? (T(), R("div", ya, Lt(s.message.content), 1)) : (T(), R("div", {
+        a.value || l.value ? (T(), R("div", ya, Lt(s.message.content), 1)) : (T(), R("div", {
           key: 1,
           class: "nc-message-bubble__content",
           innerHTML: h.value
@@ -2160,7 +2160,7 @@ const La = /* @__PURE__ */ Z(Ra, [["render", Ia]]), Ma = { class: "nc-message-li
 }, Oa = { class: "nc-message-list__loader" }, Na = { class: "nc-scroll-fab" }, $a = 50, Pa = /* @__PURE__ */ fe({
   __name: "MessageList",
   setup(s) {
-    const e = oe(Ie), n = at("scrollContainer"), r = j(!0), t = /* @__PURE__ */ new Set(), i = j(/* @__PURE__ */ new Set());
+    const e = oe(Ie), n = at("scrollContainer"), r = j(!0), t = /* @__PURE__ */ new Set(), a = j(/* @__PURE__ */ new Set());
     let l = !1, c = !1;
     ke(
       () => e.messages.value,
@@ -2168,7 +2168,7 @@ const La = /* @__PURE__ */ Z(Ra, [["render", Ia]]), Ma = { class: "nc-message-li
         const I = /* @__PURE__ */ new Set();
         l && !c && k.forEach((x) => {
           t.has(x.id) || I.add(x.id);
-        }), k.forEach((x) => t.add(x.id)), i.value = I;
+        }), k.forEach((x) => t.add(x.id)), a.value = I;
       }
     );
     function o() {
@@ -2231,7 +2231,7 @@ const La = /* @__PURE__ */ Z(Ra, [["render", Ia]]), Ma = { class: "nc-message-li
             (T(!0), R(Mt, null, vs(ne(e).messages.value, (x) => (T(), le(Ea, {
               key: x.id,
               message: x,
-              animate: i.value.has(x.id)
+              animate: a.value.has(x.id)
             }, null, 8, ["message", "animate"]))), 128))
           ])
         ]),
@@ -2278,7 +2278,7 @@ function Ua(s, e) {
 const Ha = /* @__PURE__ */ Z(Ba, [["render", Ua]]), Wa = { class: "nc-chat-input" }, Ga = /* @__PURE__ */ fe({
   __name: "ChatInput",
   setup(s) {
-    const e = oe(Ie), n = oe(Ce), r = $(() => n?.placeholder ?? "Type your message..."), t = j(""), i = at("textareaRef"), l = $(() => t.value.trim().length > 0 && !e.isSending.value);
+    const e = oe(Ie), n = oe(Ce), r = $(() => n?.placeholder ?? "Type your message..."), t = j(""), a = at("textareaRef"), l = $(() => t.value.trim().length > 0 && !e.isSending.value);
     async function c() {
       const h = t.value.trim();
       if (!(!h || e.isSending.value)) {
@@ -2301,7 +2301,7 @@ const Ha = /* @__PURE__ */ Z(Ba, [["render", Ua]]), Wa = { class: "nc-chat-input
       () => e.isOpen.value,
       (h) => {
         h && he(() => {
-          i.value?.focus();
+          a.value?.focus();
         });
       },
       { immediate: !0 }
@@ -2309,13 +2309,13 @@ const Ha = /* @__PURE__ */ Z(Ba, [["render", Ua]]), Wa = { class: "nc-chat-input
       () => e.isSending.value,
       (h, p) => {
         p && !h && he(() => {
-          i.value?.focus();
+          a.value?.focus();
         });
       }
     ), (h, p) => (T(), R("div", Wa, [
       E(Cs, {
         ref_key: "textareaRef",
-        ref: i,
+        ref: a,
         modelValue: t.value,
         "onUpdate:modelValue": p[0] || (p[0] = (g) => t.value = g),
         "auto-grow": "",
@@ -2365,7 +2365,7 @@ const Ha = /* @__PURE__ */ Z(Ba, [["render", Ua]]), Wa = { class: "nc-chat-input
 }), qa = /* @__PURE__ */ Z(Ga, [["__scopeId", "data-v-1f6d9226"]]), Za = { class: "nc-chat-panel__body" }, Ya = /* @__PURE__ */ fe({
   __name: "ChatPanel",
   setup(s) {
-    const e = oe(Ie), n = oe(Ce), r = $(() => n?.welcomeMessage), t = As(), i = $(() => t.width.value < 768), l = (c) => {
+    const e = oe(Ie), n = oe(Ce), r = $(() => n?.welcomeMessage), t = As(), a = $(() => t.width.value < 768), l = (c) => {
       c.key === "Escape" && e.isOpen.value && e.close();
     };
     return ke(
@@ -2383,7 +2383,7 @@ const Ha = /* @__PURE__ */ Z(Ba, [["render", Ua]]), Wa = { class: "nc-chat-input
             key: 0,
             theme: "nativeChat",
             "with-background": "",
-            class: Bt(["nc-chat-panel border-md", { "nc-chat-panel--mobile": i.value }]),
+            class: Bt(["nc-chat-panel border-md", { "nc-chat-panel--mobile": a.value }]),
             role: "complementary",
             "aria-label": "Chat with AI Assistant"
           }, {
@@ -2414,16 +2414,16 @@ const Ha = /* @__PURE__ */ Z(Ba, [["render", Ua]]), Wa = { class: "nc-chat-input
   setup(s) {
     const e = Es();
     if (!e.themes.value.nativeChat) {
-      const i = e.themes.value.light;
+      const a = e.themes.value.light;
       e.themes.value.nativeChat = {
-        ...i,
+        ...a,
         ...yt,
         colors: {
-          ...i.colors,
+          ...a.colors,
           ...yt.colors
         },
         variables: {
-          ...i.variables,
+          ...a.variables,
           ...yt.variables
         }
       };
@@ -2433,12 +2433,12 @@ const Ha = /* @__PURE__ */ Z(Ba, [["render", Ua]]), Wa = { class: "nc-chat-input
     const t = at("floatingButtonRef");
     return ke(
       () => r.isOpen.value,
-      (i) => {
-        i || he(() => {
+      (a) => {
+        a || he(() => {
           t.value?.focus();
         });
       }
-    ), (i, l) => (T(), le(Wn, { theme: "nativeChat" }, {
+    ), (a, l) => (T(), le(Wn, { theme: "nativeChat" }, {
       default: F(() => [
         E(Bs, {
           ref_key: "floatingButtonRef",
@@ -2466,24 +2466,61 @@ function li(s) {
   const { axiosInstance: e } = s;
   return {
     async createConversation() {
-      return (await e.post("/conversations", {})).data;
+      const r = (await e.post("/conversations", {})).data;
+      return {
+        id: r.conversation_id,
+        createdAt: r.created_at
+      };
     },
     async getConversations(n, r) {
-      return (await e.get("/conversations", {
+      const a = (await e.get("/conversations", {
         params: { offset: n, limit: r }
       })).data;
+      return {
+        conversations: a.items.map((l) => ({
+          id: l.conversation_id,
+          createdAt: l.created_at
+        })),
+        hasMore: a.pagination?.has_more ?? !1
+      };
     },
     async getMessages(n, r, t) {
-      return (await e.get(
+      const l = (await e.get(
         `/conversations/${encodeURIComponent(n)}/messages`,
         { params: { offset: r, limit: t } }
       )).data;
+      return {
+        messages: l.items.map((c) => ({
+          id: c.message_id,
+          conversationId: n,
+          role: c.sender,
+          content: c.content,
+          createdAt: c.created_at
+        })),
+        hasMore: l.pagination?.has_more ?? !1
+      };
     },
     async sendMessage(n, r) {
-      return (await e.post(
+      const a = (await e.post(
         `/conversations/${encodeURIComponent(n)}/messages`,
         { message: r }
       )).data;
+      return {
+        userMessage: {
+          id: a.user_message_id,
+          conversationId: a.conversation_id,
+          role: "user",
+          content: a.user_message,
+          createdAt: a.timestamp
+        },
+        assistantMessage: {
+          id: a.assistant_message_id,
+          conversationId: a.conversation_id,
+          role: "assistant",
+          content: a.assistant_response,
+          createdAt: a.timestamp
+        }
+      };
     }
   };
 }

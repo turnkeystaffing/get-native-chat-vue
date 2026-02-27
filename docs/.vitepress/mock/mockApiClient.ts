@@ -289,7 +289,7 @@ export const mockApiClient: NativeChatApiClient = {
   async getConversations(offset: number, limit: number): Promise<ConversationListResponse> {
     checkError()
     if (simulateFreshConversation) {
-      return { conversations: [], has_more: false }
+      return { conversations: [], hasMore: false }
     }
     const allConversations = [
       {
@@ -299,7 +299,7 @@ export const mockApiClient: NativeChatApiClient = {
     ]
     return {
       conversations: allConversations.slice(offset, offset + limit),
-      has_more: offset + limit < allConversations.length,
+      hasMore: offset + limit < allConversations.length,
     }
   },
 
@@ -312,12 +312,12 @@ export const mockApiClient: NativeChatApiClient = {
     // Simulate 300ms–1s network latency
     await new Promise((resolve) => setTimeout(resolve, 300 + Math.random() * 700))
     if (simulateFreshConversation) {
-      return { messages: [], has_more: false }
+      return { messages: [], hasMore: false }
     }
     const page = messagesNewestFirst.slice(offset, offset + limit)
     return {
       messages: page,
-      has_more: offset + limit < messagesNewestFirst.length,
+      hasMore: offset + limit < messagesNewestFirst.length,
     }
   },
 

@@ -119,7 +119,7 @@ export function useChat(
       const response = await apiClient.getMessages(conversationId.value!, 0, batchSize)
       const chronological = [...response.messages].reverse()
       messages.value = chronological
-      hasMore.value = response.has_more
+      hasMore.value = response.hasMore
       messageOffset.value = chronological.length
     } catch {
       // Open chat with empty state as fallback
@@ -196,7 +196,7 @@ export function useChat(
       const chronological = [...response.messages].reverse()
       messages.value = [...chronological, ...messages.value]
       messageOffset.value += chronological.length
-      hasMore.value = response.has_more
+      hasMore.value = response.hasMore
     } catch {
       // Silent failure per UX spec
     } finally {
