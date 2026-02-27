@@ -11,7 +11,7 @@ const placeholder = computed(() => config?.placeholder ?? 'Type your message...'
 const inputText = ref('')
 const textareaRef = useTemplateRef<{ focus: () => void }>('textareaRef')
 
-const canSend = computed(() => inputText.value.trim().length > 0 && !chatState.isSending.value)
+const canSend = computed(() => inputText.value.trim().length > 0)
 
 async function handleSend() {
   const text = inputText.value.trim()
@@ -92,18 +92,12 @@ watch(
           variant="text"
           density="comfortable"
           :color="canSend || chatState.isSending.value ? 'primary' : undefined"
-          :disabled="!canSend"
+          :disabled="!canSend && !chatState.isSending.value"
+          :loading="chatState.isSending.value"
           aria-label="Send message"
           @click="handleSend"
         >
-          <v-progress-circular
-            v-if="chatState.isSending.value"
-            indeterminate
-            :size="16"
-            :width="2"
-            color="primary"
-          />
-          <v-icon v-else :icon="IconSend" color="secondary"></v-icon>
+          <v-icon :icon="IconSend" color="secondary"></v-icon>
         </v-btn>
       </template>
     </v-textarea>

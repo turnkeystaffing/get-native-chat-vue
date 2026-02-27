@@ -121,16 +121,17 @@ describe('ChatInput', () => {
     expect(chatState.sendMessage).not.toHaveBeenCalled()
   })
 
-  it('send button and textarea disabled when isSending is true', () => {
+  it('send button shows loading and textarea disabled when isSending is true', () => {
     const isSending = ref(true)
     const chatState = createMockChatState({ isSending: readonly(isSending) })
     const { wrapper } = mountChatInput(chatState)
 
     const textarea = wrapper.find('textarea')
-    const btn = wrapper.find('[aria-label="Send message"]')
+    const btn = wrapper.findComponent({ name: 'VBtn' })
 
     expect(textarea.attributes('disabled')).toBeDefined()
-    expect(btn.attributes('disabled')).toBeDefined()
+    expect(btn.props('loading')).toBe(true)
+    expect(btn.props('disabled')).toBe(false)
   })
 
   it('failedMessageText pre-populates the input field', async () => {
@@ -284,13 +285,14 @@ describe('ChatInput', () => {
     expect(textarea.element.value).toBe('')
   })
 
-  it('shows spinner instead of IconSend when isSending is true', () => {
+  it('shows loading state with IconSend still present when isSending is true', () => {
     const isSending = ref(true)
     const chatState = createMockChatState({ isSending: readonly(isSending) })
     const { wrapper } = mountChatInput(chatState)
 
-    expect(wrapper.find('.v-progress-circular').exists()).toBe(true)
-    expect(wrapper.findComponent(IconSend).exists()).toBe(false)
+    const btn = wrapper.findComponent({ name: 'VBtn' })
+    expect(btn.props('loading')).toBe(true)
+    expect(wrapper.findComponent(IconSend).exists()).toBe(true)
   })
 
   it('shows IconSend instead of spinner when isSending is false', () => {
